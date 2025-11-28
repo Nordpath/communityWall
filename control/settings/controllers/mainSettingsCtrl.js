@@ -64,6 +64,14 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                         if (typeof (result.data.appSettings.notifyAdminsOnPost) == 'undefined') {
                             result.data.appSettings.notifyAdminsOnPost = false;
                         }
+                        if (!result.data.appSettings.bottomLogo) {
+                            result.data.appSettings.bottomLogo = {
+                                displayMode: 'logo',
+                                imageUrl: '',
+                                linkUrl: '',
+                                enabled: false
+                            };
+                        }
                     } else if (!result.data.appSettings) {
                         result.data.appSettings = {};
                         result.data.appSettings.showMembers = true;
@@ -75,6 +83,12 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                         };
                         result.data.appSettings.enableModeration = false;
                         result.data.appSettings.notifyAdminsOnPost = false;
+                        result.data.appSettings.bottomLogo = {
+                            displayMode: 'logo',
+                            imageUrl: '',
+                            linkUrl: '',
+                            enabled: false
+                        };
                     }
                     $scope.data = result.data.appSettings;
 
@@ -349,4 +363,53 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
             }
         })
     }
+
+    $scope.selectBottomLogoImage = function () {
+        buildfire.imageLib.showDialog({}, function (err, result) {
+            if (err) {
+                console.error('Error selecting image:', err);
+                buildfire.dialog.toast({
+                    message: "Error selecting image",
+                    type: 'danger'
+                });
+                return;
+            }
+
+            if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                $scope.data.bottomLogo.imageUrl = result.selectedFiles[0];
+                $scope.save();
+                $scope.$digest();
+            }
+        });
+    };
+
+    $scope.removeBottomLogo = function () {
+        buildfire.dialog.confirm({
+            message: "Are you sure you want to remove the bottom logo?",
+            confirmButton: {
+                text: "Remove",
+                type: "danger"
+            }
+        }, function (err, isConfirmed) {
+            if (err) {
+                console.error('Error confirming removal:', err);
+                return;
+            }
+
+            if (isConfirmed) {
+                $scope.data.bottomLogo = {
+                    displayMode: 'logo',
+                    imageUrl: '',
+                    linkUrl: '',
+                    enabled: false
+                };
+                $scope.save();
+                buildfire.dialog.toast({
+                    message: "Bottom logo removed successfully",
+                    type: 'success'
+                });
+                $scope.$digest();
+            }
+        });
+    };
 }]);

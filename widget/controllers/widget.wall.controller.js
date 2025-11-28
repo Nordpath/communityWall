@@ -594,9 +594,62 @@
                   else callback(null, null);
               })
           }
+          WidgetWall.bottomLogo = {
+              displayMode: 'logo',
+              imageUrl: '',
+              linkUrl: '',
+              enabled: false
+          };
+
+          WidgetWall.loadBottomLogoConfig = function () {
+              buildfire.datastore.get('Social', function (err, result) {
+                  if (err) {
+                      console.error('Error loading bottom logo config:', err);
+                      return;
+                  }
+                  if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
+                      WidgetWall.bottomLogo = result.data.appSettings.bottomLogo;
+                      WidgetWall.adjustContentPadding();
+                      $scope.$digest();
+                  }
+              });
+          };
+
+          WidgetWall.handleLogoClick = function () {
+              if (WidgetWall.bottomLogo.linkUrl) {
+                  var url = WidgetWall.bottomLogo.linkUrl;
+                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                      url = 'https://' + url;
+                  }
+
+                  buildfire.analytics.trackAction('bottom_logo_clicked', {
+                      mode: WidgetWall.bottomLogo.displayMode,
+                      url: url
+                  });
+
+                  buildfire.navigation.openWindow(url, '_blank');
+              }
+          };
+
+          WidgetWall.adjustContentPadding = function () {
+              if (WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl) {
+                  var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '110px' : '80px';
+                  var scrollContainer = document.querySelector('.post-infinite-scroll');
+                  if (scrollContainer) {
+                      scrollContainer.style.paddingBottom = paddingValue;
+                  }
+              } else {
+                  var scrollContainer = document.querySelector('.post-infinite-scroll');
+                  if (scrollContainer) {
+                      scrollContainer.style.paddingBottom = '0px';
+                  }
+              }
+          };
+
           WidgetWall.init = function () {
 
               WidgetWall.startSkeleton();
+              WidgetWall.loadBottomLogoConfig();
               WidgetWall.SocialItems.getSettings((err, result) => {
                   if (err) {
                       WidgetWall.stopSkeleton();
@@ -1718,6 +1771,10 @@
               console.log(response)
               if (response.tag === "Social") {
                   WidgetWall.setSettings(response);
+                  if (response.data && response.data.appSettings && response.data.appSettings.bottomLogo) {
+                      WidgetWall.bottomLogo = response.data.appSettings.bottomLogo;
+                      WidgetWall.adjustContentPadding();
+                  }
                   setTimeout(function () {
                       if (!response.data.appSettings.disableFollowLeaveGroup) {
                           let wallSVG = document.getElementById("WidgetWallSvg")

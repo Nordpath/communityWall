@@ -1642,3 +1642,78 @@ button.btn-danger-outlined:hover, button.btn-danger-outlined:focus{
      text-overflow: ellipsis;
      display: inline-block;
  }
+
+/* Bottom Logo/Banner Styles */
+.bottom-logo-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+/* Banner Mode - Full Width */
+.bottom-banner-mode {
+    width: 100%;
+    height: 90px;
+    cursor: pointer;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    background: #000;
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-banner-mode img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Logo Mode - Centered */
+.bottom-logo-mode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 16px;
+    padding-bottom: calc(12px + constant(safe-area-inset-bottom));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+}
+
+.bottom-logo-mode img {
+    max-width: 120px;
+    max-height: 50px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+/* Hover effects */
+.bottom-logo-mode:hover {
+    opacity: 0.9;
+}
+
+.bottom-banner-mode:hover {
+    opacity: 0.95;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .bottom-banner-mode {
+        height: 70px;
+    }
+
+    .bottom-logo-mode img {
+        max-width: 100px;
+        max-height: 40px;
+    }
+}
+
+/* Ensure content doesn't overlap with banner/logo */
+.post-infinite-scroll {
+    transition: padding-bottom 0.3s ease;
+}
