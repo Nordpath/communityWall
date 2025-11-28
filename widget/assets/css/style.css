@@ -1600,6 +1600,7 @@ a.comments .material-icons-outlined,
 
 .footer-right .social-icon:first-child .material-icons-outlined {
     color: var(--share-icon-color, #06A77D) !important;
+    transform: rotate(-45deg);
 }
 
 .footer-right .social-icon:last-child .material-icons-outlined {
