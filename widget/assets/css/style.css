@@ -669,8 +669,8 @@ button.btn--lg,
     align-items: center;
     justify-content: space-between;
     padding-top: 0;
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .footer-left {
@@ -688,7 +688,7 @@ button.btn--lg,
     align-items: center;
     padding: .5rem;
     font-size: .75rem;
-    margin-right: .75rem;
+    margin-right: 0;
 }
 
 .head .social-icon {
@@ -707,7 +707,7 @@ button.btn--lg,
 .status-footer .icon,
 .footer .icon {
     font-size:1.4rem;
-    margin-right: .25rem;
+    margin-right: .5rem;
 }
 
 .social-item {
