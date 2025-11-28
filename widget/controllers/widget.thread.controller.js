@@ -877,8 +877,9 @@
                       return encodeURIComponent(match)
                   }) : '',
                   commentId: Util.UUID(),
-                  userToken: Thread.SocialItems.userDetails.userToken,
+                  userToken: Thread.SocialItems.userDetails.userDetails.userToken,
                   imageUrl: imageUrl || null,
+                  videos: $scope.Thread.videos || [],
                   userId: Thread.SocialItems.userDetails.userId,
                   likes: [],
                   userDetails: Thread.SocialItems.userDetails,
@@ -939,6 +940,7 @@
               if (data && data.results && data.results.length > 0 && !data.cancelled) {
                   $scope.Thread.comment = data.results["0"].textValue;
                   $scope.Thread.images = data.results["0"].images;
+                  $scope.Thread.videos = data.results["0"].videos;
 
                   var gif = getGifUrl(data.results["0"].gifs);
                   if (gif && $scope.Thread.images && $scope.Thread.images.push) {
@@ -968,6 +970,10 @@
                                   enable: true,
                                   multiple: true
                               },
+                              "videos": {
+                                  enable: true,
+                                  multiple: true
+                              },
                               "gifs": {
                                   enable: false
                               }
@@ -976,7 +982,7 @@
                           if (err) return console.error("Something went wrong.", err);
                           if (data.cancelled) return console.error('User canceled.')
                           Thread.getPostContent(data);
-                          if ((Thread.comment || ($scope.Thread.images && $scope.Thread.images.length > 0))) {
+                          if ((Thread.comment || ($scope.Thread.images && $scope.Thread.images.length > 0) || ($scope.Thread.videos && $scope.Thread.videos.length > 0))) {
                               Thread.addComment($scope.Thread.images);
                           }
                       });

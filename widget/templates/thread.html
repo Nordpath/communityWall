@@ -44,6 +44,11 @@
                         <div ng-repeat="image in Thread.post.imageUrl track by $index" class="post-images-container">
                             <img ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, Thread.post.imageUrl)">
                         </div>
+                        <div ng-repeat="video in Thread.post.videos track by $index" class="post-videos-container">
+                            <video controls width="100%" playsinline>
+                                <source ng-src="{{video}}" type="video/mp4">
+                            </video>
+                        </div>
                     </div>
                 </div>
                 <div class="footer">
@@ -99,6 +104,11 @@
                             <div class="plugin-banner ellipsis">
                                 <div class="plugin-slide text-center" style="max-height: none !important;">
                                     <img ng-repeat="image in comment.imageUrl track by $index" ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, comment.imageUrl)">
+                                    <div ng-repeat="video in comment.videos track by $index" class="post-videos-container">
+                                        <video controls width="100%" playsinline>
+                                            <source ng-src="{{video}}" type="video/mp4">
+                                        </video>
+                                    </div>
                                 </div>
                             </div>
                             <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer">

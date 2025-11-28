@@ -1697,6 +1697,20 @@ a.comments .iconsTheme.iconsFont {
     border-radius: 8px;
 }
 
+.post-videos-container {
+    margin: 2vh 0;
+}
+
+.post-videos-container video {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+    border-radius: 8px;
+    background-color: #000;
+}
+
 .blocked-users {
     height: 100vh;
     overflow: scroll;

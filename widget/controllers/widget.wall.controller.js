@@ -1344,6 +1344,7 @@
               postData.userDetails = WidgetWall.SocialItems.userDetails;
               postData.imageUrl = imageUrl || null;
               postData.images = WidgetWall.images ? $scope.WidgetWall.images : [];
+              postData.videos = WidgetWall.videos ? $scope.WidgetWall.videos : [];
               postData.wid = WidgetWall.SocialItems.wid;
               postData.text = WidgetWall.postText ? WidgetWall.postText.replace(/[#&%+!@^*()-]/g, function (match) {
                   return encodeURIComponent(match)
@@ -1397,6 +1398,7 @@
               if (data && data.results && data.results.length > 0 && !data.cancelled) {
                   $scope.WidgetWall.postText = data.results["0"].textValue;
                   $scope.WidgetWall.images = data.results["0"].images;
+                  $scope.WidgetWall.videos = data.results["0"].videos;
 
                   var gif = getGifUrl(data.results["0"].gifs);
                   if (gif && $scope.WidgetWall.images && $scope.WidgetWall.images.push) {
@@ -1427,6 +1429,10 @@
                                   enable: true,
                                   multiple: true
                               },
+                              "videos": {
+                                  enable: true,
+                                  multiple: true
+                              },
                               "gifs": {
                                   enable: false
                               }
@@ -1435,7 +1441,7 @@
                           if (err) return console.error("Something went wrong.", err);
                           if (data.cancelled) return;
                           WidgetWall.getPostContent(data);
-                          if ((WidgetWall.postText || ($scope.WidgetWall.images && $scope.WidgetWall.images.length > 0))) {
+                          if ((WidgetWall.postText || ($scope.WidgetWall.images && $scope.WidgetWall.images.length > 0) || ($scope.WidgetWall.videos && $scope.WidgetWall.videos.length > 0))) {
                               finalPostCreation($scope.WidgetWall.images, (err) => {
                                   if (err) {
                                       return;

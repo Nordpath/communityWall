@@ -149,6 +149,11 @@
                                                     <div ng-repeat="image in post.images track by $index" class="post-images-container">
                                                         <img  ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)">
                                                     </div>
+                                                    <div ng-repeat="video in post.videos track by $index" class="post-videos-container">
+                                                        <video controls width="100%" playsinline>
+                                                            <source ng-src="{{video}}" type="video/mp4">
+                                                        </video>
+                                                    </div>
                                                 </div>
                                             </a>
                                         </div>
