@@ -168,10 +168,42 @@
               }).catch((error) => console.error(error));
           }
 
+          Thread.loadThemeColors = function () {
+              buildfire.datastore.get('Social', function (err, result) {
+                  if (err) {
+                      console.error('Error loading theme colors:', err);
+                      return;
+                  }
+                  if (result && result.data && result.data.appSettings && result.data.appSettings.themeColors) {
+                      Thread.applyThemeColors(result.data.appSettings.themeColors);
+                  }
+              });
+          };
+
+          Thread.applyThemeColors = function (colors) {
+              var root = document.documentElement;
+              if (colors.fabButton) {
+                  root.style.setProperty('--fab-button-color', colors.fabButton);
+              }
+              if (colors.likeIcon) {
+                  root.style.setProperty('--like-icon-color', colors.likeIcon);
+              }
+              if (colors.commentIcon) {
+                  root.style.setProperty('--comment-icon-color', colors.commentIcon);
+              }
+              if (colors.shareIcon) {
+                  root.style.setProperty('--share-icon-color', colors.shareIcon);
+              }
+              if (colors.menuIcon) {
+                  root.style.setProperty('--menu-icon-color', colors.menuIcon);
+              }
+          };
+
           Thread.init = function () {
               Thread.skeletonPost.start();
               Thread.skeletonComments.start();
               Thread.initCommentFabBtn();
+              Thread.loadThemeColors();
               if ($routeParams.threadId) {
                   let post = Thread.SocialItems.items.find(el => el.id === $routeParams.threadId);
                   Thread.post = post || {};

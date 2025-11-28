@@ -72,6 +72,15 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                                 enabled: false
                             };
                         }
+                        if (!result.data.appSettings.themeColors) {
+                            result.data.appSettings.themeColors = {
+                                fabButton: '#FF6B35',
+                                likeIcon: '#E63946',
+                                commentIcon: '#457B9D',
+                                shareIcon: '#06A77D',
+                                menuIcon: '#9B59B6'
+                            };
+                        }
                     } else if (!result.data.appSettings) {
                         result.data.appSettings = {};
                         result.data.appSettings.showMembers = true;
@@ -88,6 +97,13 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             imageUrl: '',
                             linkUrl: '',
                             enabled: false
+                        };
+                        result.data.appSettings.themeColors = {
+                            fabButton: '#FF6B35',
+                            likeIcon: '#E63946',
+                            commentIcon: '#457B9D',
+                            shareIcon: '#06A77D',
+                            menuIcon: '#9B59B6'
                         };
                     }
                     $scope.data = result.data.appSettings;

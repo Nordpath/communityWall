@@ -267,6 +267,71 @@
     </div>
 
     <div style="padding: 0px 12px !important; margin-top: 2rem;">
+        <h1>Theme Colors</h1>
+        <p class="label2" style="margin-bottom: 1.5rem; color: #666;">Customize the colors of buttons and icons in the widget</p>
+
+        <div class="row" style="margin-bottom: 1.25rem;">
+            <div class="col-md-4">
+                <label style="font-size: 14px !important;">FAB Button Color</label>
+            </div>
+            <div class="col-md-8">
+                <input type="color" class="form-control" ng-model="data.themeColors.fabButton" ng-change="save()" style="height: 40px; padding: 4px;">
+                <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Color for the floating action button (create post button)
+                </p>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 1.25rem;">
+            <div class="col-md-4">
+                <label style="font-size: 14px !important;">Like Icon Color</label>
+            </div>
+            <div class="col-md-8">
+                <input type="color" class="form-control" ng-model="data.themeColors.likeIcon" ng-change="save()" style="height: 40px; padding: 4px;">
+                <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Color for the heart/like icon
+                </p>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 1.25rem;">
+            <div class="col-md-4">
+                <label style="font-size: 14px !important;">Comment Icon Color</label>
+            </div>
+            <div class="col-md-8">
+                <input type="color" class="form-control" ng-model="data.themeColors.commentIcon" ng-change="save()" style="height: 40px; padding: 4px;">
+                <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Color for the chat bubble/comment icon
+                </p>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 1.25rem;">
+            <div class="col-md-4">
+                <label style="font-size: 14px !important;">Share Icon Color</label>
+            </div>
+            <div class="col-md-8">
+                <input type="color" class="form-control" ng-model="data.themeColors.shareIcon" ng-change="save()" style="height: 40px; padding: 4px;">
+                <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Color for the share/send icon
+                </p>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 1.25rem;">
+            <div class="col-md-4">
+                <label style="font-size: 14px !important;">Menu Icon Color</label>
+            </div>
+            <div class="col-md-8">
+                <input type="color" class="form-control" ng-model="data.themeColors.menuIcon" ng-change="save()" style="height: 40px; padding: 4px;">
+                <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Color for the three-dot menu icon
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 0px 12px !important; margin-top: 2rem;">
         <h1>Bottom Logo</h1>
         <p class="label2" style="margin-bottom: 1.5rem; color: #666;">Choose between a small logo or a full-width banner at the bottom of the widget</p>
 

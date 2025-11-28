@@ -624,14 +624,38 @@
                       console.error('Error loading bottom logo config:', err);
                       return;
                   }
-                  if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
-                      WidgetWall.bottomLogo = result.data.appSettings.bottomLogo;
-                      WidgetWall.adjustLayoutForBottomLogo();
+                  if (result && result.data && result.data.appSettings) {
+                      if (result.data.appSettings.bottomLogo) {
+                          WidgetWall.bottomLogo = result.data.appSettings.bottomLogo;
+                          WidgetWall.adjustLayoutForBottomLogo();
+                      }
+                      if (result.data.appSettings.themeColors) {
+                          WidgetWall.applyThemeColors(result.data.appSettings.themeColors);
+                      }
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
                   }
               });
+          };
+
+          WidgetWall.applyThemeColors = function (colors) {
+              var root = document.documentElement;
+              if (colors.fabButton) {
+                  root.style.setProperty('--fab-button-color', colors.fabButton);
+              }
+              if (colors.likeIcon) {
+                  root.style.setProperty('--like-icon-color', colors.likeIcon);
+              }
+              if (colors.commentIcon) {
+                  root.style.setProperty('--comment-icon-color', colors.commentIcon);
+              }
+              if (colors.shareIcon) {
+                  root.style.setProperty('--share-icon-color', colors.shareIcon);
+              }
+              if (colors.menuIcon) {
+                  root.style.setProperty('--menu-icon-color', colors.menuIcon);
+              }
           };
 
           WidgetWall.handleLogoClick = function () {
