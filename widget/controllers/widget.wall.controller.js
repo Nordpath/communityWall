@@ -27,12 +27,25 @@
           WidgetWall.skeletonActive = false;
           WidgetWall.deeplinkHandled = false;
           WidgetWall.isFromDeepLink= false;
+          WidgetWall.skeleton = null;
 
-          WidgetWall.skeleton = new Buildfire.components.skeleton('.social-item', {
-              type: 'list-item-avatar, list-item-two-line, image'});
+          WidgetWall.initSkeleton = function () {
+            if (!WidgetWall.skeleton) {
+              try {
+                WidgetWall.skeleton = new Buildfire.components.skeleton('.social-item', {
+                  type: 'list-item-avatar, list-item-two-line, image'
+                });
+              } catch (err) {
+                console.warn('Skeleton initialization failed:', err);
+              }
+            }
+          };
 
           WidgetWall.startSkeleton = function () {
-            if (!WidgetWall.skeletonActive) {
+            if (!WidgetWall.skeleton) {
+              WidgetWall.initSkeleton();
+            }
+            if (WidgetWall.skeleton && !WidgetWall.skeletonActive) {
               WidgetWall.skeleton.start();
               WidgetWall.skeletonActive = true;
             }
@@ -40,7 +53,7 @@
 
           WidgetWall.stopSkeleton = function () {
             WidgetWall.postsLoaded = true;
-            if (WidgetWall.skeletonActive) {
+            if (WidgetWall.skeleton && WidgetWall.skeletonActive) {
               WidgetWall.skeleton.stop();
               WidgetWall.skeletonActive = false;
             }
