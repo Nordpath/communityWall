@@ -174,8 +174,13 @@
                       console.error('Error loading theme colors:', err);
                       return;
                   }
-                  if (result && result.data && result.data.appSettings && result.data.appSettings.themeColors) {
-                      Thread.applyThemeColors(result.data.appSettings.themeColors);
+                  if (result && result.data && result.data.appSettings) {
+                      if (result.data.appSettings.themeColors) {
+                          Thread.applyThemeColors(result.data.appSettings.themeColors);
+                      }
+                      if (result.data.appSettings.usernameFont) {
+                          Thread.applyUsernameFont(result.data.appSettings.usernameFont);
+                      }
                   }
               });
           };
@@ -196,6 +201,19 @@
               }
               if (colors.menuIcon) {
                   root.style.setProperty('--menu-icon-color', colors.menuIcon);
+              }
+          };
+
+          Thread.applyUsernameFont = function (font) {
+              var root = document.documentElement;
+              if (font.family) {
+                  root.style.setProperty('--username-font-family', font.family);
+              }
+              if (font.weight) {
+                  root.style.setProperty('--username-font-weight', font.weight);
+              }
+              if (font.size) {
+                  root.style.setProperty('--username-font-size', font.size);
               }
           };
 

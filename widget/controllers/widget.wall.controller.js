@@ -632,6 +632,9 @@
                       if (result.data.appSettings.themeColors) {
                           WidgetWall.applyThemeColors(result.data.appSettings.themeColors);
                       }
+                      if (result.data.appSettings.usernameFont) {
+                          WidgetWall.applyUsernameFont(result.data.appSettings.usernameFont);
+                      }
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
@@ -655,6 +658,19 @@
               }
               if (colors.menuIcon) {
                   root.style.setProperty('--menu-icon-color', colors.menuIcon);
+              }
+          };
+
+          WidgetWall.applyUsernameFont = function (font) {
+              var root = document.documentElement;
+              if (font.family) {
+                  root.style.setProperty('--username-font-family', font.family);
+              }
+              if (font.weight) {
+                  root.style.setProperty('--username-font-weight', font.weight);
+              }
+              if (font.size) {
+                  root.style.setProperty('--username-font-size', font.size);
               }
           };
 

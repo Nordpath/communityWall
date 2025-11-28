@@ -81,6 +81,13 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                                 menuIcon: '#9B59B6'
                             };
                         }
+                        if (!result.data.appSettings.usernameFont) {
+                            result.data.appSettings.usernameFont = {
+                                family: 'inherit',
+                                weight: '400',
+                                size: '13px'
+                            };
+                        }
                     } else if (!result.data.appSettings) {
                         result.data.appSettings = {};
                         result.data.appSettings.showMembers = true;
@@ -104,6 +111,11 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             commentIcon: '#457B9D',
                             shareIcon: '#06A77D',
                             menuIcon: '#9B59B6'
+                        };
+                        result.data.appSettings.usernameFont = {
+                            family: 'inherit',
+                            weight: '400',
+                            size: '13px'
                         };
                     }
                     $scope.data = result.data.appSettings;
