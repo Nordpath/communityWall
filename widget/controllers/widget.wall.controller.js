@@ -112,6 +112,10 @@
               else if (actionItem && actionItem.iconUrl) {
                   WidgetWall.fabSpeedDial.onMainButtonClick = () => WidgetWall.navigateTo()
               }
+
+              setTimeout(function() {
+                  WidgetWall.adjustLayoutForBottomLogo();
+              }, 100);
           }
 
           WidgetWall.showHideCommentBox = function () {
@@ -622,7 +626,7 @@
                   }
                   if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
                       WidgetWall.bottomLogo = result.data.appSettings.bottomLogo;
-                      WidgetWall.adjustContentPadding();
+                      WidgetWall.adjustLayoutForBottomLogo();
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
@@ -646,17 +650,28 @@
               }
           };
 
-          WidgetWall.adjustContentPadding = function () {
+          WidgetWall.adjustLayoutForBottomLogo = function () {
               if (WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl) {
                   var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '110px' : '80px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
                   }
+
+                  var fabButton = document.querySelector('#addBtn');
+                  if (fabButton) {
+                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '100px' : '85px';
+                      fabButton.style.bottom = fabBottomOffset;
+                  }
               } else {
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = '0px';
+                  }
+
+                  var fabButton = document.querySelector('#addBtn');
+                  if (fabButton) {
+                      fabButton.style.bottom = '20px';
                   }
               }
           };
@@ -1788,7 +1803,7 @@
                   WidgetWall.setSettings(response);
                   if (response.data && response.data.appSettings && response.data.appSettings.bottomLogo) {
                       WidgetWall.bottomLogo = response.data.appSettings.bottomLogo;
-                      WidgetWall.adjustContentPadding();
+                      WidgetWall.adjustLayoutForBottomLogo();
                   }
                   setTimeout(function () {
                       if (!response.data.appSettings.disableFollowLeaveGroup) {
