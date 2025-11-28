@@ -1598,6 +1598,14 @@ a.comments .material-icons-outlined,
     vertical-align: middle;
 }
 
+a.likes .iconsTheme.iconsFont {
+    color: var(--like-counter-color, var(--like-icon-color, #E63946)) !important;
+}
+
+a.comments .iconsTheme.iconsFont {
+    color: var(--comment-counter-color, var(--comment-icon-color, #457B9D)) !important;
+}
+
 .footer-right .social-icon:first-child .material-icons-outlined {
     color: var(--share-icon-color, #06A77D) !important;
     transform: rotate(-45deg);
