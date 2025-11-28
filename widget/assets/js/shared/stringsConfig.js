@@ -187,6 +187,12 @@ const stringsConfig = {
 				, maxLength: 30
 				, defaultValue: "More Options"
 			},
+			sharePost: {
+				title: "Share Post"
+				, placeholder: "Share Post"
+				, maxLength: 30
+				, defaultValue: "Share Post"
+			},
 			reportPost: {
 				title: "Report Post"
 				, placeholder: "Report Post"
@@ -253,6 +259,18 @@ const stringsConfig = {
 				, placeholder: "Owner of this post is already banned."
 				, maxLength: 50
 				, defaultValue: "Owner of this post is already banned."
+			},
+			sharePostSuccess: {
+				title: "Share Post Success"
+				, placeholder: "Link copied to clipboard!"
+				, maxLength: 50
+				, defaultValue: "Link copied to clipboard!"
+			},
+			sharePostFail: {
+				title: "Share Post Failure"
+				, placeholder: "Unable to share post. Please try again."
+				, maxLength: 50
+				, defaultValue: "Unable to share post. Please try again."
 			}
 		}
 	},

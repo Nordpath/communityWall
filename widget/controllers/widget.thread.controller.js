@@ -664,6 +664,110 @@
               );
           }
 
+          Thread.sharePost = function (post) {
+              if (!post || !post.id) return;
+
+              buildfire.spinner.show();
+
+              const queryStringObj = {
+                  postId: post.id
+              };
+
+              if (Thread.SocialItems.wid) {
+                  queryStringObj.wid = Thread.SocialItems.wid;
+              }
+
+              if (Thread.SocialItems.pluginTitle) {
+                  queryStringObj.wTitle = Thread.SocialItems.pluginTitle;
+              }
+
+              buildfire.deeplink.createLink({
+                  data: queryStringObj
+              }, (err, result) => {
+                  buildfire.spinner.hide();
+
+                  if (err) {
+                      console.error('Error creating deep link:', err);
+                      Buildfire.dialog.toast({
+                          message: Thread.SocialItems.languages.sharePostFail || "Unable to share post. Please try again.",
+                          type: 'danger'
+                      });
+                      return;
+                  }
+
+                  if (result && result.link) {
+                      if (navigator.clipboard && navigator.clipboard.writeText) {
+                          navigator.clipboard.writeText(result.link).then(() => {
+                              Buildfire.dialog.toast({
+                                  message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
+                                  type: 'success'
+                              });
+
+                              if (typeof Analytics !== 'undefined') {
+                                  Analytics.trackAction("post-shared");
+                              }
+                          }).catch((clipboardErr) => {
+                              console.error('Clipboard write failed:', clipboardErr);
+                              Thread.fallbackShare(result.link, post);
+                          });
+                      } else {
+                          Thread.fallbackShare(result.link, post);
+                      }
+                  }
+              });
+          }
+
+          Thread.fallbackShare = function(link, post) {
+              if (navigator.share) {
+                  const shareData = {
+                      title: Thread.SocialItems.context.title || 'Community Post',
+                      text: post.text ? post.text.substring(0, 100) + (post.text.length > 100 ? '...' : '') : 'Check out this post!',
+                      url: link
+                  };
+
+                  navigator.share(shareData).then(() => {
+                      Buildfire.dialog.toast({
+                          message: Thread.SocialItems.languages.sharePostSuccess || "Post shared successfully!",
+                          type: 'success'
+                      });
+
+                      if (typeof Analytics !== 'undefined') {
+                          Analytics.trackAction("post-shared");
+                      }
+                  }).catch((shareErr) => {
+                      if (shareErr.name !== 'AbortError') {
+                          console.error('Share failed:', shareErr);
+                      }
+                  });
+              } else {
+                  const tempInput = document.createElement('input');
+                  tempInput.value = link;
+                  document.body.appendChild(tempInput);
+                  tempInput.select();
+                  tempInput.setSelectionRange(0, 99999);
+
+                  try {
+                      document.execCommand('copy');
+                      Buildfire.dialog.toast({
+                          message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
+                          type: 'success'
+                      });
+
+                      if (typeof Analytics !== 'undefined') {
+                          Analytics.trackAction("post-shared");
+                      }
+                  } catch (err) {
+                      console.error('Fallback copy failed:', err);
+                      Buildfire.dialog.toast({
+                          message: Thread.SocialItems.languages.sharePostFail || "Unable to share post. Please try again.",
+                          type: 'danger'
+                      });
+                  } finally {
+                      document.body.removeChild(tempInput);
+                  }
+              }
+          }
+
           Thread.reportPost = function () {
               Buildfire.services.reportAbuse.report(
                 {
