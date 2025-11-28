@@ -85,8 +85,21 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             result.data.appSettings.usernameFont = {
                                 family: 'inherit',
                                 weight: '400',
-                                size: '13px'
+                                size: '13px',
+                                familyType: 'preset',
+                                customFontName: '',
+                                customFontUrl: ''
                             };
+                        }
+                        // Initialize new fields for existing configs
+                        if (!result.data.appSettings.usernameFont.familyType) {
+                            result.data.appSettings.usernameFont.familyType = 'preset';
+                        }
+                        if (!result.data.appSettings.usernameFont.customFontName) {
+                            result.data.appSettings.usernameFont.customFontName = '';
+                        }
+                        if (!result.data.appSettings.usernameFont.customFontUrl) {
+                            result.data.appSettings.usernameFont.customFontUrl = '';
                         }
                     } else if (!result.data.appSettings) {
                         result.data.appSettings = {};
@@ -115,7 +128,10 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                         result.data.appSettings.usernameFont = {
                             family: 'inherit',
                             weight: '400',
-                            size: '13px'
+                            size: '13px',
+                            familyType: 'preset',
+                            customFontName: '',
+                            customFontUrl: ''
                         };
                     }
                     $scope.data = result.data.appSettings;
@@ -439,5 +455,44 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                 $scope.$digest();
             }
         });
+    };
+
+    $scope.handleFontTypeChange = function () {
+        if ($scope.data.usernameFont.familyType === 'preset') {
+            // Reset to default preset font
+            if (!$scope.data.usernameFont.family || $scope.data.usernameFont.family.startsWith('custom-')) {
+                $scope.data.usernameFont.family = 'inherit';
+            }
+            $scope.data.usernameFont.customFontUrl = '';
+        } else if ($scope.data.usernameFont.familyType === 'custom') {
+            // Switch to custom mode
+            if (!$scope.data.usernameFont.customFontName) {
+                $scope.data.usernameFont.customFontName = '';
+            }
+        }
+        $scope.save();
+    };
+
+    $scope.handleCustomFontChange = function () {
+        if ($scope.data.usernameFont.customFontName && $scope.data.usernameFont.customFontName.trim()) {
+            const fontName = $scope.data.usernameFont.customFontName.trim();
+            const encodedFontName = fontName.replace(/ /g, '+');
+
+            // Generate Google Fonts URL with multiple weights
+            $scope.data.usernameFont.customFontUrl =
+                `https://fonts.googleapis.com/css2?family=${encodedFontName}:wght@300;400;500;600;700;800;900&display=swap`;
+
+            // Set the font family for CSS
+            $scope.data.usernameFont.family = `'${fontName}', sans-serif`;
+
+            buildfire.dialog.toast({
+                message: `Custom font "${fontName}" will be loaded`,
+                type: 'success'
+            });
+        } else {
+            $scope.data.usernameFont.customFontUrl = '';
+            $scope.data.usernameFont.family = 'inherit';
+        }
+        $scope.save();
     };
 }]);

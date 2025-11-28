@@ -206,6 +206,29 @@
 
           Thread.applyUsernameFont = function (font) {
               var root = document.documentElement;
+
+              // Load custom Google Font if specified
+              if (font.customFontUrl && font.customFontUrl.trim()) {
+                  // Check if the font link already exists
+                  var existingLink = document.getElementById('custom-username-font');
+                  if (existingLink) {
+                      existingLink.remove();
+                  }
+
+                  // Create and append new font link
+                  var link = document.createElement('link');
+                  link.id = 'custom-username-font';
+                  link.rel = 'stylesheet';
+                  link.href = font.customFontUrl;
+                  document.head.appendChild(link);
+              } else {
+                  // Remove custom font link if switching back to preset
+                  var existingLink = document.getElementById('custom-username-font');
+                  if (existingLink) {
+                      existingLink.remove();
+                  }
+              }
+
               if (font.family) {
                   root.style.setProperty('--username-font-family', font.family);
               }
