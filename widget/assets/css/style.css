@@ -1234,7 +1234,7 @@ textarea {
 }
 .has-comment-box .post-infinite-scroll,
 .side-thread-section .has-comment-box.post-section{
-    padding-bottom: 6rem;
+    padding-bottom: 7rem;
     padding-top: 45px;
 }
 
@@ -1712,13 +1712,15 @@ a.comments .iconsTheme.iconsFont {
 }
 
 .feed-tabs-container {
-    position: relative;
-    z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 99;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 0;
     background-color: #fff;
     width: 100%;
     display: block;
+    transform: none !important;
 }
 
 .feed-tabs {
@@ -1761,6 +1763,14 @@ a.comments .iconsTheme.iconsFont {
 .feed-tab.active span {
     color: #007aff;
     font-weight: 600;
+}
+
+.post-section.has-feed-tabs {
+    margin-top: 50px;
+}
+
+.post-section.has-feed-tabs .first-post {
+    margin-top: 8px;
 }
 
 .blocked-users {
