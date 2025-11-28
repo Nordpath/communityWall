@@ -60,18 +60,6 @@
             <div class="backgroundColorTheme content">
                 <div class="padding-zero" style="height: 100%;">
                     <div class="social-plugin social-wall">
-                        <div ng-show="WidgetWall.loadedPlugin"
-                        sticky-navbar scroll-container=".post-infinite-scroll"
-                        ng-class="{'head-btn': WidgetWall.allowFollowLeaveGroup, 'head-btn2': !WidgetWall.allowFollowLeaveGroup}" class="text-center flex flex-items-center flex-space-between social-top-banner" id="socialHeader">
-                            <p class="text-primary follow-btn" ng-click="WidgetWall.followUnfollow()"  ng-show="WidgetWall.allowFollowLeaveGroup">
-                                <button class="btn btn-danger-outlined" id="followBtn">
-                                    {{WidgetWall.groupFollowingStatus ? (WidgetWall.SocialItems.languages.leaveGroup) : WidgetWall.SocialItems.languages.joinGroup}}
-                                </button>
-                            </p>
-                            <p class="text-primary flex margin-zero pointer" ng-click="WidgetWall.showTopDrawer()">
-                                <span id="membersSvg" class="material-icons-outlined">more_horiz</span>
-                            </p>
-                        </div>
                         <div ng-show="!WidgetWall.SocialItems.isPrivateChat"
                         class="feed-tabs-container backgroundColorTheme">
                             <div class="feed-tabs">
@@ -92,7 +80,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div ng-class="{'has-comment-box':WidgetWall.SocialItems.userDetails.userId == null || WidgetWall.allowCreateThread,'has-group-header' : WidgetWall.allowFollowLeaveGroup, 'has-feed-tabs': !WidgetWall.SocialItems.isPrivateChat}"
+                        <div ng-class="{'has-comment-box':WidgetWall.SocialItems.userDetails.userId == null || WidgetWall.allowCreateThread, 'has-feed-tabs': !WidgetWall.SocialItems.isPrivateChat}"
                             class="post-section backgroundColorTheme">
                             <div class="post-infinite-scroll" id="top" ng-class="{'no-scroll': !WidgetWall.postsLoaded}">
                                 <div>
