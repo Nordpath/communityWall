@@ -271,6 +271,30 @@ const stringsConfig = {
 				, placeholder: "Unable to share post. Please try again."
 				, maxLength: 50
 				, defaultValue: "Unable to share post. Please try again."
+			},
+			postPendingReview: {
+				title: "Post Pending Review"
+				, placeholder: "Your post has been submitted for review. It will appear in the feed once approved by an admin."
+				, maxLength: 150
+				, defaultValue: "Your post has been submitted for review. It will appear in the feed once approved by an admin."
+			},
+			postPublished: {
+				title: "Post Published"
+				, placeholder: "Your post has been published successfully!"
+				, maxLength: 50
+				, defaultValue: "Your post has been published successfully!"
+			},
+			postApproved: {
+				title: "Post Approved"
+				, placeholder: "Your post has been approved and is now visible in the feed."
+				, maxLength: 100
+				, defaultValue: "Your post has been approved and is now visible in the feed."
+			},
+			postRejected: {
+				title: "Post Rejected"
+				, placeholder: "Your post was rejected."
+				, maxLength: 50
+				, defaultValue: "Your post was rejected."
 			}
 		}
 	},

@@ -156,29 +156,77 @@
                 ContentHome.noMore = false;
             };
 
+            ContentHome.moderationEnabled = false;
+            ContentHome.filterStatus = 'all';
+            ContentHome.pendingCount = 0;
+            ContentHome.approvedCount = 0;
+            ContentHome.rejectedCount = 0;
+            ContentHome.allPosts = [];
+
             ContentHome.getPosts = function () {
                 ContentHome.loading = true;
-                const searchOptions = {
-                    sort: { "_buildfire.index.date1": -1 },
-                    recordCount: true
-                };
-                buildfire.publicData.search(searchOptions, 'posts', (err, data) => {
+
+                Buildfire.datastore.get('Social', function (err, result) {
                     if (err) {
-                        ContentHome.posts = [];
+                        console.error('Error getting moderation settings:', err);
+                    }
+                    ContentHome.moderationEnabled = result && result.data && result.data.appSettings && result.data.appSettings.enableModeration;
+
+                    const searchOptions = {
+                        sort: { "_buildfire.index.date1": -1 },
+                        recordCount: true
+                    };
+
+                    buildfire.publicData.search(searchOptions, 'posts', (err, data) => {
+                        if (err) {
+                            ContentHome.posts = [];
+                            ContentHome.loading = false;
+                            if (!$scope.$$phase) $scope.$digest();
+                            return console.error(err);
+                        }
+                        if (data && data.result) {
+                            ContentHome.allPosts = data.result.map(item => ({ ...item.data, id: item.id }));
+
+                            if (ContentHome.moderationEnabled && ContentHome.filterStatus === 'pending') {
+                                ContentHome.filterStatus = 'pending';
+                            }
+
+                            ContentHome.updateCounts();
+                            ContentHome.applyFilter();
+                        } else {
+                            ContentHome.posts = [];
+                            ContentHome.loading = false;
+                            if (!$scope.$$phase) $scope.$digest();
+                        }
                         ContentHome.loading = false;
                         if (!$scope.$$phase) $scope.$digest();
-                        return console.error(err);
-                    }
-                    if (data && data.result) {
-                        ContentHome.posts = data.result.map(item => ({ ...item.data, id: item.id }));
-                    } else {
-                        ContentHome.posts = [];
-                        ContentHome.loading = false;
-                        if (!$scope.$$phase) $scope.$digest();
-                    }
-                    ContentHome.loading = false;
-                    if (!$scope.$$phase) $scope.$digest();
+                    });
                 });
+            };
+
+            ContentHome.updateCounts = function() {
+                ContentHome.pendingCount = ContentHome.allPosts.filter(p => p.status === 'pending').length;
+                ContentHome.approvedCount = ContentHome.allPosts.filter(p => p.status === 'approved' || !p.status).length;
+                ContentHome.rejectedCount = ContentHome.allPosts.filter(p => p.status === 'rejected').length;
+            };
+
+            ContentHome.filterByStatus = function(status) {
+                ContentHome.filterStatus = status;
+                ContentHome.applyFilter();
+                if (!$scope.$$phase) $scope.$digest();
+            };
+
+            ContentHome.applyFilter = function() {
+                if (ContentHome.filterStatus === 'all') {
+                    ContentHome.posts = ContentHome.allPosts;
+                } else {
+                    ContentHome.posts = ContentHome.allPosts.filter(post => {
+                        if (ContentHome.filterStatus === 'approved') {
+                            return post.status === 'approved' || !post.status;
+                        }
+                        return post.status === ContentHome.filterStatus;
+                    });
+                }
             };
 
             ContentHome.showComments = function (post) {
@@ -210,6 +258,126 @@
                     }
                 });
                 return userImageUrl;
+            };
+
+            ContentHome.approvePost = function (postId) {
+                buildfire.dialog.confirm(
+                    {
+                        title: "Approve Post",
+                        message: "Are you sure you want to approve this post?",
+                        confirmButton: {
+                            text: "Approve",
+                            type: "success",
+                        },
+                    },
+                    (err, isConfirmed) => {
+                        if (err) console.error(err);
+                        if (isConfirmed) {
+                            Buildfire.getContext(function (err, context) {
+                                const moderatorName = (context.currentUser && context.currentUser.displayName) || 'Admin';
+
+                                buildfire.publicData.getById(postId, 'posts', function (err, post) {
+                                    if (err) {
+                                        console.error('Error getting post:', err);
+                                        return;
+                                    }
+
+                                    post.data.status = 'approved';
+                                    post.data.moderatedBy = moderatorName;
+                                    post.data.moderatedOn = new Date();
+                                    post.data.moderationReason = null;
+                                    post.data._buildfire.index.string2 = 'approved';
+
+                                    buildfire.publicData.update(postId, post.data, 'posts', function (err, result) {
+                                        if (err) {
+                                            console.error('Error approving post:', err);
+                                            return;
+                                        }
+
+                                        Buildfire.messaging.sendMessageToWidget({ 'name': EVENTS.POST_APPROVED, 'id': postId });
+
+                                        const postIndex = ContentHome.allPosts.findIndex(p => p.id === postId);
+                                        if (postIndex !== -1) {
+                                            ContentHome.allPosts[postIndex] = { ...result, id: postId };
+                                        }
+                                        ContentHome.updateCounts();
+                                        ContentHome.applyFilter();
+                                        if (!$scope.$$phase) $scope.$digest();
+
+                                        buildfire.notifications.pushNotification.schedule({
+                                            title: "Post Approved",
+                                            text: "Your post has been approved and is now visible in the feed.",
+                                            userIds: [post.data.userId]
+                                        }, function(err, result) {
+                                            if (err) console.error('Error sending notification:', err);
+                                        });
+                                    });
+                                });
+                            });
+                        }
+                    }
+                );
+            };
+
+            ContentHome.rejectPost = function (postId) {
+                buildfire.dialog.prompt(
+                    {
+                        title: "Reject Post",
+                        message: "Please provide a reason for rejecting this post (optional):",
+                        confirmButton: {
+                            text: "Reject",
+                            type: "danger",
+                        },
+                    },
+                    (err, reason) => {
+                        if (err) console.error(err);
+                        if (reason !== null) {
+                            Buildfire.getContext(function (err, context) {
+                                const moderatorName = (context.currentUser && context.currentUser.displayName) || 'Admin';
+
+                                buildfire.publicData.getById(postId, 'posts', function (err, post) {
+                                    if (err) {
+                                        console.error('Error getting post:', err);
+                                        return;
+                                    }
+
+                                    post.data.status = 'rejected';
+                                    post.data.moderatedBy = moderatorName;
+                                    post.data.moderatedOn = new Date();
+                                    post.data.moderationReason = reason || 'No reason provided';
+                                    post.data._buildfire.index.string2 = 'rejected';
+
+                                    buildfire.publicData.update(postId, post.data, 'posts', function (err, result) {
+                                        if (err) {
+                                            console.error('Error rejecting post:', err);
+                                            return;
+                                        }
+
+                                        Buildfire.messaging.sendMessageToWidget({ 'name': EVENTS.POST_REJECTED, 'id': postId });
+
+                                        const postIndex = ContentHome.allPosts.findIndex(p => p.id === postId);
+                                        if (postIndex !== -1) {
+                                            ContentHome.allPosts[postIndex] = { ...result, id: postId };
+                                        }
+                                        ContentHome.updateCounts();
+                                        ContentHome.applyFilter();
+                                        if (!$scope.$$phase) $scope.$digest();
+
+                                        if (reason) {
+                                            buildfire.notifications.pushNotification.schedule({
+                                                title: "Post Rejected",
+                                                text: `Your post was rejected. Reason: ${reason}`,
+                                                userIds: [post.data.userId]
+                                            }, function(err, result) {
+                                                if (err) console.error('Error sending notification:', err);
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                    }
+                );
             };
 
             // Method for deleting post using SocialDataStore deletePost method

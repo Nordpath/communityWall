@@ -1207,7 +1207,12 @@
                     _id: postData.userDetails && postData.userDetails.userId ? postData.userDetails.userId : null
                 }, postData.text, () =>
                   SocialDataStore.createPost(postData).then((response) => {
-                      WidgetWall.SocialItems.items.unshift(postData);
+                      const isPending = response.data && response.data.status === 'pending';
+
+                      if (!isPending) {
+                          WidgetWall.SocialItems.items.unshift(postData);
+                      }
+
                       Buildfire.messaging.sendMessageToControl({
                           name: EVENTS.POST_CREATED,
                           status: 'Success',
@@ -1215,7 +1220,21 @@
                       });
                       postData.id = response.data.id;
                       postData.uniqueLink = response.data.uniqueLink;
-                      WidgetWall.scheduleNotification(postData, 'post');
+
+                      if (isPending) {
+                          Buildfire.dialog.toast({
+                              message: WidgetWall.SocialItems.languages.postPendingReview || "Your post has been submitted for review. It will appear in the feed once approved by an admin.",
+                              type: 'info',
+                              duration: 5000
+                          });
+                      } else {
+                          WidgetWall.scheduleNotification(postData, 'post');
+                          Buildfire.dialog.toast({
+                              message: WidgetWall.SocialItems.languages.postPublished || "Your post has been published successfully!",
+                              type: 'success'
+                          });
+                      }
+
                       // window.scrollTo(0, 0);
                       // $location.hash('top');
                       // $anchorScroll();

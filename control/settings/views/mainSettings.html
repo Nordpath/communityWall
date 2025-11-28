@@ -219,6 +219,46 @@
                 </div>
             </div>
         </div>
+
+        <h1 style="margin-top: 2rem;">Post Moderation</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label class="label2" style="font-size: 14px !important;">
+                    <div class="tooltip-container">
+                        <span class="nowrap">Enable Post Moderation</span>
+                        <span class="btn-info-icon btn-primary">
+                            <span class="cp-tooltip">When enabled, all posts must be approved by an admin before appearing in the feed. This helps prevent inappropriate content.</span>
+                        </span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-md-8">
+                <div class="button-switch">
+                    <input id="enableModeration" type="checkbox" ng-model="data.enableModeration" ng-change="save()">
+                    <label for="enableModeration" class="label-success"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="data.enableModeration">
+            <div class="col-md-4">
+                <label class="label2" style="font-size: 14px !important;">
+                    <div class="tooltip-container">
+                        <span class="nowrap">Notify Admins of New Posts</span>
+                        <span class="btn-info-icon btn-primary">
+                            <span class="cp-tooltip">Send a notification to admins when a new post is submitted for review.</span>
+                        </span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-md-8">
+                <div class="button-switch">
+                    <input id="notifyAdmins" type="checkbox" ng-model="data.notifyAdminsOnPost" ng-change="save()">
+                    <label for="notifyAdmins" class="label-success"></label>
+                </div>
+            </div>
+        </div>
     </form>
 
     <div style="padding: 0px 12px !important;">

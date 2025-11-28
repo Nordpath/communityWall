@@ -58,6 +58,12 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                                 actionItem: null
                             };
                         }
+                        if (typeof (result.data.appSettings.enableModeration) == 'undefined') {
+                            result.data.appSettings.enableModeration = false;
+                        }
+                        if (typeof (result.data.appSettings.notifyAdminsOnPost) == 'undefined') {
+                            result.data.appSettings.notifyAdminsOnPost = false;
+                        }
                     } else if (!result.data.appSettings) {
                         result.data.appSettings = {};
                         result.data.appSettings.showMembers = true;
@@ -67,6 +73,8 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             value: "default",
                             actionItem: null
                         };
+                        result.data.appSettings.enableModeration = false;
+                        result.data.appSettings.notifyAdminsOnPost = false;
                     }
                     $scope.data = result.data.appSettings;
 

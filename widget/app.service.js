@@ -681,30 +681,61 @@
                 },
                 createPost: function (postData) {
                     var deferred = $q.defer();
-                    postData.userToken = postData.userDetails.userToken;
-                    postData.userId = postData.userDetails.userId;
-                    postData.likes = [];
-                    postData.comments = [];
-                    postData.createdOn = new Date();
-                    postData.createdBy = postData.userDetails.userId;
-                    postData._buildfire = {
-                        index: {
-                            string1: postData.wid,
-                            date1: new Date().getTime(),
-                            array1: [{string1: `createdBy_${postData.userDetails.userId}`}]
+
+                    buildfire.datastore.get('Social', function (err, result) {
+                        if (err) {
+                            console.error('Error getting moderation settings:', err);
                         }
-                    }
-                    buildfire.publicData.insert(postData, 'posts', (error, result) => {
-                        if (error) return deferred.reject(error);
-                        if (result && result.id && result.data) {
-                            result.data.id = result.id;
-                            result.data.uniqueLink = result.id + "-" + result.data.wid;
-                            buildfire.publicData.update(result.id, result.data, 'posts', (err, posts) => {
-                                if (error) return deferred.reject(error);
-                                return deferred.resolve(posts);
-                            });
+
+                        const moderationEnabled = result && result.data && result.data.appSettings && result.data.appSettings.enableModeration;
+                        const notifyAdmins = result && result.data && result.data.appSettings && result.data.appSettings.notifyAdminsOnPost;
+
+                        postData.userToken = postData.userDetails.userToken;
+                        postData.userId = postData.userDetails.userId;
+                        postData.likes = [];
+                        postData.comments = [];
+                        postData.createdOn = new Date();
+                        postData.createdBy = postData.userDetails.userId;
+                        postData.status = moderationEnabled ? 'pending' : 'approved';
+                        postData.moderatedBy = null;
+                        postData.moderatedOn = null;
+                        postData.moderationReason = null;
+
+                        postData._buildfire = {
+                            index: {
+                                string1: postData.wid,
+                                string2: postData.status,
+                                date1: new Date().getTime(),
+                                array1: [{string1: `createdBy_${postData.userDetails.userId}`}]
+                            }
                         }
+
+                        buildfire.publicData.insert(postData, 'posts', (error, insertResult) => {
+                            if (error) return deferred.reject(error);
+                            if (insertResult && insertResult.id && insertResult.data) {
+                                insertResult.data.id = insertResult.id;
+                                insertResult.data.uniqueLink = insertResult.id + "-" + insertResult.data.wid;
+                                buildfire.publicData.update(insertResult.id, insertResult.data, 'posts', (err, posts) => {
+                                    if (err) return deferred.reject(err);
+
+                                    if (moderationEnabled && notifyAdmins) {
+                                        buildfire.notifications.pushNotification.schedule({
+                                            title: "New Post Pending Review",
+                                            text: "A new post has been submitted and requires approval.",
+                                            queryString: "postId=" + insertResult.id,
+                                            sendToSelf: false,
+                                            sendToAdmin: true
+                                        }, function(err, result) {
+                                            if (err) console.error('Error sending notification:', err);
+                                        });
+                                    }
+
+                                    return deferred.resolve(posts);
+                                });
+                            }
+                        });
                     });
+
                     return deferred.promise;
                 },
                 addComment: function (data) {
@@ -1157,36 +1188,51 @@
                 const blockedUserIds = _this.blockedUsers.concat(_this.blockedByUsers || []);
                 const blockedUserStrings = blockedUserIds.map(userId => `createdBy_${userId}`);
 
+                const moderationFilter = _this.appSettings && _this.appSettings.enableModeration ?
+                    { '_buildfire.index.string2': { $in: ['approved', null] } } : null;
+
                 if (_this.wid === "") {
-                    filter = {
-                        $and: [
-                            {
-                                '_buildfire.index.string1': {
-                                    $eq: ''
-                                }
-                            },
-                            {
-                                '_buildfire.index.array1.string1': {
-                                    $nin: blockedUserStrings
-                                }
+                    const andConditions = [
+                        {
+                            '_buildfire.index.string1': {
+                                $eq: ''
                             }
-                        ]
+                        },
+                        {
+                            '_buildfire.index.array1.string1': {
+                                $nin: blockedUserStrings
+                            }
+                        }
+                    ];
+
+                    if (moderationFilter) {
+                        andConditions.push(moderationFilter);
+                    }
+
+                    filter = {
+                        $and: andConditions
                     };
                 } else {
-                    filter = {
-                        $and: [
-                            {
-                                "_buildfire.index.string1": {
-                                    "$regex": _this.wid,
-                                    "$options": "i"
-                                }
-                            },
-                            {
-                                '_buildfire.index.array1.string1': {
-                                    $nin: blockedUserStrings
-                                }
+                    const andConditions = [
+                        {
+                            "_buildfire.index.string1": {
+                                "$regex": _this.wid,
+                                "$options": "i"
                             }
-                        ]
+                        },
+                        {
+                            '_buildfire.index.array1.string1': {
+                                $nin: blockedUserStrings
+                            }
+                        }
+                    ];
+
+                    if (moderationFilter) {
+                        andConditions.push(moderationFilter);
+                    }
+
+                    filter = {
+                        $and: andConditions
                     };
                 }
 

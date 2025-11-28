@@ -9,6 +9,25 @@
         </div>
     </div>
 
+    <div class="item row" ng-if="ContentHome.moderationEnabled">
+        <div class="col-xs-12">
+            <div class="btn-group margin-bottom-fifteen" role="group">
+                <button type="button" class="btn" ng-class="ContentHome.filterStatus === 'pending' ? 'btn-primary' : 'btn-default'" ng-click="ContentHome.filterByStatus('pending')">
+                    Pending ({{ContentHome.pendingCount}})
+                </button>
+                <button type="button" class="btn" ng-class="ContentHome.filterStatus === 'approved' ? 'btn-primary' : 'btn-default'" ng-click="ContentHome.filterByStatus('approved')">
+                    Approved ({{ContentHome.approvedCount}})
+                </button>
+                <button type="button" class="btn" ng-class="ContentHome.filterStatus === 'rejected' ? 'btn-primary' : 'btn-default'" ng-click="ContentHome.filterByStatus('rejected')">
+                    Rejected ({{ContentHome.rejectedCount}})
+                </button>
+                <button type="button" class="btn" ng-class="ContentHome.filterStatus === 'all' ? 'btn-primary' : 'btn-default'" ng-click="ContentHome.filterByStatus('all')">
+                    All Posts
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="empty-state" ng-if="!ContentHome.posts.length && !ContentHome.loading">
         <h4 class="text-center" style="font-size:16px; line-height:22px;">Looks like you do not have any posts yet. To add one, you can do so through the emulator to your right.</h4>
         <br>
@@ -39,6 +58,9 @@
                             {{getUserName(post.userDetails)}}
                         </p>
                         <p class="time-ago caption margin-bottom-zero">{{ContentHome.getDuration(post.createdOn) | convertTimeFormat}}</p>
+                        <span ng-if="post.status" class="badge" ng-class="{'badge-warning': post.status === 'pending', 'badge-success': post.status === 'approved', 'badge-danger': post.status === 'rejected'}" style="margin-left: 10px;">
+                            {{post.status | uppercase}}
+                        </span>
                     </div>
                     <div class="icons left-auto">
                         <a class="social-icon"
@@ -67,11 +89,17 @@
                 </div>
                 
                 <div class="social-footer">
-                    <div class="status flex">
+                    <div class="status flex" style="flex-wrap: wrap; gap: 10px;">
                         <a class="text-danger padded-sm caption" ng-click="ContentHome.deletePost(post.id)">Delete Post</a>
+                        <a class="btn btn-success btn-sm" ng-if="post.status === 'pending'" ng-click="ContentHome.approvePost(post.id)">Approve</a>
+                        <a class="btn btn-danger btn-sm" ng-if="post.status === 'pending'" ng-click="ContentHome.rejectPost(post.id)">Reject</a>
                         <a class="left-auto padded-sm caption" ng-show="post.comments.length" ng-click="post.viewComments = !post.viewComments">
                             {{ post.viewComments ? 'Hide Comments' : 'Show Comments'}}
                         </a>
+                    </div>
+                    <div ng-if="post.moderatedBy && post.moderatedOn" class="padded-sm caption" style="font-size: 12px; color: #666;">
+                        Moderated by {{post.moderatedBy}} on {{ContentHome.getDuration(post.moderatedOn) | convertTimeFormat}}
+                        <span ng-if="post.moderationReason"> - Reason: {{post.moderationReason}}</span>
                     </div>
                 </div>
                 <hr class="small margin-zero" ng-if="post.comments.length && post.viewComments">
