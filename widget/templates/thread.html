@@ -35,15 +35,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="padding-half-rem padding-top-zero padding-bottom-zero"></div>
-                    <div class="flex">
-                        <a class="social-icon margin-one-rem margin-top-zero margin-bottom-zero ng-cloak" ng-click="Thread.sharePost(Thread.post)" style="height: 2rem; margin-top: 0.75rem;">
-                            <span class="material-icons-outlined">send</span>
-                        </a>
-                        <a class="social-icon margin-one-rem margin-top-zero margin-bottom-zero ng-cloak" ng-click="Thread.openBottomDrawer(Thread.post)" style="height: 2rem; margin-top: 0.75rem;">
-                            <span class="material-icons-outlined">more_horiz</span>
-                        </a>
-                    </div>
                 </div>
                 <div class="post-text copy" style="word-wrap: break-word">
                     <p class="margin-zero body-text-theme" ng-bind-html="Thread.util.injectAnchors(Thread.post.text) | newLine"></p><p></p>
@@ -57,11 +48,21 @@
                 </div>
                 <div class="footer">
                     <div class="status-footer">
-                        <a class="likes social-icon ng-cloak" ng-click="Thread.likeThread(Thread.post, 'thread')">
-                            <i class="material-icons-outlined" aria-hidden="true">{{!isItemLiked(Thread.post, Thread.SocialItems.userDetails.userId)?"thumb_up_off_alt":"thumb_up_alt"}}</i>
-                            <span class="iconsTheme iconsFont"
-                                ng-class="{active: isItemLiked(Thread.post, Thread.SocialItems.userDetails.userId)}">{{Thread.post.likes.length}}</span>
-                        </a>
+                        <div class="footer-left">
+                            <a class="likes social-icon ng-cloak" ng-click="Thread.likeThread(Thread.post, 'thread')">
+                                <i class="material-icons-outlined" aria-hidden="true">{{!isItemLiked(Thread.post, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
+                                <span class="iconsTheme iconsFont"
+                                    ng-class="{active: isItemLiked(Thread.post, Thread.SocialItems.userDetails.userId)}">{{Thread.post.likes.length}}</span>
+                            </a>
+                        </div>
+                        <div class="footer-right">
+                            <a class="social-icon ng-cloak" ng-click="Thread.sharePost(Thread.post)">
+                                <span class="material-icons-outlined">send</span>
+                            </a>
+                            <a class="social-icon ng-cloak" ng-click="Thread.openBottomDrawer(Thread.post)">
+                                <span class="material-icons-outlined">more_vert</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="comments-list" ng-if="Thread.processedComments">

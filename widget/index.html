@@ -127,14 +127,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex">
-                                            <a class="social-icon margin-one-rem margin-top-zero margin-bottom-zero ng-cloak" ng-click="WidgetWall.sharePost(post)" style="height: 2rem; margin-top: 0.75rem;">
-                                                <span class="material-icons-outlined">send</span>
-                                            </a>
-                                            <a class="social-icon margin-one-rem margin-top-zero margin-bottom-zero ng-cloak" ng-click="WidgetWall.openBottomDrawer(post)" style="height: 2rem; margin-top: 0.75rem;">
-                                                <span class="material-icons-outlined">more_horiz</span>
-                                            </a>
-                                        </div>
                                     </div>
                                     <div class="post-text copy">
                                         <p class="cursor-pointer margin-zero">
@@ -164,19 +156,29 @@
                                     <div ng-show="post.userId" class="footer clearfix">
                                         <div class="status">
                                             <div class="status-footer">
-                                                <a class="social-icon likes ng-cloak"
-                                                ng-click="WidgetWall.likeThread(post)">
-                                                <i class="material-icons-outlined" aria-hidden="true">{{!isItemLiked(post, WidgetWall.SocialItems.userDetails.userId)?"thumb_up_off_alt":"thumb_up_alt"}}</i>
-                                                <span class="iconsTheme iconsFont"
-                                                ng-class="{notActive: !isItemLiked(post, WidgetWall.SocialItems.userDetails.userId)}">{{post.likes.length}}</span>
-                                            </a>
+                                                <div class="footer-left">
+                                                    <a class="social-icon likes ng-cloak"
+                                                    ng-click="WidgetWall.likeThread(post)">
+                                                    <i class="material-icons-outlined" aria-hidden="true">{{!isItemLiked(post, WidgetWall.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
+                                                    <span class="iconsTheme iconsFont"
+                                                    ng-class="{notActive: !isItemLiked(post, WidgetWall.SocialItems.userDetails.userId)}">{{post.likes.length}}</span>
+                                                </a>
 
-                                            <a ng-if="!WidgetWall.SocialItems.isPrivateChat"
-                                                ng-click=" (!WidgetWall.SocialItems.isPrivateChat) ? WidgetWall.goInToThread(post.id) : return"
-                                                class="social-icon comments ng-cloak">
-                                                <i class="material-icons-outlined icons2Font notActive" aria-hidden="true">chat_bubble_outline</i>
-                                                <span class="iconsTheme iconsFont">{{post.comments.length}}</span>
-                                            </a>
+                                                <a ng-if="!WidgetWall.SocialItems.isPrivateChat"
+                                                    ng-click=" (!WidgetWall.SocialItems.isPrivateChat) ? WidgetWall.goInToThread(post.id) : return"
+                                                    class="social-icon comments ng-cloak">
+                                                    <i class="material-icons-outlined icons2Font notActive" aria-hidden="true">chat_bubble_outline</i>
+                                                    <span class="iconsTheme iconsFont">{{post.comments.length}}</span>
+                                                </a>
+                                                </div>
+                                                <div class="footer-right">
+                                                    <a class="social-icon ng-cloak" ng-click="WidgetWall.sharePost(post)">
+                                                        <span class="material-icons-outlined">send</span>
+                                                    </a>
+                                                    <a class="social-icon ng-cloak" ng-click="WidgetWall.openBottomDrawer(post)">
+                                                        <span class="material-icons-outlined">more_vert</span>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -642,9 +642,20 @@ button.btn--lg,
 .status-footer{
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     padding-top: 0;
     margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
 }
 .status-footer .social-icon,
 .footer .social-icon {
