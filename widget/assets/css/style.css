@@ -59,12 +59,15 @@
  }
   #addBtn {
     background-color: var(--fab-button-color, #FF6B35) !important;
+    border-radius: 50% !important;
  }
   #addBtn button {
     background-color: var(--fab-button-color, #FF6B35) !important;
+    border-radius: 50% !important;
  }
   #addCommentBtn button {
     background-color: var(--fab-button-color, #FF6B35) !important;
+    border-radius: 50% !important;
  }
   .fab-button {
     padding: 0;
