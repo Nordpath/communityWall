@@ -1085,16 +1085,19 @@
                     ' | ' + (users[1] ? SocialItems.prototype.getUserName(users[1]) : 'Someone');
             }
 
-            SocialItems.prototype.getPosts = function (callback) {
+            SocialItems.prototype.getPosts = function (activeTab, callback) {
+                if (typeof activeTab === 'function') {
+                    callback = activeTab;
+                    activeTab = 'newest';
+                }
+
                 let pageSize = _this.pageSize,
                     page = _this.page;
                 let searchOptions = {
                     pageSize,
                     page,
-                    filter: getFilter(),
-                    sort: {
-                        "_buildfire.index.date1": -1
-                    },
+                    filter: getFilter(activeTab),
+                    sort: getSort(activeTab),
                     recordCount: true
                 }
 
@@ -1103,9 +1106,18 @@
 
                     if (data && data.result.length) {
                         const result = data.result.filter(newItem => !_this.items.some(existItem => existItem.id === newItem.id));
-                        const newItems = result.map(item => {
+                        let newItems = result.map(item => {
                             return {...item.data, id: item.id};
                         });
+
+                        if (activeTab === 'popular') {
+                            newItems.sort((a, b) => {
+                                const aLikes = (a.likes && a.likes.length) || 0;
+                                const bLikes = (b.likes && b.likes.length) || 0;
+                                return bLikes - aLikes;
+                            });
+                        }
+
                         _this.items = _this.items.concat(newItems);
                         if (data.totalRecord > _this.items.length) {
                             _this.showMorePosts = true;
@@ -1171,7 +1183,10 @@
                 buildfire.publicData.getById(id, "posts", callback);
             }
 
-            function getSort() {
+            function getSort(activeTab) {
+                if (activeTab === 'popular') {
+                    return null;
+                }
                 if (_this.indexingUpdateDone)
                     return {
                         "_buildfire.index.date1": -1
@@ -1181,7 +1196,7 @@
                 };
             }
 
-            function getFilter() {
+            function getFilter(activeTab) {
                 let filter = {};
 
                 const blockedUserIds = _this.blockedUsers.concat(_this.blockedByUsers || []);
@@ -1208,6 +1223,12 @@
                         andConditions.push(moderationFilter);
                     }
 
+                    if (activeTab === 'myPosts' && _this.userDetails && _this.userDetails.userId) {
+                        andConditions.push({
+                            'userId': _this.userDetails.userId
+                        });
+                    }
+
                     filter = {
                         $and: andConditions
                     };
@@ -1228,6 +1249,12 @@
 
                     if (moderationFilter) {
                         andConditions.push(moderationFilter);
+                    }
+
+                    if (activeTab === 'myPosts' && _this.userDetails && _this.userDetails.userId) {
+                        andConditions.push({
+                            'userId': _this.userDetails.userId
+                        });
                     }
 
                     filter = {

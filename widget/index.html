@@ -72,7 +72,28 @@
                                 <span id="membersSvg" class="material-icons-outlined">more_horiz</span>
                             </p>
                         </div>
-                        <div ng-class="{'has-comment-box':WidgetWall.SocialItems.userDetails.userId == null || WidgetWall.allowCreateThread,'has-group-header' : WidgetWall.allowFollowLeaveGroup}"
+                        <div ng-show="WidgetWall.loadedPlugin && !WidgetWall.SocialItems.isPrivateChat"
+                        sticky-navbar scroll-container=".post-infinite-scroll"
+                        class="feed-tabs-container backgroundColorTheme">
+                            <div class="feed-tabs">
+                                <div class="feed-tab"
+                                     ng-class="{'active': WidgetWall.activeTab === 'newest'}"
+                                     ng-click="WidgetWall.switchTab('newest')">
+                                    <span>Newest</span>
+                                </div>
+                                <div class="feed-tab"
+                                     ng-class="{'active': WidgetWall.activeTab === 'popular'}"
+                                     ng-click="WidgetWall.switchTab('popular')">
+                                    <span>Most Popular</span>
+                                </div>
+                                <div class="feed-tab"
+                                     ng-class="{'active': WidgetWall.activeTab === 'myPosts'}"
+                                     ng-click="WidgetWall.switchTab('myPosts')">
+                                    <span>My Posts</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-class="{'has-comment-box':WidgetWall.SocialItems.userDetails.userId == null || WidgetWall.allowCreateThread,'has-group-header' : WidgetWall.allowFollowLeaveGroup, 'has-feed-tabs': WidgetWall.loadedPlugin && !WidgetWall.SocialItems.isPrivateChat}"
                             class="post-section backgroundColorTheme">
                             <div class="post-infinite-scroll" id="top" ng-class="{'no-scroll': !WidgetWall.postsLoaded}">
                                 <div>

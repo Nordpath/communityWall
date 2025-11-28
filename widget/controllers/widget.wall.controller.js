@@ -29,6 +29,8 @@
           WidgetWall.isFromDeepLink= false;
           WidgetWall.skeleton = null;
 
+          WidgetWall.activeTab = 'newest';
+
           WidgetWall.initSkeleton = function () {
             if (!WidgetWall.skeleton) {
               try {
@@ -230,8 +232,23 @@
               });
           }
 
+          WidgetWall.switchTab = function (tab) {
+              if (WidgetWall.activeTab === tab) return;
+
+              WidgetWall.activeTab = tab;
+              WidgetWall.SocialItems.items = [];
+              WidgetWall.SocialItems.page = 0;
+              WidgetWall.SocialItems.showMorePosts = false;
+              WidgetWall.postsLoaded = false;
+
+              WidgetWall.getPosts(() => {
+                  WidgetWall.postsLoaded = true;
+                  $scope.$digest();
+              });
+          }
+
           WidgetWall.getPosts = function (callback = null)  {
-              WidgetWall.SocialItems.getPosts(function (err, data) {
+              WidgetWall.SocialItems.getPosts(WidgetWall.activeTab, function (err, data) {
                   window.buildfire.messaging.sendMessageToControl({
                       name: 'SEND_POSTS_TO_CP',
                       posts: WidgetWall.SocialItems.items,
