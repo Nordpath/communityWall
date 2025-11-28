@@ -1591,6 +1591,13 @@ a.comments .material-icons-outlined,
     color: var(--comment-icon-color, #457B9D) !important;
 }
 
+.comment-bubble-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--comment-icon-color, #457B9D) !important;
+    vertical-align: middle;
+}
+
 .footer-right .social-icon:first-child .material-icons-outlined {
     color: var(--share-icon-color, #06A77D) !important;
 }
