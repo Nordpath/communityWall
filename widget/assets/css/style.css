@@ -1712,11 +1712,13 @@ a.comments .iconsTheme.iconsFont {
 }
 
 .feed-tabs-container {
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 100;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 0;
+    background-color: #fff;
+    width: 100%;
+    display: block;
 }
 
 .feed-tabs {
@@ -1726,6 +1728,7 @@ a.comments .iconsTheme.iconsFont {
     width: 100%;
     padding: 0;
     margin: 0;
+    background-color: #fff;
 }
 
 .feed-tab {
@@ -1736,6 +1739,7 @@ a.comments .iconsTheme.iconsFont {
     position: relative;
     transition: all 0.3s ease;
     border-bottom: 3px solid transparent;
+    background-color: transparent;
 }
 
 .feed-tab span {
@@ -1743,6 +1747,7 @@ a.comments .iconsTheme.iconsFont {
     font-weight: 500;
     color: #666;
     transition: color 0.3s ease;
+    display: block;
 }
 
 .feed-tab:hover span {
@@ -1756,10 +1761,6 @@ a.comments .iconsTheme.iconsFont {
 .feed-tab.active span {
     color: #007aff;
     font-weight: 600;
-}
-
-.post-section.has-feed-tabs {
-    padding-top: 50px;
 }
 
 .blocked-users {

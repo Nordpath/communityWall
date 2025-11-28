@@ -72,8 +72,7 @@
                                 <span id="membersSvg" class="material-icons-outlined">more_horiz</span>
                             </p>
                         </div>
-                        <div ng-show="WidgetWall.loadedPlugin && !WidgetWall.SocialItems.isPrivateChat"
-                        sticky-navbar scroll-container=".post-infinite-scroll"
+                        <div ng-show="!WidgetWall.SocialItems.isPrivateChat"
                         class="feed-tabs-container backgroundColorTheme">
                             <div class="feed-tabs">
                                 <div class="feed-tab"
@@ -93,7 +92,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div ng-class="{'has-comment-box':WidgetWall.SocialItems.userDetails.userId == null || WidgetWall.allowCreateThread,'has-group-header' : WidgetWall.allowFollowLeaveGroup, 'has-feed-tabs': WidgetWall.loadedPlugin && !WidgetWall.SocialItems.isPrivateChat}"
+                        <div ng-class="{'has-comment-box':WidgetWall.SocialItems.userDetails.userId == null || WidgetWall.allowCreateThread,'has-group-header' : WidgetWall.allowFollowLeaveGroup, 'has-feed-tabs': !WidgetWall.SocialItems.isPrivateChat}"
                             class="post-section backgroundColorTheme">
                             <div class="post-infinite-scroll" id="top" ng-class="{'no-scroll': !WidgetWall.postsLoaded}">
                                 <div>
