@@ -623,7 +623,9 @@
                   if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
                       WidgetWall.bottomLogo = result.data.appSettings.bottomLogo;
                       WidgetWall.adjustContentPadding();
-                      $scope.$digest();
+                      if (!$scope.$$phase) {
+                          $scope.$apply();
+                      }
                   }
               });
           };
@@ -1798,7 +1800,9 @@
                   }, 100);
               } else if (response.tag === "languages")
                   WidgetWall.SocialItems.formatLanguages(response);
-              $scope.$digest();
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
           });
 
           function updatePostsWithNames(user, status) {

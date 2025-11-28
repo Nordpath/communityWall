@@ -54,8 +54,8 @@
 </head>
 
 <body id="test">
-    <div class="main_view">
-        <div class="slide-right main-thread-section" ng-show="showThread" ng-controller="WidgetWallCtrl as WidgetWall"
+    <div class="main_view" ng-controller="WidgetWallCtrl as WidgetWall">
+        <div class="slide-right main-thread-section" ng-show="showThread"
             ng-cloak>
             <div class="backgroundColorTheme content">
                 <div class="padding-zero" style="height: 100%;">
@@ -203,7 +203,7 @@
             <h5 class="titleBarTheme text-center" style="margin-top: 35px;">Something went wrong!! Please try again</h5>
         </div>
 
-        <div class="bottom-logo-container" ng-controller="WidgetWallCtrl as WidgetWall" ng-show="WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl">
+        <div class="bottom-logo-container" ng-show="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl">
             <div class="bottom-logo-mode" ng-if="WidgetWall.bottomLogo.displayMode === 'logo'" ng-click="WidgetWall.handleLogoClick()">
                 <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Logo">
             </div>
