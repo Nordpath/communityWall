@@ -57,6 +57,12 @@
   #addBtn .material-icons, #addCommentBtn .material-icons {
     color: #fff !important;
  }
+  #addBtn {
+    background-color: #FF5722 !important;
+ }
+  #addBtn button {
+    background-color: #FF5722 !important;
+ }
   .fab-button {
     padding: 0;
  }
@@ -1554,6 +1560,26 @@ button.btn-danger-outlined:hover, button.btn-danger-outlined:focus{
 }
 .material-icons-outlined{
     color: var(--bf-theme-icons) !important;
+}
+
+.social-icon.likes .material-icons-outlined {
+    color: #E91E63 !important;
+}
+
+.social-icon.comments .material-icons-outlined {
+    color: #2196F3 !important;
+}
+
+.footer-right .social-icon:first-child .material-icons-outlined {
+    color: #4CAF50 !important;
+}
+
+.footer-right .social-icon:last-child .material-icons-outlined {
+    color: #9C27B0 !important;
+}
+
+.head .social-icon .material-icons-outlined {
+    color: #FF9800 !important;
 }
 #socialHeader, .head-btn, .head-btn2 {
     transition: transform .3s ease-in-out;
