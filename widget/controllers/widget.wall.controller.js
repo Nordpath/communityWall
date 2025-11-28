@@ -1365,7 +1365,7 @@
                                   multiple: true
                               },
                               "gifs": {
-                                  enable: true
+                                  enable: false
                               }
                           }
                       }, (err, data) => {
