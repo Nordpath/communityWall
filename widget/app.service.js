@@ -156,8 +156,7 @@
                 resizeImage(imageUrl, options) {
                     const calculateWidth = () => {
                         const windowWidth = window.innerWidth;
-                        const windowHeight = window.innerHeight;
-                        return { width: windowWidth, height: Math.floor(windowHeight / 3) };
+                        return { width: windowWidth };
                     }
                     if (!options) {
                         options = calculateWidth();

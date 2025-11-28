@@ -1672,6 +1672,14 @@ a.comments .material-icons-outlined,
     margin: 2vh 0;
 }
 
+.post-images-container img {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+    display: block;
+}
+
 .blocked-users {
     height: 100vh;
     overflow: scroll;
