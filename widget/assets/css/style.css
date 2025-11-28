@@ -280,7 +280,7 @@ button.btn--lg,
     height: 3.5rem;
     border-radius: 50%;
     position: fixed;
-    bottom: 1.5rem;
+    bottom: 110px;
     right: 1.5rem;
     box-shadow: 0 .125rem .5rem rgba(50, 50, 50, 0.3);
 }
@@ -1789,6 +1789,10 @@ a.comments .iconsTheme.iconsFont {
     .bottom-logo-mode img {
         max-width: 100px;
         max-height: 40px;
+    }
+
+    .btn.btn--fab {
+        bottom: 90px;
     }
 }
 
