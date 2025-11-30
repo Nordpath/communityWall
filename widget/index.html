@@ -219,15 +219,6 @@
         <div class="slide-left side-thread-section" ng-view="" ng-hide="showThread">
             <h5 class="titleBarTheme text-center" style="margin-top: 35px;">Something went wrong!! Please try again</h5>
         </div>
-
-        <div class="bottom-logo-container" ng-show="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl">
-            <div class="bottom-logo-mode" ng-if="WidgetWall.bottomLogo.displayMode === 'logo'" ng-click="WidgetWall.handleLogoClick()">
-                <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Logo">
-            </div>
-            <div class="bottom-banner-mode" ng-if="WidgetWall.bottomLogo.displayMode === 'banner'" ng-click="WidgetWall.handleLogoClick()">
-                <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Banner">
-            </div>
-        </div>
     </div>
     <script>
         buildfire.appearance.titlebar.show();
