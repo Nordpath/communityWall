@@ -227,7 +227,10 @@
                   }
                   WidgetWall.appTheme = obj.colors;
 
-                  document.getElementById('socialHeader').style.setProperty("background-color", obj.colors.backgroundColor, "important");
+                  var socialHeader = document.getElementById('socialHeader');
+                  if (socialHeader) {
+                      socialHeader.style.setProperty("background-color", obj.colors.backgroundColor, "important");
+                  }
                   WidgetWall.loadedPlugin = true;
               });
           }
