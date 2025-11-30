@@ -39,8 +39,8 @@
                 <div class="post-text copy" style="word-wrap: break-word">
                     <p class="margin-zero body-text-theme" ng-bind-html="Thread.util.injectAnchors(Thread.post.text) | newLine"></p><p></p>
                 </div>
-                <div class="plugin-banner clearfix">
-                    <div class="plugin-slide text-center" style="max-height: none !important;">
+                <div class="post-media-container clearfix" ng-if="Thread.post.imageUrl.length > 0 || Thread.post.videos.length > 0">
+                    <div class="post-media-wrapper text-center" style="max-height: none !important;">
                         <div ng-repeat="image in Thread.post.imageUrl track by $index" class="post-images-container">
                             <img ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, Thread.post.imageUrl)">
                         </div>
@@ -101,8 +101,8 @@
                                         {{Thread.SocialItems.languages.messageDeleted ? Thread.SocialItems.languages.messageDeleted  : "This message was deleted."}}
                                     </p>
                             </div>
-                            <div class="plugin-banner ellipsis">
-                                <div class="plugin-slide text-center" style="max-height: none !important;">
+                            <div class="post-media-container ellipsis" ng-if="comment.imageUrl.length > 0 || comment.videos.length > 0">
+                                <div class="post-media-wrapper text-center" style="max-height: none !important;">
                                     <img ng-repeat="image in comment.imageUrl track by $index" ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, comment.imageUrl)">
                                     <div ng-repeat="video in comment.videos track by $index" class="post-videos-container">
                                         <video controls width="100%" playsinline>

@@ -150,8 +150,8 @@
                                                 <p ng-if="(post.text.trim().length>150 && post.seeMore)" class="text-info" ng-click="WidgetWall.seeLess(post)">Read Less</p>
                                         </p>
                                     </div>
-                                    <div class="plugin-banner">
-                                        <div class="plugin-slide text-center" style="max-height: none !important;">
+                                    <div class="post-media-container" ng-if="post.images.length > 0 || post.videos.length > 0">
+                                        <div class="post-media-wrapper text-center" style="max-height: none !important;">
                                             <a ng-click="openThread($event,post)">
                                                 <div data-wrap="true">
                                                     <div ng-repeat="image in post.images track by $index" class="post-images-container">

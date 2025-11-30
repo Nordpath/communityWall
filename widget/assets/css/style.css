@@ -788,7 +788,7 @@ button.btn--lg,
  .social-comment:last-of-type .thread-dot::before{
      height: 1rem;
  }
- .social-comment .plugin-banner{
+ .social-comment .post-media-container{
     margin: 0 .75rem;
     border-radius: .5rem;
     overflow: hidden;
@@ -1549,7 +1549,7 @@ html[buildfire][safe-area="true"] body {
 .bf-primary-text{
     color: var(--bf-theme-primary) !important;
 }
-.plugin-banner .box {
+.post-media-container .box {
     margin: 0 !important;
 }
 .wallMembers .social-item .social-profile-photo {
