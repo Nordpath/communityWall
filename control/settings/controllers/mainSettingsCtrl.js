@@ -71,6 +71,8 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                                 linkUrl: '',
                                 enabled: false
                             };
+                        } else {
+                            result.data.appSettings.bottomLogo.enabled = false;
                         }
                         if (!result.data.appSettings.themeColors) {
                             result.data.appSettings.themeColors = {

@@ -644,6 +644,7 @@
                   if (result && result.data && result.data.appSettings) {
                       if (result.data.appSettings.bottomLogo) {
                           WidgetWall.bottomLogo = result.data.appSettings.bottomLogo;
+                          WidgetWall.bottomLogo.enabled = false;
                           WidgetWall.adjustLayoutForBottomLogo();
                       }
                       if (result.data.appSettings.themeColors) {
@@ -1889,6 +1890,7 @@
                   WidgetWall.setSettings(response);
                   if (response.data && response.data.appSettings && response.data.appSettings.bottomLogo) {
                       WidgetWall.bottomLogo = response.data.appSettings.bottomLogo;
+                      WidgetWall.bottomLogo.enabled = false;
                       WidgetWall.adjustLayoutForBottomLogo();
                   }
                   setTimeout(function () {
