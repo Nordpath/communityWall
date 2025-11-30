@@ -1718,7 +1718,7 @@
                   queryStringObj.wTitle = WidgetWall.SocialItems.pluginTitle;
               }
 
-              buildfire.deeplink.createLink({
+              buildfire.deeplink.template.get({
                   data: queryStringObj
               }, (err, result) => {
                   buildfire.spinner.hide();
@@ -1732,9 +1732,9 @@
                       return;
                   }
 
-                  if (result && result.link) {
+                  if (result && result.deeplink) {
                       if (navigator.clipboard && navigator.clipboard.writeText) {
-                          navigator.clipboard.writeText(result.link).then(() => {
+                          navigator.clipboard.writeText(result.deeplink).then(() => {
                               Buildfire.dialog.toast({
                                   message: WidgetWall.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
                                   type: 'success'
@@ -1745,10 +1745,10 @@
                               }
                           }).catch((clipboardErr) => {
                               console.error('Clipboard write failed:', clipboardErr);
-                              WidgetWall.fallbackShare(result.link, post);
+                              WidgetWall.fallbackShare(result.deeplink, post);
                           });
                       } else {
-                          WidgetWall.fallbackShare(result.link, post);
+                          WidgetWall.fallbackShare(result.deeplink, post);
                       }
                   }
               });

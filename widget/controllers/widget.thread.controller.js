@@ -754,7 +754,7 @@
                   queryStringObj.wTitle = Thread.SocialItems.pluginTitle;
               }
 
-              buildfire.deeplink.createLink({
+              buildfire.deeplink.template.get({
                   data: queryStringObj
               }, (err, result) => {
                   buildfire.spinner.hide();
@@ -768,9 +768,9 @@
                       return;
                   }
 
-                  if (result && result.link) {
+                  if (result && result.deeplink) {
                       if (navigator.clipboard && navigator.clipboard.writeText) {
-                          navigator.clipboard.writeText(result.link).then(() => {
+                          navigator.clipboard.writeText(result.deeplink).then(() => {
                               Buildfire.dialog.toast({
                                   message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
                                   type: 'success'
@@ -781,10 +781,10 @@
                               }
                           }).catch((clipboardErr) => {
                               console.error('Clipboard write failed:', clipboardErr);
-                              Thread.fallbackShare(result.link, post);
+                              Thread.fallbackShare(result.deeplink, post);
                           });
                       } else {
-                          Thread.fallbackShare(result.link, post);
+                          Thread.fallbackShare(result.deeplink, post);
                       }
                   }
               });
