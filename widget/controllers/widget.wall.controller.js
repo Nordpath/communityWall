@@ -735,7 +735,7 @@
 
           WidgetWall.adjustLayoutForBottomLogo = function () {
               if (WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl) {
-                  var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '110px' : '80px';
+                  var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '150px' : '80px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
