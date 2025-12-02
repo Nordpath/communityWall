@@ -743,7 +743,7 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '100px' : '85px';
+                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '140px' : '85px';
                       fabButton.style.bottom = fabBottomOffset;
                   }
               } else {
