@@ -1391,7 +1391,7 @@
                       if (isPending) {
                           Buildfire.dialog.toast({
                               message: WidgetWall.SocialItems.languages.postPendingReview || "Your post has been submitted for review. It will appear in the feed once approved by an admin.",
-                              type: 'info',
+                              type: 'warning',
                               duration: 5000
                           });
                       } else {
