@@ -982,7 +982,19 @@
                           if (err) return console.error("Something went wrong.", err);
                           if (data.cancelled) return console.error('User canceled.')
                           Thread.getPostContent(data);
-                          if ((Thread.comment || ($scope.Thread.images && $scope.Thread.images.length > 0) || ($scope.Thread.videos && $scope.Thread.videos.length > 0))) {
+
+                          const hasImages = $scope.Thread.images && $scope.Thread.images.length > 0;
+                          const hasVideos = $scope.Thread.videos && $scope.Thread.videos.length > 0;
+
+                          if (!hasImages && !hasVideos) {
+                              Buildfire.dialog.toast({
+                                  message: Thread.SocialItems.languages.mediaRequired || "Please add an image or video to post",
+                                  type: 'warning'
+                              });
+                              return;
+                          }
+
+                          if ((Thread.comment || hasImages || hasVideos)) {
                               Thread.addComment($scope.Thread.images);
                           }
                       });

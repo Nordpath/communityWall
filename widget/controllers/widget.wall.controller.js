@@ -1461,7 +1461,19 @@
                           if (err) return console.error("Something went wrong.", err);
                           if (data.cancelled) return;
                           WidgetWall.getPostContent(data);
-                          if ((WidgetWall.postText || ($scope.WidgetWall.images && $scope.WidgetWall.images.length > 0) || ($scope.WidgetWall.videos && $scope.WidgetWall.videos.length > 0))) {
+
+                          const hasImages = $scope.WidgetWall.images && $scope.WidgetWall.images.length > 0;
+                          const hasVideos = $scope.WidgetWall.videos && $scope.WidgetWall.videos.length > 0;
+
+                          if (!hasImages && !hasVideos) {
+                              Buildfire.dialog.toast({
+                                  message: WidgetWall.SocialItems.languages.mediaRequired || "Please add an image or video to post",
+                                  type: 'warning'
+                              });
+                              return;
+                          }
+
+                          if ((WidgetWall.postText || hasImages || hasVideos)) {
                               finalPostCreation($scope.WidgetWall.images, (err) => {
                                   if (err) {
                                       return;
