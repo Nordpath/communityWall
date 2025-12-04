@@ -1762,23 +1762,7 @@
                   }
 
                   if (result && result.deeplink) {
-                      if (navigator.clipboard && navigator.clipboard.writeText) {
-                          navigator.clipboard.writeText(result.deeplink).then(() => {
-                              Buildfire.dialog.toast({
-                                  message: WidgetWall.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
-                                  type: 'success'
-                              });
-
-                              if (typeof Analytics !== 'undefined') {
-                                  Analytics.trackAction("post-shared");
-                              }
-                          }).catch((clipboardErr) => {
-                              console.error('Clipboard write failed:', clipboardErr);
-                              WidgetWall.fallbackShare(result.deeplink, post);
-                          });
-                      } else {
-                          WidgetWall.fallbackShare(result.deeplink, post);
-                      }
+                      WidgetWall.fallbackShare(result.deeplink, post);
                   }
               });
           }
