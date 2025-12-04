@@ -228,6 +228,28 @@
                 <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Banner">
             </div>
         </div>
+
+        <div class="custom-post-dialog" ng-show="WidgetWall.showCustomPostDialog">
+            <div class="custom-post-overlay" ng-click="WidgetWall.closeCustomPostDialog()"></div>
+            <div class="custom-post-content">
+                <div class="custom-post-input-section">
+                    <input type="text"
+                           class="custom-post-input"
+                           placeholder="Add message"
+                           ng-model="WidgetWall.customPostText"
+                           ng-keypress="WidgetWall.handlePostKeyPress($event)">
+                </div>
+                <div class="custom-post-actions">
+                    <div class="custom-post-camera" ng-click="WidgetWall.selectImages()">
+                        <span class="camera-icon">📷</span>
+                        <span class="camera-label">{{WidgetWall.selectedImagesText}}</span>
+                    </div>
+                    <div class="custom-post-send" ng-click="WidgetWall.submitCustomPost()">
+                        <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
         buildfire.appearance.titlebar.show();

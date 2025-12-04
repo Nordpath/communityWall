@@ -957,50 +957,67 @@
               }
           }
 
+          Thread.showCustomPostDialog = false;
+          Thread.customPostText = '';
+          Thread.selectedImages = [];
+          Thread.selectedImagesText = 'Change selected';
+
           Thread.openCommentSection = function () {
               Thread.SocialItems.authenticateUser(null, (err, user) => {
                   if (err) return console.error("Getting user failed.", err);
                   if (user) {
-                      buildfire.input.showTextDialog({
-                          "placeholder": Thread.SocialItems.languages.writePost,
-                          "saveText": Thread.SocialItems.languages.confirmPost.length > 9 ? Thread.SocialItems.languages.confirmPost.substring(0, 9) : Thread.SocialItems.languages.confirmPost,
-                          "cancelText": Thread.SocialItems.languages.cancelPost.length > 9 ? Thread.SocialItems.languages.cancelPost.substring(0, 9) : Thread.SocialItems.languages.cancelPost,
-                          "attachments": {
-                              "images": {
-                                  enable: true,
-                                  multiple: true
-                              },
-                              "videos": {
-                                  enable: false,
-                                  multiple: true
-                              },
-                              "gifs": {
-                                  enable: false
-                              }
-                          }
-                      }, (err, data) => {
-                          if (err) return console.error("Something went wrong.", err);
-                          if (data.cancelled) return console.error('User canceled.')
-                          Thread.getPostContent(data);
-
-                          const hasImages = $scope.Thread.images && $scope.Thread.images.length > 0;
-                          const hasVideos = $scope.Thread.videos && $scope.Thread.videos.length > 0;
-
-                          if (!hasImages && !hasVideos) {
-                              Buildfire.dialog.toast({
-                                  message: Thread.SocialItems.languages.mediaRequired || "Please add an image or video to post",
-                                  type: 'warning'
-                              });
-                              return;
-                          }
-
-                          if ((Thread.comment || hasImages || hasVideos)) {
-                              Thread.addComment($scope.Thread.images);
-                          }
-                      });
+                      Thread.showCustomPostDialog = true;
+                      Thread.customPostText = '';
+                      Thread.selectedImages = [];
+                      Thread.selectedImagesText = 'Change selected';
+                      $scope.$apply();
                   }
               });
+          }
 
+          Thread.closeCustomPostDialog = function () {
+              Thread.showCustomPostDialog = false;
+              Thread.customPostText = '';
+              Thread.selectedImages = [];
+              Thread.selectedImagesText = 'Change selected';
+              $scope.$apply();
+          }
+
+          Thread.selectImages = function () {
+              buildfire.imageLib.showDialog({}, (err, result) => {
+                  if (err) return console.error("Error selecting images:", err);
+                  if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                      Thread.selectedImages = result.selectedFiles;
+                      const count = result.selectedFiles.length;
+                      Thread.selectedImagesText = count === 1 ? '1 image selected' : `${count} images selected`;
+                      $scope.$apply();
+                  }
+              }, {multiSelection: true});
+          }
+
+          Thread.handlePostKeyPress = function (event) {
+              if (event.keyCode === 13) {
+                  Thread.submitCustomPost();
+              }
+          }
+
+          Thread.submitCustomPost = function () {
+              const hasImages = Thread.selectedImages && Thread.selectedImages.length > 0;
+
+              if (!hasImages) {
+                  buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.mediaRequired || "Please add an image to post",
+                      type: 'warning'
+                  });
+                  return;
+              }
+
+              $scope.Thread.images = Thread.selectedImages;
+              Thread.comment = Thread.customPostText;
+
+              Thread.closeCustomPostDialog();
+
+              Thread.addComment($scope.Thread.images);
           }
 
           Thread.decodeText = function (text) {

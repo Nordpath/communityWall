@@ -1435,72 +1435,89 @@
               }
           }
 
+          WidgetWall.showCustomPostDialog = false;
+          WidgetWall.customPostText = '';
+          WidgetWall.selectedImages = [];
+          WidgetWall.selectedImagesText = 'Change selected';
+
           WidgetWall.openPostSection = function () {
               WidgetWall.SocialItems.authenticateUser(null, (err, user) => {
                   if (err) return console.error("Getting user failed.", err);
                   if (user) {
                       WidgetWall.checkFollowingStatus();
-                      buildfire.input.showTextDialog({
-                          "placeholder": WidgetWall.SocialItems.languages.writePost,
-                          "saveText": WidgetWall.SocialItems.languages.confirmPost.length > 9 ? WidgetWall.SocialItems.languages.confirmPost.substring(0, 9) : WidgetWall.SocialItems.languages.confirmPost,
-                          "cancelText": WidgetWall.SocialItems.languages.cancelPost.length > 9 ? WidgetWall.SocialItems.languages.cancelPost.substring(0, 9) : WidgetWall.SocialItems.languages.cancelPost,
-                          "attachments": {
-                              "images": {
-                                  enable: true,
-                                  multiple: true
-                              },
-                              "videos": {
-                                  enable: false,
-                                  multiple: true
-                              },
-                              "gifs": {
-                                  enable: false
-                              }
-                          }
-                      }, (err, data) => {
-                          if (err) return console.error("Something went wrong.", err);
-                          if (data.cancelled) return;
-                          WidgetWall.getPostContent(data);
+                      WidgetWall.showCustomPostDialog = true;
+                      WidgetWall.customPostText = '';
+                      WidgetWall.selectedImages = [];
+                      WidgetWall.selectedImagesText = 'Change selected';
+                      $scope.$apply();
+                  }
+              });
+          }
 
-                          const hasImages = $scope.WidgetWall.images && $scope.WidgetWall.images.length > 0;
-                          const hasVideos = $scope.WidgetWall.videos && $scope.WidgetWall.videos.length > 0;
+          WidgetWall.closeCustomPostDialog = function () {
+              WidgetWall.showCustomPostDialog = false;
+              WidgetWall.customPostText = '';
+              WidgetWall.selectedImages = [];
+              WidgetWall.selectedImagesText = 'Change selected';
+              $scope.$apply();
+          }
 
-                          if (!hasImages && !hasVideos) {
-                              Buildfire.dialog.toast({
-                                  message: WidgetWall.SocialItems.languages.mediaRequired || "Please add an image or video to post",
-                                  type: 'warning'
-                              });
+          WidgetWall.selectImages = function () {
+              buildfire.imageLib.showDialog({}, (err, result) => {
+                  if (err) return console.error("Error selecting images:", err);
+                  if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                      WidgetWall.selectedImages = result.selectedFiles;
+                      const count = result.selectedFiles.length;
+                      WidgetWall.selectedImagesText = count === 1 ? '1 image selected' : `${count} images selected`;
+                      $scope.$apply();
+                  }
+              }, {multiSelection: true});
+          }
+
+          WidgetWall.handlePostKeyPress = function (event) {
+              if (event.keyCode === 13) {
+                  WidgetWall.submitCustomPost();
+              }
+          }
+
+          WidgetWall.submitCustomPost = function () {
+              const hasImages = WidgetWall.selectedImages && WidgetWall.selectedImages.length > 0;
+
+              if (!hasImages) {
+                  buildfire.dialog.toast({
+                      message: WidgetWall.SocialItems.languages.mediaRequired || "Please add an image to post",
+                      type: 'warning'
+                  });
+                  return;
+              }
+
+              $scope.WidgetWall.images = WidgetWall.selectedImages;
+              WidgetWall.postText = WidgetWall.customPostText;
+
+              WidgetWall.closeCustomPostDialog();
+
+              finalPostCreation($scope.WidgetWall.images, (err) => {
+                  if (err) {
+                      return;
+                  }
+                  if (!WidgetWall.SocialItems.isPrivateChat) {
+                      buildfire.auth.getCurrentUser((err, currentUser) => {
+                          if (err || !currentUser) {
+                              console.error('Error getting current user: ', err);
                               return;
-                          }
-
-                          if ((WidgetWall.postText || hasImages || hasVideos)) {
-                              finalPostCreation($scope.WidgetWall.images, (err) => {
+                          } else {
+                              SocialDataStore.addFeedPost({
+                                  postText: WidgetWall.postText ? WidgetWall.postText : "",
+                                  postImages: $scope.WidgetWall.images || []
+                              }, (err, r) => {
                                   if (err) {
+                                      console.error('Error adding feed post: ', err);
                                       return;
                                   }
-                                  if (!WidgetWall.SocialItems.isPrivateChat) {
-                                      buildfire.auth.getCurrentUser((err, currentUser) => {
-                                          if (err || !currentUser) {
-                                              console.error('Error getting current user: ', err);
-                                              return;
-                                          } else {
-                                              SocialDataStore.addFeedPost({
-                                                  postText: WidgetWall.postText ? WidgetWall.postText : "",
-                                                  postImages: $scope.WidgetWall.images || []
-                                              }, (err, r) => {
-                                                  if (err) {
-                                                      console.error('Error adding feed post: ', err);
-                                                      return;
-                                                  }
-                                                  followThread();
-                                              });
-                                          }
-                                      })
-                                  }
+                                  followThread();
                               });
-
                           }
-                      });
+                      })
                   }
               });
           }

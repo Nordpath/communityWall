@@ -149,3 +149,25 @@
     </div>
 </div>
 <div ng-show="Thread.allowCreateThread" id="addCommentBtn"></div>
+
+<div class="custom-post-dialog" ng-show="Thread.showCustomPostDialog">
+    <div class="custom-post-overlay" ng-click="Thread.closeCustomPostDialog()"></div>
+    <div class="custom-post-content">
+        <div class="custom-post-input-section">
+            <input type="text"
+                   class="custom-post-input"
+                   placeholder="Add message"
+                   ng-model="Thread.customPostText"
+                   ng-keypress="Thread.handlePostKeyPress($event)">
+        </div>
+        <div class="custom-post-actions">
+            <div class="custom-post-camera" ng-click="Thread.selectImages()">
+                <span class="camera-icon">📷</span>
+                <span class="camera-label">{{Thread.selectedImagesText}}</span>
+            </div>
+            <div class="custom-post-send" ng-click="Thread.submitCustomPost()">
+                <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
+            </div>
+        </div>
+    </div>
+</div>
