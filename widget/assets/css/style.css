@@ -1754,6 +1754,7 @@ a.comments .iconsTheme.iconsFont {
     color: #666;
     transition: color 0.3s ease;
     display: block;
+    white-space: nowrap;
 }
 
 .feed-tab:hover span {
@@ -1878,8 +1879,10 @@ a.comments .iconsTheme.iconsFont {
 }
 
 #addBtn, #addCommentBtn {
-    position: relative;
-    top: 20px;
+    position: fixed;
+    bottom: 20px;
+    right: 1.5rem;
+    z-index: 150;
 }
 
 /* Ensure content doesn't overlap with banner/logo */
