@@ -1484,11 +1484,7 @@ html[buildfire][safe-area="true"] body {
 }
 
  .empty_state {
-    height: 70vh;
-    background-image: url('../img/empty_page.svg') !important;
-    background-repeat: no-repeat !important;
-    background-attachment: absolute !important;
-    background-position: center !important;
+    display: none !important;
  }
  .empty_state_text {
     margin-top: -15vh;
@@ -1575,7 +1571,7 @@ button.btn-danger-outlined:hover, button.btn-danger-outlined:focus{
     color: var(--bf-theme-danger) !important;
 }
 .body-text-theme {
-    color: var(--bf-theme-body-text) !important;
+    color: #333 !important;
 }
 .material-icons-outlined{
     color: #666 !important;
@@ -1879,6 +1875,11 @@ a.comments .iconsTheme.iconsFont {
 /* Ensure FAB button appears above bottom banner/logo */
 #addBtn {
     z-index: 150 !important;
+}
+
+#addBtn, #addCommentBtn {
+    position: relative;
+    top: 20px;
 }
 
 /* Ensure content doesn't overlap with banner/logo */
