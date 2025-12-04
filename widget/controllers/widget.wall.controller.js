@@ -91,7 +91,7 @@
                     options = {
                         mainButton: {
                             content: `<span class="material-icons">add</span>`,
-                            type: 'default',
+                            type: 'success',
                         },
                     }
               }
@@ -104,10 +104,16 @@
                     }
               }
               else {
-                  return;
+                  // Always show the FAB button for creating posts by default
+                  options = {
+                      mainButton: {
+                          content: `<span class="material-icons">add</span>`,
+                          type: 'success',
+                      },
+                  }
               }
               WidgetWall.fabSpeedDial = new buildfire.components.fabSpeedDial('#addBtn',options);
-              if (WidgetWall.allowCreateThread) {
+              if (WidgetWall.allowCreateThread || !actionItem || !actionItem.iconUrl) {
                   WidgetWall.fabSpeedDial.onMainButtonClick = () => WidgetWall.openPostSection()
 
               }
