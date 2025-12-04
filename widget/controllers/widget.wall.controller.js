@@ -1450,7 +1450,7 @@
                                   multiple: true
                               },
                               "videos": {
-                                  enable: true,
+                                  enable: false,
                                   multiple: true
                               },
                               "gifs": {
