@@ -243,3 +243,10 @@
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
   }
+
+  /* Hide TinyMCE branding */
+  .mce-branding,
+  .mce-branding-powered-by,
+  .mce-path {
+    display: none !important;
+  }
