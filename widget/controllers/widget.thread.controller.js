@@ -16,7 +16,6 @@
           Thread.util = Util;
           Thread.loaded = false;
           Thread.processedComments = false;
-          Thread.fabSpeedDial = null;
           Thread.bottomLogo = {};
           Thread.skeletonPost = new Buildfire.components.skeleton('.social-item', {
               type: 'list-item-avatar, list-item-two-line, image'
@@ -64,20 +63,6 @@
               }
           };
 
-          Thread.initCommentFabBtn = function () {
-              Thread.fabSpeedDial = new buildfire.components.fabSpeedDial('#addCommentBtn',{
-                  mainButton: {
-                      content: `<img src="assets/img/send(2).png" class="share-icon-img" alt="Share">`,
-                      type: 'default',
-                  },});
-
-              Thread.fabSpeedDial.onMainButtonClick = () => Thread.openCommentSection()
-
-              setTimeout(function() {
-                  Thread.adjustLayoutForBottomLogo();
-              }, 100);
-          }
-
           Thread.loadBottomLogoConfig = function () {
               buildfire.datastore.get('Social', function (err, result) {
                   if (err) {
@@ -100,21 +85,10 @@
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
                   }
-
-                  var fabButton = document.querySelector('#addCommentBtn');
-                  if (fabButton) {
-                      var fabBottomOffset = Thread.bottomLogo.displayMode === 'banner' ? '140px' : '85px';
-                      fabButton.style.bottom = fabBottomOffset;
-                  }
               } else {
                   var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = '7rem';
-                  }
-
-                  var fabButton = document.querySelector('#addCommentBtn');
-                  if (fabButton) {
-                      fabButton.style.bottom = '20px';
                   }
               }
           };
@@ -289,7 +263,6 @@
           Thread.init = function () {
               Thread.skeletonPost.start();
               Thread.skeletonComments.start();
-              Thread.initCommentFabBtn();
               Thread.loadBottomLogoConfig();
               Thread.loadThemeColors();
               if ($routeParams.threadId) {

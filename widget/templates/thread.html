@@ -59,6 +59,10 @@
                                 <span class="iconsTheme iconsFont"
                                     ng-class="{active: isItemLiked(Thread.post, Thread.SocialItems.userDetails.userId)}">{{Thread.post.likes.length}}</span>
                             </a>
+                            <a class="social-icon ng-cloak" ng-if="Thread.allowCreateThread" ng-click="Thread.openCommentSection()">
+                                <span class="material-icons-outlined">chat_bubble_outline</span>
+                                <span class="iconsTheme iconsFont">{{Thread.post.commentsCount || 0}}</span>
+                            </a>
                         </div>
                         <div class="footer-right">
                             <a class="social-icon ng-cloak" ng-click="Thread.sharePost(Thread.post)">
@@ -148,7 +152,6 @@
         </div>
     </div>
 </div>
-<div ng-show="Thread.allowCreateThread" id="addCommentBtn"></div>
 
 <div class="custom-post-dialog" ng-show="Thread.showCustomPostDialog">
     <div class="custom-post-overlay" ng-click="Thread.closeCustomPostDialog()"></div>
