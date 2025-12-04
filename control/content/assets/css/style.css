@@ -247,6 +247,12 @@
   /* Hide TinyMCE branding */
   .mce-branding,
   .mce-branding-powered-by,
-  .mce-path {
+  .mce-path,
+  .tox-promotion,
+  .tox-statusbar__branding,
+  .tox-statusbar__text-container,
+  a[href*="tiny.cloud"],
+  a[aria-label*="Powered by"] {
     display: none !important;
+    visibility: hidden !important;
   }

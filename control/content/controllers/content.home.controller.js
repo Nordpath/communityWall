@@ -757,6 +757,8 @@
             let updateDelay;
             tinymce.init({
                 selector: "textarea",
+                branding: false,
+                statusbar: false,
                 setup: (ed) => {
                     ed.on('KeyUp', (e) => {
                         clearTimeout(updateDelay);
