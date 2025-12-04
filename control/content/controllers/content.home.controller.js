@@ -131,6 +131,7 @@
                     skin: 'lightgray',
                     trusted: true,
                     theme: 'modern',
+                    branding: false,
                     urlconverter_callback: myCustomURLConverter,
                     plugin_preview_width: "500",
                     plugin_preview_height: "500"
