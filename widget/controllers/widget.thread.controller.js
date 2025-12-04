@@ -66,7 +66,7 @@
           Thread.initCommentFabBtn = function () {
               Thread.fabSpeedDial = new buildfire.components.fabSpeedDial('#addCommentBtn',{
                   mainButton: {
-                      content: `<span class="material-icons">send</span>`,
+                      content: `<img src="assets/img/send(2).png" class="share-icon-img" alt="Share">`,
                       type: 'default',
                   },});
 

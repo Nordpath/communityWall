@@ -1611,6 +1611,14 @@ a.comments .iconsTheme.iconsFont {
     transform: rotate(-45deg);
 }
 
+.share-icon-img {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    vertical-align: middle;
+    filter: var(--share-icon-filter, none);
+}
+
 .footer-right .social-icon:last-child .material-icons-outlined {
     color: var(--menu-icon-color, #9B59B6) !important;
 }
