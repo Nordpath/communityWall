@@ -17,6 +17,7 @@
           Thread.loaded = false;
           Thread.processedComments = false;
           Thread.fabSpeedDial = null;
+          Thread.bottomLogo = {};
           Thread.skeletonPost = new Buildfire.components.skeleton('.social-item', {
               type: 'list-item-avatar, list-item-two-line, image'
           });
@@ -71,7 +72,52 @@
                   },});
 
               Thread.fabSpeedDial.onMainButtonClick = () => Thread.openCommentSection()
+
+              setTimeout(function() {
+                  Thread.adjustLayoutForBottomLogo();
+              }, 100);
           }
+
+          Thread.loadBottomLogoConfig = function () {
+              buildfire.datastore.get('Social', function (err, result) {
+                  if (err) {
+                      console.error('Error loading bottom logo config:', err);
+                      return;
+                  }
+                  if (result && result.data && result.data.appSettings) {
+                      if (result.data.appSettings.bottomLogo) {
+                          Thread.bottomLogo = result.data.appSettings.bottomLogo;
+                          Thread.adjustLayoutForBottomLogo();
+                      }
+                  }
+              });
+          };
+
+          Thread.adjustLayoutForBottomLogo = function () {
+              if (Thread.bottomLogo && Thread.bottomLogo.enabled && Thread.bottomLogo.imageUrl) {
+                  var paddingValue = Thread.bottomLogo.displayMode === 'banner' ? '150px' : '80px';
+                  var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
+                  if (scrollContainer) {
+                      scrollContainer.style.paddingBottom = paddingValue;
+                  }
+
+                  var fabButton = document.querySelector('#addCommentBtn');
+                  if (fabButton) {
+                      var fabBottomOffset = Thread.bottomLogo.displayMode === 'banner' ? '140px' : '85px';
+                      fabButton.style.bottom = fabBottomOffset;
+                  }
+              } else {
+                  var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
+                  if (scrollContainer) {
+                      scrollContainer.style.paddingBottom = '7rem';
+                  }
+
+                  var fabButton = document.querySelector('#addCommentBtn');
+                  if (fabButton) {
+                      fabButton.style.bottom = '20px';
+                  }
+              }
+          };
 
           Thread.followLeaveGroupPermission = function () {
               if (Thread.SocialItems && Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.disableFollowLeaveGroup) {
@@ -244,6 +290,7 @@
               Thread.skeletonPost.start();
               Thread.skeletonComments.start();
               Thread.initCommentFabBtn();
+              Thread.loadBottomLogoConfig();
               Thread.loadThemeColors();
               if ($routeParams.threadId) {
                   let post = Thread.SocialItems.items.find(el => el.id === $routeParams.threadId);
