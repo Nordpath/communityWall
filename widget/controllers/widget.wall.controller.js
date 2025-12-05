@@ -1445,6 +1445,7 @@
           WidgetWall.customPostText = '';
           WidgetWall.selectedImages = [];
           WidgetWall.selectedVideos = [];
+          WidgetWall.videoUrl = '';
           WidgetWall.selectedImagesText = 'Change selected';
 
           WidgetWall.openPostSection = function () {
@@ -1456,6 +1457,7 @@
                       WidgetWall.customPostText = '';
                       WidgetWall.selectedImages = [];
                       WidgetWall.selectedVideos = [];
+                      WidgetWall.videoUrl = '';
                       WidgetWall.selectedImagesText = 'Change selected';
                       $scope.$apply();
                   }
@@ -1466,6 +1468,8 @@
               WidgetWall.showCustomPostDialog = false;
               WidgetWall.customPostText = '';
               WidgetWall.selectedImages = [];
+              WidgetWall.selectedVideos = [];
+              WidgetWall.videoUrl = '';
               WidgetWall.selectedImagesText = 'Change selected';
               $scope.$apply();
           }
@@ -1644,6 +1648,27 @@
           }
 
           WidgetWall.submitCustomPost = function () {
+              if (WidgetWall.videoUrl && WidgetWall.videoUrl.trim()) {
+                  var videoUrl = WidgetWall.videoUrl.trim();
+                  if (videoUrl.match(/\.(mp4|mov|avi|webm|m4v|mkv)$/i) ||
+                      videoUrl.includes('youtube.com') ||
+                      videoUrl.includes('youtu.be') ||
+                      videoUrl.includes('vimeo.com')) {
+                      if (!WidgetWall.selectedVideos) {
+                          WidgetWall.selectedVideos = [];
+                      }
+                      if (WidgetWall.selectedVideos.indexOf(videoUrl) === -1) {
+                          WidgetWall.selectedVideos.push(videoUrl);
+                      }
+                  } else {
+                      buildfire.dialog.toast({
+                          message: 'Please enter a valid video URL',
+                          type: 'warning'
+                      });
+                      return;
+                  }
+              }
+
               const hasImages = WidgetWall.selectedImages && WidgetWall.selectedImages.length > 0;
               const hasVideos = WidgetWall.selectedVideos && WidgetWall.selectedVideos.length > 0;
               const hasMedia = hasImages || hasVideos;

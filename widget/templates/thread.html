@@ -165,6 +165,13 @@
                    ng-model="Thread.customPostText"
                    ng-keypress="Thread.handlePostKeyPress($event)">
         </div>
+        <div class="custom-post-video-input-section" style="margin: 10px 0;">
+            <input type="text"
+                   class="custom-post-video-input"
+                   placeholder="Paste video URL (optional)"
+                   ng-model="Thread.videoUrl"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+        </div>
         <div class="custom-post-actions">
             <div class="custom-post-camera" ng-click="Thread.selectImages()">
                 <span class="camera-icon">📷</span>

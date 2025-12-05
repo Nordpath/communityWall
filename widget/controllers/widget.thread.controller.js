@@ -981,6 +981,7 @@
           Thread.customPostText = '';
           Thread.selectedImages = [];
           Thread.selectedVideos = [];
+          Thread.videoUrl = '';
           Thread.selectedImagesText = 'Change selected';
 
           Thread.openCommentSection = function () {
@@ -991,6 +992,7 @@
                       Thread.customPostText = '';
                       Thread.selectedImages = [];
                       Thread.selectedVideos = [];
+                      Thread.videoUrl = '';
                       Thread.selectedImagesText = 'Change selected';
                       $scope.$apply();
                   }
@@ -1002,6 +1004,7 @@
               Thread.customPostText = '';
               Thread.selectedImages = [];
               Thread.selectedVideos = [];
+              Thread.videoUrl = '';
               Thread.selectedImagesText = 'Change selected';
               $scope.$apply();
           }
@@ -1180,6 +1183,27 @@
           }
 
           Thread.submitCustomPost = function () {
+              if (Thread.videoUrl && Thread.videoUrl.trim()) {
+                  var videoUrl = Thread.videoUrl.trim();
+                  if (videoUrl.match(/\.(mp4|mov|avi|webm|m4v|mkv)$/i) ||
+                      videoUrl.includes('youtube.com') ||
+                      videoUrl.includes('youtu.be') ||
+                      videoUrl.includes('vimeo.com')) {
+                      if (!Thread.selectedVideos) {
+                          Thread.selectedVideos = [];
+                      }
+                      if (Thread.selectedVideos.indexOf(videoUrl) === -1) {
+                          Thread.selectedVideos.push(videoUrl);
+                      }
+                  } else {
+                      buildfire.dialog.toast({
+                          message: 'Please enter a valid video URL',
+                          type: 'warning'
+                      });
+                      return;
+                  }
+              }
+
               const hasImages = Thread.selectedImages && Thread.selectedImages.length > 0;
               const hasVideos = Thread.selectedVideos && Thread.selectedVideos.length > 0;
               const hasMedia = hasImages || hasVideos;
