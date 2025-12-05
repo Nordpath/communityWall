@@ -1004,28 +1004,43 @@
           }
 
           Thread.selectImages = function () {
-              console.log('[DEBUG] Opening image selection dialog...');
+              console.log('[DEBUG] ========================================');
+              console.log('[DEBUG] Thread.selectImages function called');
+              console.log('[DEBUG] buildfire object:', buildfire);
+              console.log('[DEBUG] buildfire.imageLib:', buildfire ? buildfire.imageLib : 'N/A');
 
-              if (!buildfire || !buildfire.imageLib || !buildfire.imageLib.showDialog) {
-                  console.error('[ERROR] BuildFire imageLib not available');
-                  buildfire.dialog.toast({
-                      message: 'Media upload feature is not available. Please try again.',
-                      type: 'danger'
-                  });
+              if (!buildfire) {
+                  console.error('[ERROR] buildfire object not available!');
+                  alert('BuildFire SDK not loaded. Please refresh the page.');
                   return;
               }
 
-              const options = {
-                  multiSelection: true
-              };
+              if (!buildfire.imageLib) {
+                  console.error('[ERROR] buildfire.imageLib not available!');
+                  alert('Image library not available. Please contact support.');
+                  return;
+              }
 
-              buildfire.imageLib.showDialog(options, (err, result) => {
-                  console.log('[DEBUG] Image dialog callback triggered', {err, result});
+              if (!buildfire.imageLib.showDialog) {
+                  console.error('[ERROR] buildfire.imageLib.showDialog not available!');
+                  alert('Image dialog not available. Please contact support.');
+                  return;
+              }
+
+              console.log('[DEBUG] All buildfire checks passed, calling showDialog...');
+
+              buildfire.imageLib.showDialog({multiSelection: true}, function(err, result) {
+                  console.log('[DEBUG] ========================================');
+                  console.log('[DEBUG] Image dialog callback triggered!');
+                  console.log('[DEBUG] Error:', err);
+                  console.log('[DEBUG] Result:', result);
+                  console.log('[DEBUG] Result type:', typeof result);
+                  console.log('[DEBUG] Result keys:', result ? Object.keys(result) : 'null');
 
                   if (err) {
                       console.error('[ERROR] Error selecting images:', err);
                       buildfire.dialog.toast({
-                          message: 'Failed to open media picker. Please try again.',
+                          message: 'Error: ' + (err.message || err),
                           type: 'danger'
                       });
                       return;
@@ -1037,18 +1052,27 @@
                   }
 
                   if (result && result.selectedFiles && result.selectedFiles.length > 0) {
-                      console.log(`[DEBUG] ${result.selectedFiles.length} images selected`);
+                      console.log(`[DEBUG] SUCCESS: ${result.selectedFiles.length} images selected`);
+                      console.log('[DEBUG] Selected files:', result.selectedFiles);
                       Thread.selectedImages = result.selectedFiles;
                       const count = result.selectedFiles.length;
                       Thread.selectedImagesText = count === 1 ? '1 image selected' : `${count} images selected`;
+
+                      buildfire.dialog.toast({
+                          message: Thread.selectedImagesText,
+                          type: 'success'
+                      });
 
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
                   } else {
-                      console.log('[DEBUG] No images selected');
+                      console.log('[DEBUG] No images selected or unexpected result format');
+                      console.log('[DEBUG] Full result object:', JSON.stringify(result));
                   }
               });
+
+              console.log('[DEBUG] showDialog called, waiting for response...');
           }
 
           Thread.handlePostKeyPress = function (event) {
