@@ -26,6 +26,7 @@
   "devDependencies": {
     "chai": "^3.0.0",
     "del": "^3.0.0",
+    "glogg": "^2.2.0",
     "gulp": "^4.0.2",
     "gulp-bytediff": "^1.0.0",
     "gulp-concat": "^2.6.1",
@@ -38,6 +39,7 @@
     "gulp-strip-comments": "^2.5.1",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.6",
+    "gulplog": "^2.2.0",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.9",
     "karma-chai": "^0.1.0",
@@ -46,7 +48,7 @@
     "karma-junit-reporter": "^0.3.8",
     "karma-mocha": "^0.2.0",
     "mocha": "^2.2.5",
+    "sparkles": "^2.1.0",
     "uglify-es": "^3.3.9"
   }
 }
-

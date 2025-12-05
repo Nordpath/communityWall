@@ -980,7 +980,6 @@
           Thread.showCustomPostDialog = false;
           Thread.customPostText = '';
           Thread.selectedImages = [];
-          Thread.selectedVideos = [];
           Thread.selectedImagesText = 'Change selected';
 
           Thread.openCommentSection = function () {
@@ -1005,10 +1004,10 @@
           }
 
           Thread.selectImages = function () {
-              console.log('[DEBUG] Opening media selection dialog...');
+              console.log('[DEBUG] Opening image selection dialog...');
 
-              if (!buildfire || !buildfire.services || !buildfire.services.publicFiles) {
-                  console.error('[ERROR] BuildFire publicFiles service not available');
+              if (!buildfire || !buildfire.imageLib || !buildfire.imageLib.showDialog) {
+                  console.error('[ERROR] BuildFire imageLib not available');
                   buildfire.dialog.toast({
                       message: 'Media upload feature is not available. Please try again.',
                       type: 'danger'
@@ -1016,108 +1015,40 @@
                   return;
               }
 
-              const MAX_FILE_SIZE_MB = 15;
-              const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
               const options = {
-                  allowMultipleFilesUpload: true,
-                  filter: [
-                      'image/jpeg',
-                      'image/jpg',
-                      'image/png',
-                      'image/gif',
-                      'image/webp',
-                      'video/mp4',
-                      'video/quicktime',
-                      'video/x-msvideo',
-                      'video/webm'
-                  ]
+                  multiSelection: true
               };
 
-              const onProgress = (progress) => {
-                  console.log('[DEBUG] Upload progress:', progress);
-              };
+              buildfire.imageLib.showDialog(options, (err, result) => {
+                  console.log('[DEBUG] Image dialog callback triggered', {err, result});
 
-              const onComplete = (file) => {
-                  console.log('[DEBUG] File upload complete:', file);
-              };
-
-              buildfire.services.publicFiles.showDialog(
-                  options,
-                  onProgress,
-                  onComplete,
-                  (err, files) => {
-                      console.log('[DEBUG] Media dialog callback triggered', {err, files});
-
-                      if (err) {
-                          console.error('[ERROR] Error selecting media:', err);
-                          buildfire.dialog.toast({
-                              message: 'Failed to open media picker. Please try again.',
-                              type: 'danger'
-                          });
-                          return;
-                      }
-
-                      if (!files || files.length === 0) {
-                          console.log('[DEBUG] No files selected');
-                          return;
-                      }
-
-                      const oversizedFiles = files.filter(file => {
-                          const sizeInBytes = file.size * 1024;
-                          return sizeInBytes > MAX_FILE_SIZE_BYTES;
+                  if (err) {
+                      console.error('[ERROR] Error selecting images:', err);
+                      buildfire.dialog.toast({
+                          message: 'Failed to open media picker. Please try again.',
+                          type: 'danger'
                       });
+                      return;
+                  }
 
-                      if (oversizedFiles.length > 0) {
-                          console.error('[ERROR] Files exceed 15MB limit:', oversizedFiles);
-                          buildfire.dialog.toast({
-                              message: `Some files exceed the ${MAX_FILE_SIZE_MB}MB limit and were not uploaded. Please choose smaller files.`,
-                              type: 'warning',
-                              duration: 5000
-                          });
-                          files = files.filter(file => {
-                              const sizeInBytes = file.size * 1024;
-                              return sizeInBytes <= MAX_FILE_SIZE_BYTES;
-                          });
+                  if (result && result.cancelled) {
+                      console.log('[DEBUG] User cancelled image selection');
+                      return;
+                  }
 
-                          if (files.length === 0) {
-                              return;
-                          }
-                      }
-
-                      const images = [];
-                      const videos = [];
-
-                      files.forEach(file => {
-                          if (file.type && file.type.startsWith('image/')) {
-                              images.push(file.url);
-                          } else if (file.type && file.type.startsWith('video/')) {
-                              videos.push(file.url);
-                          }
-                      });
-
-                      console.log(`[DEBUG] Processed: ${images.length} images, ${videos.length} videos`);
-
-                      Thread.selectedImages = images;
-                      Thread.selectedVideos = videos;
-
-                      const totalCount = images.length + videos.length;
-                      const imagePart = images.length === 1 ? '1 image' : `${images.length} images`;
-                      const videoPart = videos.length === 1 ? '1 video' : `${videos.length} videos`;
-
-                      if (images.length > 0 && videos.length > 0) {
-                          Thread.selectedImagesText = `${imagePart} & ${videoPart} selected`;
-                      } else if (images.length > 0) {
-                          Thread.selectedImagesText = `${imagePart} selected`;
-                      } else if (videos.length > 0) {
-                          Thread.selectedImagesText = `${videoPart} selected`;
-                      }
+                  if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                      console.log(`[DEBUG] ${result.selectedFiles.length} images selected`);
+                      Thread.selectedImages = result.selectedFiles;
+                      const count = result.selectedFiles.length;
+                      Thread.selectedImagesText = count === 1 ? '1 image selected' : `${count} images selected`;
 
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
+                  } else {
+                      console.log('[DEBUG] No images selected');
                   }
-              );
+              });
           }
 
           Thread.handlePostKeyPress = function (event) {
@@ -1128,24 +1059,21 @@
 
           Thread.submitCustomPost = function () {
               const hasImages = Thread.selectedImages && Thread.selectedImages.length > 0;
-              const hasVideos = Thread.selectedVideos && Thread.selectedVideos.length > 0;
-              const hasMedia = hasImages || hasVideos;
 
-              if (!hasMedia) {
+              if (!hasImages) {
                   buildfire.dialog.toast({
-                      message: Thread.SocialItems.languages.mediaRequired || "Please add an image or video to post",
+                      message: Thread.SocialItems.languages.mediaRequired || "Please add an image to post",
                       type: 'warning'
                   });
                   return;
               }
 
-              $scope.Thread.images = Thread.selectedImages || [];
-              $scope.Thread.videos = Thread.selectedVideos || [];
+              $scope.Thread.images = Thread.selectedImages;
+              $scope.Thread.videos = Thread.videos ? $scope.Thread.videos : [];
               Thread.comment = Thread.customPostText;
 
               console.log('[DEBUG] Submitting comment with:', {
                   images: $scope.Thread.images.length,
-                  videos: $scope.Thread.videos.length,
                   text: Thread.comment
               });
 
