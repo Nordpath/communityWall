@@ -1929,32 +1929,36 @@ a.comments .iconsTheme.iconsFont {
     background: white;
     width: 100%;
     max-width: 500px;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    padding: 16px;
     margin: 0 auto;
+    padding-bottom: calc(16px + constant(safe-area-inset-bottom));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 .custom-post-input-section {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
 }
 
 .custom-post-input {
     flex: 1;
     padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    border-radius: 24px;
     font-size: 15px;
     outline: none;
     box-sizing: border-box;
     font-family: inherit;
+    background-color: #f5f5f5;
+    transition: all 0.2s ease;
 }
 
 .custom-post-input:focus {
     border-color: #007bff;
+    background-color: #fff;
 }
 
 .custom-post-input::placeholder {
@@ -1964,8 +1968,7 @@ a.comments .iconsTheme.iconsFont {
 .custom-post-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 0 5px;
+    gap: 8px;
 }
 
 .custom-post-camera {
@@ -2009,16 +2012,21 @@ a.comments .iconsTheme.iconsFont {
     justify-content: center;
     padding: 8px;
     flex-shrink: 0;
+    transition: opacity 0.2s ease;
 }
 
 .send-icon-img {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
 }
 
 .custom-post-send:hover {
-    opacity: 0.8;
+    opacity: 0.7;
+}
+
+.custom-post-send:active {
+    opacity: 0.5;
 }
 
 .custom-post-camera:hover .camera-label {
