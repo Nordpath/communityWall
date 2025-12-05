@@ -601,57 +601,49 @@
            * @param type
            */
           Thread.scheduleNotification = function (post, text) {
-              SubscribedUsersData.getGroupFollowingStatus(Thread.post.userId, Thread.SocialItems.wid, Thread.SocialItems.context.instanceId, function (err, status) {
-                  if (status.length && status[0].data && !status[0].data.leftWall) {
-                      let followsPost = status[0].data.posts.find(el => el === Thread.post.id);
-                      if (followsPost) {
-                          let options = {
-                              title: 'Notification',
-                              text: '',
-                              sendToSelf: false
-                          };
+              let options = {
+                  title: 'Notification',
+                  text: '',
+                  sendToSelf: false
+              };
 
-                          Util.setExpression({title: Thread.SocialItems.context.title});
+              Util.setExpression({title: Thread.SocialItems.context.title});
 
-                          let titleKey, messageKey, inAppMessageKey;
-                            if (text === 'likedComment') {
-                                options.users = [post.userId];
-                                titleKey = Thread.SocialItems.languages.commentLikeNotificationTitle;
-                                messageKey = Thread.SocialItems.languages.commentLikeNotificationMessageBody;
-                                inAppMessageKey = Thread.SocialItems.languages.commentLikeInAppMessageBody;
-                            } else if (text === 'likedPost') {
-                                options.users = [Thread.post.userId];
-                                titleKey = Thread.SocialItems.languages.postLikeNotificationTitle;
-                                messageKey = Thread.SocialItems.languages.postLikeNotificationMessageBody;
-                                inAppMessageKey = Thread.SocialItems.languages.postLikeInAppMessageBody;
-                            } else if (text === 'comment') {
-                                options.users = [Thread.post.userId];
-                                titleKey = Thread.SocialItems.languages.commentNotificationMessageTitle;
-                                messageKey = Thread.SocialItems.languages.commentNotificationMessageBody;
-                                inAppMessageKey = Thread.SocialItems.languages.commentInAppMessageBody;
-                            }
+              let titleKey, messageKey, inAppMessageKey;
+              if (text === 'likedComment') {
+                  options.users = [post.userId];
+                  titleKey = Thread.SocialItems.languages.commentLikeNotificationTitle;
+                  messageKey = Thread.SocialItems.languages.commentLikeNotificationMessageBody;
+                  inAppMessageKey = Thread.SocialItems.languages.commentLikeInAppMessageBody;
+              } else if (text === 'likedPost') {
+                  options.users = [Thread.post.userId];
+                  titleKey = Thread.SocialItems.languages.postLikeNotificationTitle;
+                  messageKey = Thread.SocialItems.languages.postLikeNotificationMessageBody;
+                  inAppMessageKey = Thread.SocialItems.languages.postLikeInAppMessageBody;
+              } else if (text === 'comment') {
+                  options.users = [Thread.post.userId];
+                  titleKey = Thread.SocialItems.languages.commentNotificationMessageTitle;
+                  messageKey = Thread.SocialItems.languages.commentNotificationMessageBody;
+                  inAppMessageKey = Thread.SocialItems.languages.commentInAppMessageBody;
+              }
 
-                          if (Thread.SocialItems.wid) {
-                              options.queryString = `&dld=${encodeURIComponent(JSON.stringify({wid: Thread.SocialItems.wid}))}`
-                          } else {
-                              options.queryString = `&dld=${encodeURIComponent(JSON.stringify({postId: Thread.post.id}))}`
-                          }
+              if (Thread.SocialItems.wid) {
+                  options.queryString = `&dld=${encodeURIComponent(JSON.stringify({wid: Thread.SocialItems.wid}))}`
+              } else {
+                  options.queryString = `&dld=${encodeURIComponent(JSON.stringify({postId: Thread.post.id}))}`
+              }
 
-                          Promise.all([Util.evaluateExpression(titleKey), Util.evaluateExpression(messageKey), Util.evaluateExpression(inAppMessageKey)])
-                            .then(([title, message, inAppMessage]) => {
-                                options.title = title;
-                                options.text = message;
-                                options.inAppMessage = inAppMessage;
+              Promise.all([Util.evaluateExpression(titleKey), Util.evaluateExpression(messageKey), Util.evaluateExpression(inAppMessageKey)])
+                .then(([title, message, inAppMessage]) => {
+                    options.title = title;
+                    options.text = message;
+                    options.inAppMessage = inAppMessage;
 
-                                buildfire.notifications.pushNotification.schedule(options, function (err) {
-                                    if (err) return console.error('Error while setting PN schedule.', err);
-                                    console.log("SENT NOTIFICATION", options);
-                                });
-                            })
-                      }
-                  }
-              });
-
+                    buildfire.notifications.pushNotification.schedule(options, function (err) {
+                        if (err) return console.error('Error while setting PN schedule.', err);
+                        console.log("SENT NOTIFICATION", options);
+                    });
+                })
           }
           Thread.likeThread = function (post) {
               Thread.SocialItems.authenticateUser(null, (err, userData) => {
