@@ -980,6 +980,7 @@
           Thread.showCustomPostDialog = false;
           Thread.customPostText = '';
           Thread.selectedImages = [];
+          Thread.selectedVideos = [];
           Thread.selectedImagesText = 'Change selected';
 
           Thread.openCommentSection = function () {
@@ -989,6 +990,7 @@
                       Thread.showCustomPostDialog = true;
                       Thread.customPostText = '';
                       Thread.selectedImages = [];
+                      Thread.selectedVideos = [];
                       Thread.selectedImagesText = 'Change selected';
                       $scope.$apply();
                   }
@@ -999,6 +1001,7 @@
               Thread.showCustomPostDialog = false;
               Thread.customPostText = '';
               Thread.selectedImages = [];
+              Thread.selectedVideos = [];
               Thread.selectedImagesText = 'Change selected';
               $scope.$apply();
           }
@@ -1007,6 +1010,7 @@
               console.log('[DEBUG] ========================================');
               console.log('[DEBUG] Thread.selectImages function called');
               console.log('[DEBUG] buildfire object:', buildfire);
+              console.log('[DEBUG] buildfire.services:', buildfire ? buildfire.services : 'N/A');
               console.log('[DEBUG] buildfire.imageLib:', buildfire ? buildfire.imageLib : 'N/A');
 
               if (!buildfire) {
@@ -1015,48 +1019,96 @@
                   return;
               }
 
-              if (!buildfire.imageLib) {
-                  console.error('[ERROR] buildfire.imageLib not available!');
-                  alert('Image library not available. Please contact support.');
-                  return;
-              }
+              var usePublicFiles = buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog;
 
-              if (!buildfire.imageLib.showDialog) {
-                  console.error('[ERROR] buildfire.imageLib.showDialog not available!');
-                  alert('Image dialog not available. Please contact support.');
-                  return;
-              }
+              console.log('[DEBUG] Using publicFiles API:', usePublicFiles);
 
-              console.log('[DEBUG] All buildfire checks passed, calling showDialog...');
+              if (usePublicFiles) {
+                  console.log('[DEBUG] Calling publicFiles.showDialog with image and video support...');
 
-              buildfire.imageLib.showDialog({multiSelection: true}, function(err, result) {
-                  console.log('[DEBUG] ========================================');
-                  console.log('[DEBUG] Image dialog callback triggered!');
-                  console.log('[DEBUG] Error:', err);
-                  console.log('[DEBUG] Result:', result);
-                  console.log('[DEBUG] Result type:', typeof result);
-                  console.log('[DEBUG] Result keys:', result ? Object.keys(result) : 'null');
+                  var options = {
+                      allowMultipleFilesUpload: true,
+                      filter: [
+                          'image/jpeg',
+                          'image/jpg',
+                          'image/png',
+                          'image/gif',
+                          'image/webp',
+                          'video/mp4',
+                          'video/quicktime',
+                          'video/x-msvideo',
+                          'video/avi',
+                          'video/webm',
+                          'video/mov'
+                      ]
+                  };
 
-                  if (err) {
-                      console.error('[ERROR] Error selecting images:', err);
-                      buildfire.dialog.toast({
-                          message: 'Error: ' + (err.message || err),
-                          type: 'danger'
+                  var onProgress = function(progress) {
+                      console.log('[DEBUG] Upload progress:', progress);
+                  };
+
+                  var onComplete = function(file) {
+                      console.log('[DEBUG] File upload complete:', file);
+                  };
+
+                  buildfire.services.publicFiles.showDialog(options, onProgress, onComplete, function(err, files) {
+                      console.log('[DEBUG] ========================================');
+                      console.log('[DEBUG] publicFiles callback triggered!');
+                      console.log('[DEBUG] Error:', err);
+                      console.log('[DEBUG] Files:', files);
+
+                      if (err) {
+                          console.error('[ERROR] Error selecting media:', err);
+                          buildfire.dialog.toast({
+                              message: 'Error selecting media. Please try again.',
+                              type: 'danger'
+                          });
+                          return;
+                      }
+
+                      if (!files || files.length === 0) {
+                          console.log('[DEBUG] No files selected');
+                          return;
+                      }
+
+                      var images = [];
+                      var videos = [];
+
+                      files.forEach(function(file) {
+                          console.log('[DEBUG] Processing file:', file);
+                          if (file.type && file.type.startsWith('image/')) {
+                              images.push(file.url);
+                          } else if (file.type && file.type.startsWith('video/')) {
+                              videos.push(file.url);
+                          } else if (file.url) {
+                              var ext = file.url.split('.').pop().toLowerCase();
+                              if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) >= 0) {
+                                  images.push(file.url);
+                              } else if (['mp4', 'mov', 'avi', 'webm', 'quicktime'].indexOf(ext) >= 0) {
+                                  videos.push(file.url);
+                              }
+                          }
                       });
-                      return;
-                  }
 
-                  if (result && result.cancelled) {
-                      console.log('[DEBUG] User cancelled image selection');
-                      return;
-                  }
+                      console.log(`[DEBUG] Processed: ${images.length} images, ${videos.length} videos`);
 
-                  if (result && result.selectedFiles && result.selectedFiles.length > 0) {
-                      console.log(`[DEBUG] SUCCESS: ${result.selectedFiles.length} images selected`);
-                      console.log('[DEBUG] Selected files:', result.selectedFiles);
-                      Thread.selectedImages = result.selectedFiles;
-                      const count = result.selectedFiles.length;
-                      Thread.selectedImagesText = count === 1 ? '1 image selected' : `${count} images selected`;
+                      Thread.selectedImages = images;
+                      Thread.selectedVideos = videos;
+
+                      var totalCount = images.length + videos.length;
+                      if (totalCount === 0) {
+                          console.log('[DEBUG] No valid media files selected');
+                          return;
+                      }
+
+                      var parts = [];
+                      if (images.length > 0) {
+                          parts.push(images.length === 1 ? '1 image' : images.length + ' images');
+                      }
+                      if (videos.length > 0) {
+                          parts.push(videos.length === 1 ? '1 video' : videos.length + ' videos');
+                      }
+                      Thread.selectedImagesText = parts.join(' & ') + ' selected';
 
                       buildfire.dialog.toast({
                           message: Thread.selectedImagesText,
@@ -1066,13 +1118,59 @@
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
-                  } else {
-                      console.log('[DEBUG] No images selected or unexpected result format');
-                      console.log('[DEBUG] Full result object:', JSON.stringify(result));
-                  }
-              });
+                  });
 
-              console.log('[DEBUG] showDialog called, waiting for response...');
+              } else {
+                  console.log('[DEBUG] Falling back to imageLib.showDialog (images only)...');
+
+                  if (!buildfire.imageLib || !buildfire.imageLib.showDialog) {
+                      console.error('[ERROR] No image/media upload API available!');
+                      alert('Media upload is not available. Please contact support.');
+                      return;
+                  }
+
+                  buildfire.imageLib.showDialog({multiSelection: true}, function(err, result) {
+                      console.log('[DEBUG] ========================================');
+                      console.log('[DEBUG] imageLib callback triggered!');
+                      console.log('[DEBUG] Error:', err);
+                      console.log('[DEBUG] Result:', result);
+
+                      if (err) {
+                          console.error('[ERROR] Error selecting images:', err);
+                          buildfire.dialog.toast({
+                              message: 'Error: ' + (err.message || err),
+                              type: 'danger'
+                          });
+                          return;
+                      }
+
+                      if (result && result.cancelled) {
+                          console.log('[DEBUG] User cancelled image selection');
+                          return;
+                      }
+
+                      if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                          console.log(`[DEBUG] SUCCESS: ${result.selectedFiles.length} images selected`);
+                          Thread.selectedImages = result.selectedFiles;
+                          Thread.selectedVideos = [];
+                          var count = result.selectedFiles.length;
+                          Thread.selectedImagesText = count === 1 ? '1 image selected' : count + ' images selected';
+
+                          buildfire.dialog.toast({
+                              message: Thread.selectedImagesText,
+                              type: 'success'
+                          });
+
+                          if (!$scope.$$phase) {
+                              $scope.$apply();
+                          }
+                      } else {
+                          console.log('[DEBUG] No images selected');
+                      }
+                  });
+              }
+
+              console.log('[DEBUG] Media selection dialog requested...');
           }
 
           Thread.handlePostKeyPress = function (event) {
@@ -1083,21 +1181,24 @@
 
           Thread.submitCustomPost = function () {
               const hasImages = Thread.selectedImages && Thread.selectedImages.length > 0;
+              const hasVideos = Thread.selectedVideos && Thread.selectedVideos.length > 0;
+              const hasMedia = hasImages || hasVideos;
 
-              if (!hasImages) {
+              if (!hasMedia) {
                   buildfire.dialog.toast({
-                      message: Thread.SocialItems.languages.mediaRequired || "Please add an image to post",
+                      message: Thread.SocialItems.languages.mediaRequired || "Please add an image or video to post",
                       type: 'warning'
                   });
                   return;
               }
 
-              $scope.Thread.images = Thread.selectedImages;
-              $scope.Thread.videos = Thread.videos ? $scope.Thread.videos : [];
+              $scope.Thread.images = Thread.selectedImages || [];
+              $scope.Thread.videos = Thread.selectedVideos || [];
               Thread.comment = Thread.customPostText;
 
               console.log('[DEBUG] Submitting comment with:', {
                   images: $scope.Thread.images.length,
+                  videos: $scope.Thread.videos.length,
                   text: Thread.comment
               });
 
