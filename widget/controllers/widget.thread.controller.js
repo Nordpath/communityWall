@@ -123,6 +123,7 @@
           }
 
           Thread.showComments = () => {
+              Thread.organizeThreadedComments();
               Thread.processedComments = true;
               if (!$scope.$$phase) $scope.$digest();
           }
@@ -136,6 +137,36 @@
           Thread.isBlockedUser = (userId) => {
               const blockedUsers = Thread.SocialItems.blockedUsers;
               return blockedUsers.includes(userId);
+          }
+
+          Thread.organizeThreadedComments = function () {
+              if (!Thread.post.comments || !Thread.post.comments.length) {
+                  Thread.threadedComments = [];
+                  return;
+              }
+
+              const commentMap = {};
+              const rootComments = [];
+
+              Thread.post.comments.forEach(comment => {
+                  if (!comment.replies) {
+                      comment.replies = [];
+                  }
+                  if (!comment.parentCommentId) {
+                      comment.parentCommentId = null;
+                  }
+                  commentMap[comment.commentId] = comment;
+              });
+
+              Thread.post.comments.forEach(comment => {
+                  if (comment.parentCommentId && commentMap[comment.parentCommentId]) {
+                      commentMap[comment.parentCommentId].replies.push(comment);
+                  } else {
+                      rootComments.push(comment);
+                  }
+              });
+
+              Thread.threadedComments = rootComments;
           }
 
           Thread.handleDeletedUsers = function () {
@@ -891,7 +922,7 @@
               );
           }
 
-          Thread.addComment = function () {
+          Thread.addComment = function (parentCommentId = null) {
               let commentData = {
                   threadId: Thread.post.id,
                   comment: Thread.comment ? Thread.comment.replace(/[#&%+!@^*()-]/g, function (match) {
@@ -904,7 +935,9 @@
                   userId: Thread.SocialItems.userDetails.userId,
                   likes: [],
                   userDetails: Thread.SocialItems.userDetails,
-                  createdOn: new Date()
+                  createdOn: new Date(),
+                  parentCommentId: parentCommentId,
+                  replies: []
               };
               SocialDataStore.addComment(commentData).then(
                 function (data) {
@@ -919,6 +952,7 @@
                         'comment': commentData
                     });
                     Thread.post.comments.push(commentData);
+                    Thread.organizeThreadedComments();
                     Thread.scheduleNotification(commentData, 'comment');
                 });
           }
@@ -980,13 +1014,15 @@
 
           Thread.showCustomPostDialog = false;
           Thread.customPostText = '';
+          Thread.replyingToComment = null;
 
-          Thread.openCommentSection = function () {
+          Thread.openCommentSection = function (parentComment = null) {
               Thread.SocialItems.authenticateUser(null, (err, user) => {
                   if (err) return console.error("Getting user failed.", err);
                   if (user) {
                       Thread.showCustomPostDialog = true;
                       Thread.customPostText = '';
+                      Thread.replyingToComment = parentComment;
                       $scope.$apply();
                   }
               });
@@ -995,6 +1031,7 @@
           Thread.closeCustomPostDialog = function () {
               Thread.showCustomPostDialog = false;
               Thread.customPostText = '';
+              Thread.replyingToComment = null;
               if (!$scope.$$phase) $scope.$apply();
           }
 
@@ -1015,10 +1052,11 @@
               }
 
               Thread.comment = Thread.customPostText;
+              const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
 
               Thread.closeCustomPostDialog();
 
-              Thread.addComment();
+              Thread.addComment(parentCommentId);
           }
 
           Thread.decodeText = function (text) {

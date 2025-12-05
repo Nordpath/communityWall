@@ -2036,3 +2036,83 @@ a.comments .iconsTheme.iconsFont {
 .custom-post-video:hover .video-label {
     color: #333;
 }
+
+/* Nested Comments Styles */
+.comment-wrapper {
+    position: relative;
+}
+
+.replies-container {
+    margin-left: 40px;
+    padding-left: 16px;
+    border-left: 2px solid #e0e0e0;
+    margin-top: 8px;
+}
+
+.nested-reply .comment-wrapper {
+    margin-top: 12px;
+}
+
+.social-comment-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.reply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    margin-left: 8px;
+}
+
+.reply-btn:hover {
+    opacity: 0.7;
+}
+
+.reply-btn .material-icons-outlined {
+    font-size: 18px;
+}
+
+.reply-btn .reply-text {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.reply-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.reply-to-text {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.cancel-reply {
+    cursor: pointer;
+    font-size: 18px;
+    color: #999;
+    padding: 4px 8px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.cancel-reply:hover {
+    color: #333;
+}
+
+@media (max-width: 480px) {
+    .replies-container {
+        margin-left: 24px;
+        padding-left: 12px;
+    }
+}
