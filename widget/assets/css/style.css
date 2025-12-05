@@ -1935,7 +1935,7 @@ a.comments .iconsTheme.iconsFont {
     margin: 0 auto;
 }
 
-.custom-post-input-row {
+.custom-post-input-section {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1964,7 +1964,7 @@ a.comments .iconsTheme.iconsFont {
 .custom-post-actions {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
     padding: 0 5px;
 }
 
@@ -1990,7 +1990,6 @@ a.comments .iconsTheme.iconsFont {
     align-items: center;
     cursor: pointer;
     gap: 8px;
-    margin-left: 15px;
 }
 
 .video-icon {
@@ -2009,6 +2008,7 @@ a.comments .iconsTheme.iconsFont {
     align-items: center;
     justify-content: center;
     padding: 8px;
+    flex-shrink: 0;
 }
 
 .send-icon-img {

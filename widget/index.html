@@ -238,14 +238,18 @@
                            placeholder="Add message"
                            ng-model="WidgetWall.customPostText"
                            ng-keypress="WidgetWall.handlePostKeyPress($event)">
+                    <div class="custom-post-send" ng-click="WidgetWall.submitCustomPost()">
+                        <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
+                    </div>
                 </div>
                 <div class="custom-post-actions">
                     <div class="custom-post-camera" ng-click="WidgetWall.selectImages()">
                         <span class="camera-icon">📷</span>
-                        <span class="camera-label">{{WidgetWall.selectedImagesText}}</span>
+                        <span class="camera-label">Change selected</span>
                     </div>
-                    <div class="custom-post-send" ng-click="WidgetWall.submitCustomPost()">
-                        <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
+                    <div class="custom-post-video" ng-click="WidgetWall.selectVideos()">
+                        <span class="video-icon">🎥</span>
+                        <span class="video-label">Change selected</span>
                     </div>
                 </div>
             </div>
