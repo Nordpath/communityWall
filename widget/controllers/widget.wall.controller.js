@@ -1662,7 +1662,10 @@
                       return;
                   }
 
-                  buildfire.imageLib.showDialog({multiSelection: true}, function(err, result) {
+                  console.log('[DEBUG] About to call imageLib.showDialog...');
+
+                  try {
+                      buildfire.imageLib.showDialog({multiSelection: true}, function(err, result) {
                       console.log('[DEBUG] ========================================');
                       console.log('[DEBUG] imageLib callback triggered!');
                       console.log('[DEBUG] Error:', err);
@@ -1700,6 +1703,13 @@
                           console.log('[DEBUG] No images selected');
                       }
                   });
+                  } catch (ex) {
+                      console.error('[ERROR] Exception calling imageLib.showDialog:', ex);
+                      buildfire.dialog.toast({
+                          message: 'Error opening image selector: ' + ex.message,
+                          type: 'danger'
+                      });
+                  }
               }
 
               console.log('[DEBUG] Image selection dialog requested...');
@@ -1806,11 +1816,14 @@
                       return;
                   }
 
-                  buildfire.imageLib.showDialog({
-                      multiSelection: true,
-                      showIcons: false,
-                      showFiles: true
-                  }, function(err, result) {
+                  console.log('[DEBUG] About to call imageLib.showDialog for videos...');
+
+                  try {
+                      buildfire.imageLib.showDialog({
+                          multiSelection: true,
+                          showIcons: false,
+                          showFiles: true
+                      }, function(err, result) {
                       console.log('[DEBUG] ========================================');
                       console.log('[DEBUG] imageLib callback for videos triggered!');
                       console.log('[DEBUG] Error:', err);
@@ -1864,6 +1877,13 @@
                           console.log('[DEBUG] No files selected');
                       }
                   });
+                  } catch (ex) {
+                      console.error('[ERROR] Exception calling imageLib.showDialog for videos:', ex);
+                      buildfire.dialog.toast({
+                          message: 'Error opening video selector: ' + ex.message,
+                          type: 'danger'
+                      });
+                  }
               }
 
               console.log('[DEBUG] Video selection dialog requested...');
