@@ -166,6 +166,17 @@
                   }
               });
 
+              // Add depth calculation for styling
+              const setDepth = (comments, depth = 0) => {
+                  comments.forEach(comment => {
+                      comment.depth = depth;
+                      if (comment.replies && comment.replies.length > 0) {
+                          setDepth(comment.replies, depth + 1);
+                      }
+                  });
+              };
+              setDepth(rootComments);
+
               Thread.threadedComments = rootComments;
           }
 

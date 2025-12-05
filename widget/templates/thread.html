@@ -82,7 +82,7 @@
                 </div>
 
                 <script type="text/ng-template" id="comment-template.html">
-                    <div class="comment-wrapper" ng-class="{'nested-comment': comment.parentCommentId}">
+                    <div class="comment-wrapper" ng-class="{'nested-comment': comment.parentCommentId, 'max-depth': comment.depth >= 3}">
                         <div class="social-comment-inner">
                             <div class="thread-dot head pointer"
                                  ng-click="comment.userId !== Thread.SocialItems.userDetails.userId && Thread.showMoreOptionsComment(comment)">
@@ -141,7 +141,7 @@
                             <span class="material-icons-outlined">more_vert</span>
                             </a>
                         </div>
-                        <div class="replies-container" ng-if="comment.replies && comment.replies.length > 0">
+                        <div class="replies-container" ng-if="comment.replies && comment.replies.length > 0" ng-class="{'max-depth-container': comment.depth >= 2}">
                             <div class="social-comment nested-reply" ng-repeat="comment in comment.replies" ng-include="'comment-template.html'">
                             </div>
                         </div>

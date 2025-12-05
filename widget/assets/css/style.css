@@ -2049,6 +2049,12 @@ a.comments .iconsTheme.iconsFont {
     margin-top: 8px;
 }
 
+/* Limit indentation after depth 3 */
+.replies-container.max-depth-container {
+    margin-left: 20px;
+    padding-left: 8px;
+}
+
 .nested-reply .comment-wrapper {
     margin-top: 12px;
 }
@@ -2114,5 +2120,11 @@ a.comments .iconsTheme.iconsFont {
     .replies-container {
         margin-left: 24px;
         padding-left: 12px;
+    }
+
+    /* Further reduce indentation on mobile for deep nesting */
+    .replies-container.max-depth-container {
+        margin-left: 12px;
+        padding-left: 6px;
     }
 }
