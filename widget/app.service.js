@@ -1270,7 +1270,10 @@
                     event.preventDefault();
                     event.stopPropagation();
 
-                    buildfire.imagePreviewer.show({ images, index });
+                    var imageUrl = images[index];
+                    if (imageUrl) {
+                        window.open(imageUrl, '_blank');
+                    }
                 }
             };
 

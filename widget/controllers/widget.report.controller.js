@@ -162,11 +162,12 @@
                     imageList.images = Report.post.imageUrl;
                     imageList.addEventListener('imageSelected', (e) => {
                         let selectedImage = e.detail.filter(image => image.selected);
-                        if (selectedImage && selectedImage[0] && selectedImage[0].name)
-                            selectedImage[0].name = selectedImage[0].name;
-                        buildfire.imagePreviewer.show({
-                            images: selectedImage
-                        });
+                        if (selectedImage && selectedImage[0]) {
+                            var imageUrl = selectedImage[0].url || selectedImage[0].name || selectedImage[0];
+                            if (imageUrl) {
+                                window.open(imageUrl, '_blank');
+                            }
+                        }
                     });
 
                 });
