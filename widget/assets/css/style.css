@@ -1935,12 +1935,15 @@ a.comments .iconsTheme.iconsFont {
     margin: 0 auto;
 }
 
-.custom-post-input-section {
+.custom-post-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 15px;
 }
 
 .custom-post-input {
-    width: 100%;
+    flex: 1;
     padding: 12px 16px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -1961,7 +1964,7 @@ a.comments .iconsTheme.iconsFont {
 .custom-post-actions {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 15px;
     padding: 0 5px;
 }
 
