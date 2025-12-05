@@ -1445,8 +1445,8 @@
           WidgetWall.customPostText = '';
           WidgetWall.selectedImages = [];
           WidgetWall.selectedVideos = [];
-          WidgetWall.videoUrl = '';
-          WidgetWall.selectedImagesText = 'Change selected';
+          WidgetWall.selectedImagesText = 'Add images';
+          WidgetWall.selectedVideosText = 'Add videos';
 
           WidgetWall.openPostSection = function () {
               WidgetWall.SocialItems.authenticateUser(null, (err, user) => {
@@ -1457,8 +1457,8 @@
                       WidgetWall.customPostText = '';
                       WidgetWall.selectedImages = [];
                       WidgetWall.selectedVideos = [];
-                      WidgetWall.videoUrl = '';
-                      WidgetWall.selectedImagesText = 'Change selected';
+                      WidgetWall.selectedImagesText = 'Add images';
+                      WidgetWall.selectedVideosText = 'Add videos';
                       $scope.$apply();
                   }
               });
@@ -1469,8 +1469,8 @@
               WidgetWall.customPostText = '';
               WidgetWall.selectedImages = [];
               WidgetWall.selectedVideos = [];
-              WidgetWall.videoUrl = '';
-              WidgetWall.selectedImagesText = 'Change selected';
+              WidgetWall.selectedImagesText = 'Add images';
+              WidgetWall.selectedVideosText = 'Add videos';
               $scope.$apply();
           }
 
@@ -1492,7 +1492,7 @@
               console.log('[DEBUG] Using publicFiles API:', usePublicFiles);
 
               if (usePublicFiles) {
-                  console.log('[DEBUG] Calling publicFiles.showDialog with image and video support...');
+                  console.log('[DEBUG] Calling publicFiles.showDialog for images...');
 
                   var options = {
                       allowMultipleFilesUpload: true,
@@ -1501,13 +1501,7 @@
                           'image/jpg',
                           'image/png',
                           'image/gif',
-                          'image/webp',
-                          'video/mp4',
-                          'video/quicktime',
-                          'video/x-msvideo',
-                          'video/avi',
-                          'video/webm',
-                          'video/mov'
+                          'image/webp'
                       ]
                   };
 
@@ -1526,9 +1520,9 @@
                       console.log('[DEBUG] Files:', files);
 
                       if (err) {
-                          console.error('[ERROR] Error selecting media:', err);
+                          console.error('[ERROR] Error selecting images:', err);
                           buildfire.dialog.toast({
-                              message: 'Error selecting media. Please try again.',
+                              message: 'Error selecting images. Please try again.',
                               type: 'danger'
                           });
                           return;
@@ -1540,43 +1534,29 @@
                       }
 
                       var images = [];
-                      var videos = [];
 
                       files.forEach(function(file) {
                           console.log('[DEBUG] Processing file:', file);
                           if (file.type && file.type.startsWith('image/')) {
                               images.push(file.url);
-                          } else if (file.type && file.type.startsWith('video/')) {
-                              videos.push(file.url);
                           } else if (file.url) {
                               var ext = file.url.split('.').pop().toLowerCase();
                               if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) >= 0) {
                                   images.push(file.url);
-                              } else if (['mp4', 'mov', 'avi', 'webm', 'quicktime'].indexOf(ext) >= 0) {
-                                  videos.push(file.url);
                               }
                           }
                       });
 
-                      console.log(`[DEBUG] Processed: ${images.length} images, ${videos.length} videos`);
+                      console.log(`[DEBUG] Processed: ${images.length} images`);
 
                       WidgetWall.selectedImages = images;
-                      WidgetWall.selectedVideos = videos;
 
-                      var totalCount = images.length + videos.length;
-                      if (totalCount === 0) {
-                          console.log('[DEBUG] No valid media files selected');
+                      if (images.length === 0) {
+                          console.log('[DEBUG] No valid images selected');
                           return;
                       }
 
-                      var parts = [];
-                      if (images.length > 0) {
-                          parts.push(images.length === 1 ? '1 image' : images.length + ' images');
-                      }
-                      if (videos.length > 0) {
-                          parts.push(videos.length === 1 ? '1 video' : videos.length + ' videos');
-                      }
-                      WidgetWall.selectedImagesText = parts.join(' & ') + ' selected';
+                      WidgetWall.selectedImagesText = images.length === 1 ? '1 image selected' : images.length + ' images selected';
 
                       buildfire.dialog.toast({
                           message: WidgetWall.selectedImagesText,
@@ -1620,7 +1600,6 @@
                       if (result && result.selectedFiles && result.selectedFiles.length > 0) {
                           console.log(`[DEBUG] SUCCESS: ${result.selectedFiles.length} images selected`);
                           WidgetWall.selectedImages = result.selectedFiles;
-                          WidgetWall.selectedVideos = [];
                           var count = result.selectedFiles.length;
                           WidgetWall.selectedImagesText = count === 1 ? '1 image selected' : count + ' images selected';
 
@@ -1638,7 +1617,106 @@
                   });
               }
 
-              console.log('[DEBUG] Media selection dialog requested...');
+              console.log('[DEBUG] Image selection dialog requested...');
+          }
+
+          WidgetWall.selectVideos = function () {
+              console.log('[DEBUG] ========================================');
+              console.log('[DEBUG] selectVideos function called');
+
+              if (!buildfire) {
+                  console.error('[ERROR] buildfire object not available!');
+                  alert('BuildFire SDK not loaded. Please refresh the page.');
+                  return;
+              }
+
+              var usePublicFiles = buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog;
+
+              if (usePublicFiles) {
+                  console.log('[DEBUG] Calling publicFiles.showDialog for videos...');
+
+                  var options = {
+                      allowMultipleFilesUpload: true,
+                      filter: [
+                          'video/mp4',
+                          'video/quicktime',
+                          'video/x-msvideo',
+                          'video/avi',
+                          'video/webm',
+                          'video/mov'
+                      ]
+                  };
+
+                  var onProgress = function(progress) {
+                      console.log('[DEBUG] Upload progress:', progress);
+                  };
+
+                  var onComplete = function(file) {
+                      console.log('[DEBUG] File upload complete:', file);
+                  };
+
+                  buildfire.services.publicFiles.showDialog(options, onProgress, onComplete, function(err, files) {
+                      console.log('[DEBUG] ========================================');
+                      console.log('[DEBUG] publicFiles callback triggered!');
+                      console.log('[DEBUG] Error:', err);
+                      console.log('[DEBUG] Files:', files);
+
+                      if (err) {
+                          console.error('[ERROR] Error selecting videos:', err);
+                          buildfire.dialog.toast({
+                              message: 'Error selecting videos. Please try again.',
+                              type: 'danger'
+                          });
+                          return;
+                      }
+
+                      if (!files || files.length === 0) {
+                          console.log('[DEBUG] No files selected');
+                          return;
+                      }
+
+                      var videos = [];
+
+                      files.forEach(function(file) {
+                          console.log('[DEBUG] Processing file:', file);
+                          if (file.type && file.type.startsWith('video/')) {
+                              videos.push(file.url);
+                          } else if (file.url) {
+                              var ext = file.url.split('.').pop().toLowerCase();
+                              if (['mp4', 'mov', 'avi', 'webm', 'quicktime', 'm4v', 'mkv'].indexOf(ext) >= 0) {
+                                  videos.push(file.url);
+                              }
+                          }
+                      });
+
+                      console.log(`[DEBUG] Processed: ${videos.length} videos`);
+
+                      WidgetWall.selectedVideos = videos;
+
+                      if (videos.length === 0) {
+                          console.log('[DEBUG] No valid videos selected');
+                          return;
+                      }
+
+                      WidgetWall.selectedVideosText = videos.length === 1 ? '1 video selected' : videos.length + ' videos selected';
+
+                      buildfire.dialog.toast({
+                          message: WidgetWall.selectedVideosText,
+                          type: 'success'
+                      });
+
+                      if (!$scope.$$phase) {
+                          $scope.$apply();
+                      }
+                  });
+              } else {
+                  buildfire.dialog.toast({
+                      message: 'Video upload requires the latest BuildFire SDK. Please contact support.',
+                      type: 'warning'
+                  });
+              }
+
+              console.log('[DEBUG] Video selection dialog requested...');
           }
 
           WidgetWall.handlePostKeyPress = function (event) {
@@ -1648,27 +1726,6 @@
           }
 
           WidgetWall.submitCustomPost = function () {
-              if (WidgetWall.videoUrl && WidgetWall.videoUrl.trim()) {
-                  var videoUrl = WidgetWall.videoUrl.trim();
-                  if (videoUrl.match(/\.(mp4|mov|avi|webm|m4v|mkv)$/i) ||
-                      videoUrl.includes('youtube.com') ||
-                      videoUrl.includes('youtu.be') ||
-                      videoUrl.includes('vimeo.com')) {
-                      if (!WidgetWall.selectedVideos) {
-                          WidgetWall.selectedVideos = [];
-                      }
-                      if (WidgetWall.selectedVideos.indexOf(videoUrl) === -1) {
-                          WidgetWall.selectedVideos.push(videoUrl);
-                      }
-                  } else {
-                      buildfire.dialog.toast({
-                          message: 'Please enter a valid video URL',
-                          type: 'warning'
-                      });
-                      return;
-                  }
-              }
-
               const hasImages = WidgetWall.selectedImages && WidgetWall.selectedImages.length > 0;
               const hasVideos = WidgetWall.selectedVideos && WidgetWall.selectedVideos.length > 0;
               const hasMedia = hasImages || hasVideos;

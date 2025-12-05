@@ -1972,6 +1972,24 @@ a.comments .iconsTheme.iconsFont {
     color: #666;
 }
 
+.custom-post-video {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 8px;
+    margin-left: 15px;
+}
+
+.video-icon {
+    font-size: 24px;
+    filter: grayscale(100%);
+}
+
+.video-label {
+    font-size: 13px;
+    color: #666;
+}
+
 .custom-post-send {
     cursor: pointer;
     display: flex;
@@ -1991,5 +2009,9 @@ a.comments .iconsTheme.iconsFont {
 }
 
 .custom-post-camera:hover .camera-label {
+    color: #333;
+}
+
+.custom-post-video:hover .video-label {
     color: #333;
 }
