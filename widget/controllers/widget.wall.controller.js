@@ -164,6 +164,52 @@
               });
           }
 
+          WidgetWall.subscribeToPushNotifications = function (groupName, callback) {
+              callback = callback || function() {};
+
+              if (!buildfire || !buildfire.notifications || !buildfire.notifications.pushNotification) {
+                  console.warn('Push notification API not available');
+                  return callback(new Error('Push notification API not available'));
+              }
+
+              var attemptSubscribe = function(retryCount) {
+                  retryCount = retryCount || 0;
+                  var maxRetries = 3;
+
+                  buildfire.device.onReady(function() {
+                      buildfire.notifications.pushNotification.subscribe({
+                          groupName: groupName
+                      }, function(err, result) {
+                          if (err) {
+                              console.error('Error subscribing to push notifications:', err);
+                              if (retryCount < maxRetries) {
+                                  setTimeout(function() {
+                                      attemptSubscribe(retryCount + 1);
+                                  }, 1000 * (retryCount + 1));
+                              } else {
+                                  callback(err);
+                              }
+                          } else {
+                              console.log('Successfully subscribed to push notifications');
+                              callback(null, result);
+                          }
+                      });
+                  }, function(err) {
+                      console.warn('Device not ready, retrying push notification subscription...');
+                      if (retryCount < maxRetries) {
+                          setTimeout(function() {
+                              attemptSubscribe(retryCount + 1);
+                          }, 1000 * (retryCount + 1));
+                      } else {
+                          console.error('Device never became ready for push notifications');
+                          callback(new Error('Device not ready'));
+                      }
+                  });
+              };
+
+              attemptSubscribe(0);
+          }
+
           WidgetWall.showHideCommentBox = function () {
               if (WidgetWall.SocialItems && WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowMainThreadTags &&
                 WidgetWall.SocialItems.appSettings.mainThreadUserTags && WidgetWall.SocialItems.appSettings.mainThreadUserTags.length > 0
@@ -408,10 +454,9 @@
                   if (err) console.log('Error while saving subscribed user data.');
                   else {
                       WidgetWall.groupFollowingStatus = true;
-                      buildfire.notifications.pushNotification.subscribe({
-                          groupName: WidgetWall.SocialItems.wid === '' ?
-                            WidgetWall.SocialItems.context.instanceId : WidgetWall.SocialItems.wid
-                      }, () => {});
+                      var groupName = WidgetWall.SocialItems.wid === '' ?
+                            WidgetWall.SocialItems.context.instanceId : WidgetWall.SocialItems.wid;
+                      WidgetWall.subscribeToPushNotifications(groupName);
                       buildfire.spinner.hide();
                       WidgetWall.loading = false;
                       $scope.$digest();
@@ -435,10 +480,9 @@
                                       status[0].data.leftWall = false;
                                       Follows.followPlugin((e, u) => e ? console.log(e) : console.log(u));
                                       buildfire.publicData.update(status[0].id, SubscribedUsersData.getDataWithIndex(status[0]).data, 'subscribedUsersData', console.log);
-                                      buildfire.notifications.pushNotification.subscribe({
-                                          groupName: WidgetWall.SocialItems.wid === '' ?
-                                            WidgetWall.SocialItems.context.instanceId : WidgetWall.SocialItems.wid
-                                      }, () => {});
+                                      var groupName = WidgetWall.SocialItems.wid === '' ?
+                                            WidgetWall.SocialItems.context.instanceId : WidgetWall.SocialItems.wid;
+                                      WidgetWall.subscribeToPushNotifications(groupName);
                                       WidgetWall.groupFollowingStatus = true;
                                   } else if (status.length && !status[0].data.leftWall)
                                       return WidgetWall.unfollowWall();
