@@ -125,7 +125,7 @@
                                 </div>
                                 <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer">
                                     <a class="social-icon likes" ng-click="!Thread.isBlockedUser(comment.userId) && Thread.likeComment(comment, 'comment')">
-                                        <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"thumb_up_off_alt":"thumb_up_alt"}}</i>
+                                        <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
                                         <span class="iconsTheme iconsFont"
                                             ng-class="{active: isItemLiked(comment, Thread.SocialItems.userDetails.userId)}">{{comment.likes.length}}</span>
                                     </a>
@@ -138,7 +138,7 @@
                             <a class="social-icon margin-one-rem margin-top-zero margin-bottom-zero"
                             ng-hide = "comment.userId != Thread.SocialItems.userDetails.userId || !comment.commentId"
                             ng-click="Thread.showMoreOptionsComment(comment)" style="height: 2rem; margin-top: 0.75rem;">
-                            <span class="material-icons-outlined">more_horiz</span>
+                            <span class="material-icons-outlined">more_vert</span>
                             </a>
                         </div>
                         <div class="replies-container" ng-if="comment.replies && comment.replies.length > 0">
