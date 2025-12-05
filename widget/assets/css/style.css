@@ -1883,11 +1883,21 @@ a.comments .iconsTheme.iconsFont {
     bottom: 20px;
     right: 1.5rem;
     z-index: 150;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#addBtn.fab-hidden, #addCommentBtn.fab-hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Ensure content doesn't overlap with banner/logo */
 .post-infinite-scroll {
     transition: padding-bottom 0.3s ease;
+    padding-bottom: 120px !important;
 }
 
 /* Custom Post Dialog Styles */

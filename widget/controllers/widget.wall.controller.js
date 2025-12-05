@@ -126,6 +126,44 @@
               }, 100);
           }
 
+          WidgetWall.initScrollDetection = function () {
+              var scrollContainer = document.querySelector('.post-infinite-scroll');
+              if (!scrollContainer) return;
+
+              var lastScrollTop = 0;
+              var scrollThreshold = 50;
+              var isScrolling = false;
+              var fabElement = document.getElementById('addBtn');
+
+              if (!fabElement) return;
+
+              scrollContainer.addEventListener('scroll', function() {
+                  if (isScrolling) return;
+
+                  isScrolling = true;
+
+                  setTimeout(function() {
+                      var currentScrollTop = scrollContainer.scrollTop;
+                      var scrollDifference = Math.abs(currentScrollTop - lastScrollTop);
+
+                      if (scrollDifference > scrollThreshold) {
+                          if (currentScrollTop > lastScrollTop && currentScrollTop > 100) {
+                              fabElement.classList.add('fab-hidden');
+                          } else {
+                              fabElement.classList.remove('fab-hidden');
+                          }
+                      }
+
+                      if (currentScrollTop <= 0) {
+                          fabElement.classList.remove('fab-hidden');
+                      }
+
+                      lastScrollTop = currentScrollTop;
+                      isScrolling = false;
+                  }, 100);
+              });
+          }
+
           WidgetWall.showHideCommentBox = function () {
               if (WidgetWall.SocialItems && WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowMainThreadTags &&
                 WidgetWall.SocialItems.appSettings.mainThreadUserTags && WidgetWall.SocialItems.appSettings.mainThreadUserTags.length > 0
@@ -192,6 +230,9 @@
               WidgetWall.followLeaveGroupPermission();
               WidgetWall.showHideCommentBox();
               WidgetWall.initFabButtons();
+              setTimeout(function() {
+                  WidgetWall.initScrollDetection();
+              }, 200);
               let dldActionItem = new URLSearchParams(window.location.search).get('actionItem');
               if (dldActionItem)
                   WidgetWall.SocialItems.appSettings.actionItem = JSON.parse(dldActionItem);
