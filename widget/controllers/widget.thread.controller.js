@@ -897,7 +897,7 @@
                       return encodeURIComponent(match)
                   }) : '',
                   commentId: Util.UUID(),
-                  userToken: Thread.SocialItems.userDetails.userDetails.userToken,
+                  userToken: Thread.SocialItems.userDetails.userToken,
                   imageUrl: [],
                   videos: [],
                   userId: Thread.SocialItems.userDetails.userId,
@@ -994,7 +994,7 @@
           Thread.closeCustomPostDialog = function () {
               Thread.showCustomPostDialog = false;
               Thread.customPostText = '';
-              $scope.$apply();
+              if (!$scope.$$phase) $scope.$apply();
           }
 
 
