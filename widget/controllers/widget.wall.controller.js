@@ -172,6 +172,14 @@
                   return callback(new Error('Push notification API not available'));
               }
 
+              if (!buildfire.device || !buildfire.device.onReady) {
+                  console.warn('Device API not available (desktop mode)');
+                  buildfire.notifications.pushNotification.subscribe({
+                      groupName: groupName
+                  }, callback);
+                  return;
+              }
+
               var attemptSubscribe = function(retryCount) {
                   retryCount = retryCount || 0;
                   var maxRetries = 3;
