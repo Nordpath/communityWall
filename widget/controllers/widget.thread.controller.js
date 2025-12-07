@@ -420,6 +420,10 @@
                       if (post.userId === Thread.SocialItems.userDetails.userId) {
                           listItems.push(
                             {
+                                id: 'editPost',
+                                text: Thread.SocialItems.languages.editPost || 'Edit Post'
+                            },
+                            {
                                 id: 'deletePost',
                                 text: Thread.SocialItems.languages.deletePost
                             }
@@ -493,6 +497,7 @@
                   else if (result.text == "Follow") Follows.followUser(userId, (err, r) => err ? console.log(err) : console.log(r));
                   else if (result.id == "reportPost") Thread.reportPost(post);
                   else if (result.id == "blockUser") Thread.blockUser(userId, post.userDetails);
+                  else if (result.id == "editPost") Thread.editPost(post);
                   else if (result.id == "deletePost") Thread.deletePost(post.id)
                   buildfire.components.drawer.closeDrawer();
               });
@@ -549,6 +554,9 @@
                       // Add options based on user conditions
                       if (comment.userId === Thread.SocialItems.userDetails.userId) {
                           drawerOptions.listItems.push({
+                              id: 'editComment',
+                              text: Thread.SocialItems.languages.editComment || 'Edit Comment'
+                          }, {
                               id: 'deleteComment',
                               text: Thread.SocialItems.languages.deleteComment
                           });
@@ -575,6 +583,10 @@
                           if (err) return console.error("Error opening drawer.", err);
                           if (result) {
                               switch (result.id) {
+                                  case 'editComment':
+                                      // Call the edit comment function
+                                      Thread.editComment(comment);
+                                      break;
                                   case 'deleteComment':
                                       // Call the existing deleteComment function
                                       Thread.deleteComment(comment);
@@ -933,8 +945,8 @@
                   }) : '',
                   commentId: Util.UUID(),
                   userToken: Thread.SocialItems.userDetails.userToken,
-                  imageUrl: [],
-                  videos: [],
+                  imageUrl: Thread.images || [],
+                  videos: Thread.videos || [],
                   userId: Thread.SocialItems.userDetails.userId,
                   likes: [],
                   userDetails: Thread.SocialItems.userDetails,
@@ -1018,6 +1030,12 @@
           Thread.showCustomPostDialog = false;
           Thread.customPostText = '';
           Thread.replyingToComment = null;
+          Thread.selectedImages = [];
+          Thread.selectedVideos = [];
+          Thread.selectedImagesText = 'Add Images';
+          Thread.selectedVideosText = 'Add Videos';
+          Thread.editingComment = null;
+          Thread.editingPost = null;
 
           Thread.openCommentSection = function (parentComment = null) {
               Thread.SocialItems.authenticateUser(null, (err, user) => {
@@ -1026,6 +1044,12 @@
                       Thread.showCustomPostDialog = true;
                       Thread.customPostText = '';
                       Thread.replyingToComment = parentComment;
+                      Thread.selectedImages = [];
+                      Thread.selectedVideos = [];
+                      Thread.selectedImagesText = 'Add Images';
+                      Thread.selectedVideosText = 'Add Videos';
+                      Thread.editingComment = null;
+                      Thread.editingPost = null;
                       $scope.$apply();
                   }
               });
@@ -1035,6 +1059,12 @@
               Thread.showCustomPostDialog = false;
               Thread.customPostText = '';
               Thread.replyingToComment = null;
+              Thread.selectedImages = [];
+              Thread.selectedVideos = [];
+              Thread.selectedImagesText = 'Add Images';
+              Thread.selectedVideosText = 'Add Videos';
+              Thread.editingComment = null;
+              Thread.editingPost = null;
               if (!$scope.$$phase) $scope.$apply();
           }
 
@@ -1054,17 +1084,154 @@
                   return;
               }
 
-              Thread.comment = Thread.customPostText;
-              const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
-
-              Thread.closeCustomPostDialog();
-
-              Thread.addComment(parentCommentId);
+              if (Thread.editingComment) {
+                  Thread.updateComment();
+              } else if (Thread.editingPost) {
+                  Thread.updatePost();
+              } else {
+                  Thread.comment = Thread.customPostText;
+                  Thread.images = Thread.selectedImages || [];
+                  Thread.videos = Thread.selectedVideos || [];
+                  const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
+                  Thread.closeCustomPostDialog();
+                  Thread.addComment(parentCommentId);
+              }
           }
 
           Thread.decodeText = function (text) {
               return decodeURIComponent(text);
           };
+
+          Thread.selectImages = function () {
+              if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                  buildfire.services.publicFiles.showDialog(
+                      {
+                          allowMultipleFilesUpload: true,
+                          filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                      },
+                      null,
+                      null,
+                      function(err, files) {
+                          if (err || !files || files.length === 0) return;
+                          Thread.selectedImages = files.map(function(f) { return f.url; });
+                          Thread.selectedImagesText = files.length === 1 ? '1 image' : files.length + ' images';
+                          if (!$scope.$$phase) $scope.$apply();
+                      }
+                  );
+              } else if (buildfire.imageLib && buildfire.imageLib.showDialog) {
+                  buildfire.imageLib.showDialog({
+                      multiSelection: true,
+                      showIcons: false
+                  }, function(err, result) {
+                      if (err || !result || !result.selectedFiles || result.cancelled) return;
+                      Thread.selectedImages = result.selectedFiles;
+                      Thread.selectedImagesText = result.selectedFiles.length === 1 ? '1 image' : result.selectedFiles.length + ' images';
+                      if (!$scope.$$phase) $scope.$apply();
+                  });
+              }
+          }
+
+          Thread.selectVideos = function () {
+              if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                  buildfire.services.publicFiles.showDialog(
+                      {
+                          allowMultipleFilesUpload: true,
+                          filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
+                      },
+                      null,
+                      null,
+                      function(err, files) {
+                          if (err || !files || files.length === 0) return;
+                          Thread.selectedVideos = files.map(function(f) { return f.url; });
+                          Thread.selectedVideosText = files.length === 1 ? '1 video' : files.length + ' videos';
+                          if (!$scope.$$phase) $scope.$apply();
+                      }
+                  );
+              } else if (buildfire.imageLib && buildfire.imageLib.showDialog) {
+                  buildfire.imageLib.showDialog({
+                      multiSelection: true,
+                      showIcons: false,
+                      showFiles: true
+                  }, function(err, result) {
+                      if (err || !result || !result.selectedFiles || result.cancelled) return;
+                      Thread.selectedVideos = result.selectedFiles;
+                      Thread.selectedVideosText = result.selectedFiles.length === 1 ? '1 video' : result.selectedFiles.length + ' videos';
+                      if (!$scope.$$phase) $scope.$apply();
+                  });
+              }
+          }
+
+          Thread.editPost = function (post) {
+              Thread.editingPost = post;
+              Thread.customPostText = post.text || '';
+              Thread.selectedImages = post.imageUrl || [];
+              Thread.selectedVideos = post.videos || [];
+              Thread.selectedImagesText = Thread.selectedImages.length > 0 ? (Thread.selectedImages.length === 1 ? '1 image' : Thread.selectedImages.length + ' images') : 'Add Images';
+              Thread.selectedVideosText = Thread.selectedVideos.length > 0 ? (Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos') : 'Add Videos';
+              Thread.showCustomPostDialog = true;
+              Thread.replyingToComment = null;
+              if (!$scope.$$phase) $scope.$apply();
+          }
+
+          Thread.editComment = function (comment) {
+              Thread.editingComment = comment;
+              Thread.customPostText = comment.comment ? decodeURIComponent(comment.comment) : '';
+              Thread.selectedImages = comment.imageUrl || [];
+              Thread.selectedVideos = comment.videos || [];
+              Thread.selectedImagesText = Thread.selectedImages.length > 0 ? (Thread.selectedImages.length === 1 ? '1 image' : Thread.selectedImages.length + ' images') : 'Add Images';
+              Thread.selectedVideosText = Thread.selectedVideos.length > 0 ? (Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos') : 'Add Videos';
+              Thread.showCustomPostDialog = true;
+              Thread.replyingToComment = null;
+              if (!$scope.$$phase) $scope.$apply();
+          }
+
+          Thread.updatePost = function () {
+              Thread.post.text = Thread.customPostText;
+              Thread.post.imageUrl = Thread.selectedImages || [];
+              Thread.post.videos = Thread.selectedVideos || [];
+              Thread.post.lastUpdatedOn = new Date();
+
+              SocialDataStore.updatePost(Thread.post).then(() => {
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.postUpdateSuccess || "Post updated successfully",
+                      type: 'success'
+                  });
+                  Thread.closeCustomPostDialog();
+                  if (!$scope.$$phase) $scope.$apply();
+              }).catch((err) => {
+                  console.error('Error updating post:', err);
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.postUpdateFail || "Failed to update post",
+                      type: 'danger'
+                  });
+              });
+          }
+
+          Thread.updateComment = function () {
+              const comment = Thread.editingComment;
+              comment.comment = Thread.customPostText.replace(/[#&%+!@^*()-]/g, function (match) {
+                  return encodeURIComponent(match);
+              });
+              comment.imageUrl = Thread.selectedImages || [];
+              comment.videos = Thread.selectedVideos || [];
+              comment.lastUpdatedOn = new Date();
+
+              SocialDataStore.updateComment(Thread.post.id, comment).then(() => {
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.commentUpdateSuccess || "Comment updated successfully",
+                      type: 'success'
+                  });
+                  Thread.organizeThreadedComments();
+                  Thread.closeCustomPostDialog();
+                  if (!$scope.$$phase) $scope.$apply();
+              }).catch((err) => {
+                  console.error('Error updating comment:', err);
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.commentUpdateFail || "Failed to update comment",
+                      type: 'danger'
+                  });
+              });
+          }
 
           Buildfire.history.onPop(function (breadcrumb) {
               Thread.goFullScreen = false;

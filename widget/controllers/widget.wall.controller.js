@@ -632,6 +632,10 @@
                       if (post.userId === WidgetWall.SocialItems.userDetails.userId) {
                           listItems.push(
                             {
+                                id: 'editPost',
+                                text: WidgetWall.SocialItems.languages.editPost || 'Edit Post'
+                            },
+                            {
                                 id: 'deletePost',
                                 text: WidgetWall.SocialItems.languages.deletePost
                             }
@@ -715,6 +719,7 @@
                   else if (result.text == "Follow") Follows.followUser(userId, (err, r) => err ? console.log(err) : console.log(r));
                   else if (result.id == "reportPost") WidgetWall.reportPost(post);
                   else if (result.id == "blockUser") WidgetWall.blockUser(userId, post.userDetails);
+                  else if (result.id == "editPost") WidgetWall.editPost(post);
                   else if (result.id == "deletePost") WidgetWall.deletePost(post.id);
                   buildfire.components.drawer.closeDrawer();
               });
@@ -1553,6 +1558,7 @@
           WidgetWall.selectedVideos = [];
           WidgetWall.selectedImagesText = 'Add images';
           WidgetWall.selectedVideosText = 'Add videos';
+          WidgetWall.editingPost = null;
 
           WidgetWall.openPostSection = function () {
               WidgetWall.SocialItems.authenticateUser(null, (err, user) => {
@@ -1565,6 +1571,7 @@
                       WidgetWall.selectedVideos = [];
                       WidgetWall.selectedImagesText = 'Add images';
                       WidgetWall.selectedVideosText = 'Add videos';
+                      WidgetWall.editingPost = null;
                       $scope.$apply();
                   }
               });
@@ -1577,6 +1584,7 @@
               WidgetWall.selectedVideos = [];
               WidgetWall.selectedImagesText = 'Add images';
               WidgetWall.selectedVideosText = 'Add videos';
+              WidgetWall.editingPost = null;
               if (!$scope.$$phase) {
                   $scope.$apply();
               }
@@ -1685,6 +1693,11 @@
           }
 
           WidgetWall.submitCustomPost = function () {
+              if (WidgetWall.editingPost) {
+                  WidgetWall.updatePost();
+                  return;
+              }
+
               const hasImages = WidgetWall.selectedImages && WidgetWall.selectedImages.length > 0;
               const hasVideos = WidgetWall.selectedVideos && WidgetWall.selectedVideos.length > 0;
               const hasMedia = hasImages || hasVideos;
@@ -1913,6 +1926,40 @@
               buildfire.spinner.show();
               buildfire.components.drawer.closeDrawer();
               SocialDataStore.deletePost(postId).then(success, error);
+          };
+
+          WidgetWall.editPost = function (post) {
+              WidgetWall.editingPost = post;
+              WidgetWall.customPostText = post.text || '';
+              WidgetWall.selectedImages = post.imageUrl || [];
+              WidgetWall.selectedVideos = post.videos || [];
+              WidgetWall.selectedImagesText = WidgetWall.selectedImages.length > 0 ? (WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images') : 'Add images';
+              WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length > 0 ? (WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos') : 'Add videos';
+              WidgetWall.showCustomPostDialog = true;
+              if (!$scope.$$phase) $scope.$apply();
+          };
+
+          WidgetWall.updatePost = function () {
+              const post = WidgetWall.editingPost;
+              post.text = WidgetWall.customPostText;
+              post.imageUrl = WidgetWall.selectedImages || [];
+              post.videos = WidgetWall.selectedVideos || [];
+              post.lastUpdatedOn = new Date();
+
+              SocialDataStore.updatePost(post).then(() => {
+                  Buildfire.dialog.toast({
+                      message: WidgetWall.SocialItems.languages.postUpdateSuccess || "Post updated successfully",
+                      type: 'success'
+                  });
+                  WidgetWall.closeCustomPostDialog();
+                  if (!$scope.$$phase) $scope.$apply();
+              }).catch((err) => {
+                  console.error('Error updating post:', err);
+                  Buildfire.dialog.toast({
+                      message: WidgetWall.SocialItems.languages.postUpdateFail || "Failed to update post",
+                      type: 'danger'
+                  });
+              });
           };
 
           WidgetWall.blockUser = function (userId, userDetails) {

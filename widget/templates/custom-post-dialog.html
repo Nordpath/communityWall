@@ -1,10 +1,13 @@
 <div class="custom-post-dialog" ng-show="WidgetWall.showCustomPostDialog">
     <div class="custom-post-overlay" ng-click="WidgetWall.closeCustomPostDialog()"></div>
     <div class="custom-post-content">
+        <div class="reply-indicator" ng-if="WidgetWall.editingPost">
+            <span class="reply-to-text">Editing Post</span>
+        </div>
         <div class="custom-post-input-row">
             <input type="text"
                    class="custom-post-input"
-                   placeholder="Add message"
+                   placeholder="{{WidgetWall.editingPost ? 'Edit post' : 'Add message'}}"
                    ng-model="WidgetWall.customPostText"
                    ng-keypress="WidgetWall.handlePostKeyPress($event)">
             <div class="custom-post-send" ng-click="WidgetWall.submitCustomPost()">

@@ -176,14 +176,30 @@
             <span class="reply-to-text">Replying to {{Thread.getDisplayName(Thread.replyingToComment.userId, Thread.replyingToComment.userDetails)}}</span>
             <span class="cancel-reply" ng-click="Thread.replyingToComment = null">✕</span>
         </div>
+        <div class="reply-indicator" ng-if="Thread.editingComment">
+            <span class="reply-to-text">Editing Comment</span>
+        </div>
+        <div class="reply-indicator" ng-if="Thread.editingPost">
+            <span class="reply-to-text">Editing Post</span>
+        </div>
         <div class="custom-post-input-section">
             <input type="text"
                    class="custom-post-input"
-                   placeholder="{{Thread.replyingToComment ? 'Add reply' : 'Add message'}}"
+                   placeholder="{{Thread.editingComment ? 'Edit comment' : (Thread.editingPost ? 'Edit post' : (Thread.replyingToComment ? 'Add reply' : 'Add message'))}}"
                    ng-model="Thread.customPostText"
                    ng-keypress="Thread.handlePostKeyPress($event)">
             <div class="custom-post-send" ng-click="Thread.submitCustomPost()">
                 <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
+            </div>
+        </div>
+        <div class="custom-post-actions">
+            <div class="custom-post-camera" ng-click="Thread.selectImages()">
+                <span class="camera-icon">📷</span>
+                <span class="camera-label">{{Thread.selectedImagesText}}</span>
+            </div>
+            <div class="custom-post-video" ng-click="Thread.selectVideos()">
+                <span class="video-icon">🎥</span>
+                <span class="video-label">{{Thread.selectedVideosText}}</span>
             </div>
         </div>
     </div>
