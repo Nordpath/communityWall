@@ -33,6 +33,16 @@
         .constant('FILE_UPLOAD', {
             CANCELLED : "Cancelled",
             SIZE_EXCEED : "File Too Large",
-            MAX_SIZE : 20        // upload file max size in 20 MB
+            MAX_SIZE : 20,        // Desktop fallback: upload file max size in MB (deprecated for mobile)
+
+            // Platform-specific file size limits:
+            // - Mobile (iOS/Android): No client-side validation, BuildFire server enforces 1GB limit
+            //   Uses native file pickers via buildfire.services.publicFiles.showDialog
+            // - Desktop/Web: Client-side validation at 10MB for images, 100MB for videos
+            //   Falls back to HTML file input with pre-upload size checks
+
+            MOBILE_MAX_SIZE: 1024,      // BuildFire server-side limit: 1GB (1024 MB)
+            DESKTOP_IMAGE_MAX_SIZE: 10, // Desktop client-side limit for images: 10 MB
+            DESKTOP_VIDEO_MAX_SIZE: 100 // Desktop client-side limit for videos: 100 MB
         })
 })(window.angular);

@@ -1561,6 +1561,21 @@
               }
           }
 
+          /**
+           * Image upload handler with platform-specific file size limits
+           *
+           * MOBILE (iOS/Android):
+           * - Uses BuildFire native file picker via publicFiles.showDialog
+           * - No client-side validation - BuildFire server enforces 1GB limit
+           * - Provides native OS file selection experience
+           * - Supports multiple image selection
+           *
+           * DESKTOP/WEB:
+           * - Falls back to imageLib.showDialog
+           * - Client-side validation applies 10MB limit per image
+           * - Pre-upload size checking prevents unnecessary uploads
+           * - HTML file input as ultimate fallback
+           */
           WidgetWall.selectImages = function () {
               console.log('[DEBUG] ========================================');
               console.log('[DEBUG] selectImages function called');
@@ -1579,6 +1594,8 @@
               console.log('[DEBUG] Using publicFiles API:', usePublicFiles);
 
               if (usePublicFiles) {
+                  // MOBILE: Using BuildFire native file picker
+                  // No client-side file size validation - BuildFire server enforces 1GB limit
                   console.log('[DEBUG] Calling publicFiles.showDialog for images...');
 
                   var options = {
@@ -1717,6 +1734,22 @@
               console.log('[DEBUG] Image selection dialog requested...');
           }
 
+          /**
+           * Video upload handler with platform-specific file size limits
+           *
+           * MOBILE (iOS/Android):
+           * - Uses BuildFire native file picker via publicFiles.showDialog
+           * - No client-side validation - BuildFire server enforces 1GB limit
+           * - Provides native OS file selection experience
+           * - Supports multiple video selection
+           * - Accepts MP4, MOV, AVI, WebM, and other formats
+           *
+           * DESKTOP/WEB:
+           * - Falls back to imageLib.showDialog with video support
+           * - Client-side validation applies 100MB limit per video
+           * - Pre-upload size checking prevents unnecessary uploads
+           * - HTML file input as ultimate fallback
+           */
           WidgetWall.selectVideos = function () {
               console.log('[DEBUG] ========================================');
               console.log('[DEBUG] selectVideos function called');
@@ -1730,6 +1763,8 @@
               var usePublicFiles = buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog;
 
               if (usePublicFiles) {
+                  // MOBILE: Using BuildFire native file picker
+                  // No client-side file size validation - BuildFire server enforces 1GB limit
                   console.log('[DEBUG] Calling publicFiles.showDialog for videos...');
 
                   var options = {
