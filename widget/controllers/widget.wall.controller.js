@@ -826,7 +826,7 @@
 
           WidgetWall.adjustLayoutForBottomLogo = function () {
               if (WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl) {
-                  var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '150px' : '80px';
+                  var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '150px' : '100px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
@@ -834,8 +834,16 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '140px' : '85px';
+                      // Increased FAB bottom offset to prevent overlap with banner
+                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '180px' : '110px';
                       fabButton.style.bottom = fabBottomOffset;
+                  }
+
+                  // Adjust bottom-post holder if present
+                  var bottomPost = document.querySelector('.holder.bottom-post');
+                  if (bottomPost) {
+                      var bottomPostOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '90px' : '70px';
+                      bottomPost.style.bottom = bottomPostOffset;
                   }
               } else {
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
@@ -846,6 +854,11 @@
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
                       fabButton.style.bottom = '20px';
+                  }
+
+                  var bottomPost = document.querySelector('.holder.bottom-post');
+                  if (bottomPost) {
+                      bottomPost.style.bottom = '0px';
                   }
               }
           };
@@ -1579,46 +1592,58 @@
            */
           WidgetWall.selectImages = function () {
               console.log('[DEBUG] ========================================');
-              console.log('[DEBUG] selectImages function called');
+              console.log('[DEBUG] selectImages function called at:', new Date().toISOString());
               console.log('[DEBUG] buildfire object:', buildfire);
               console.log('[DEBUG] buildfire.services:', buildfire ? buildfire.services : 'N/A');
               console.log('[DEBUG] buildfire.imageLib:', buildfire ? buildfire.imageLib : 'N/A');
 
               if (!buildfire) {
                   console.error('[ERROR] buildfire object not available!');
-                  alert('BuildFire SDK not loaded. Please refresh the page.');
+                  buildfire.dialog.toast({
+                      message: 'BuildFire SDK not loaded. Please refresh the page.',
+                      type: 'danger'
+                  });
                   return;
               }
 
               var usePublicFiles = buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog;
 
               console.log('[DEBUG] Using publicFiles API:', usePublicFiles);
+              console.log('[DEBUG] Device info:', buildfire.getContext ? buildfire.getContext() : 'Context not available');
 
               if (usePublicFiles) {
                   // MOBILE: Using BuildFire native file picker
                   // No client-side file size validation - BuildFire server enforces 1GB limit
                   console.log('[DEBUG] Calling publicFiles.showDialog for images...');
 
-                  var options = {
-                      allowMultipleFilesUpload: true,
-                      filter: [
-                          'image/jpeg',
-                          'image/jpg',
-                          'image/png',
-                          'image/gif',
-                          'image/webp'
-                      ]
-                  };
+                  // Show immediate feedback that the button was clicked
+                  buildfire.dialog.toast({
+                      message: 'Opening file picker...',
+                      type: 'info',
+                      duration: 2000
+                  });
 
-                  var onProgress = function(progress) {
-                      console.log('[DEBUG] Upload progress:', progress);
-                  };
+                  try {
+                      var options = {
+                          allowMultipleFilesUpload: true,
+                          filter: [
+                              'image/jpeg',
+                              'image/jpg',
+                              'image/png',
+                              'image/gif',
+                              'image/webp'
+                          ]
+                      };
 
-                  var onComplete = function(file) {
-                      console.log('[DEBUG] File upload complete:', file);
-                  };
+                      var onProgress = function(progress) {
+                          console.log('[DEBUG] Upload progress:', progress);
+                      };
 
-                  buildfire.services.publicFiles.showDialog(options, onProgress, onComplete, function(err, files) {
+                      var onComplete = function(file) {
+                          console.log('[DEBUG] File upload complete:', file);
+                      };
+
+                      buildfire.services.publicFiles.showDialog(options, onProgress, onComplete, function(err, files) {
                       console.log('[DEBUG] ========================================');
                       console.log('[DEBUG] publicFiles callback triggered!');
                       console.log('[DEBUG] Error:', err);
@@ -1672,6 +1697,13 @@
                           $scope.$apply();
                       }
                   });
+                  } catch (ex) {
+                      console.error('[ERROR] Exception calling publicFiles.showDialog:', ex);
+                      buildfire.dialog.toast({
+                          message: 'Error opening file picker: ' + ex.message,
+                          type: 'danger'
+                      });
+                  }
 
               } else {
                   // DESKTOP: Enhanced fallback to support both images AND videos
@@ -1792,11 +1824,14 @@
            */
           WidgetWall.selectVideos = function () {
               console.log('[DEBUG] ========================================');
-              console.log('[DEBUG] selectVideos function called');
+              console.log('[DEBUG] selectVideos function called at:', new Date().toISOString());
 
               if (!buildfire) {
                   console.error('[ERROR] buildfire object not available!');
-                  alert('BuildFire SDK not loaded. Please refresh the page.');
+                  buildfire.dialog.toast({
+                      message: 'BuildFire SDK not loaded. Please refresh the page.',
+                      type: 'danger'
+                  });
                   return;
               }
 
@@ -1807,27 +1842,35 @@
                   // No client-side file size validation - BuildFire server enforces 1GB limit
                   console.log('[DEBUG] Calling publicFiles.showDialog for videos...');
 
-                  var options = {
-                      allowMultipleFilesUpload: true,
-                      filter: [
-                          'video/mp4',
-                          'video/quicktime',
-                          'video/x-msvideo',
-                          'video/avi',
-                          'video/webm',
-                          'video/mov'
-                      ]
-                  };
+                  // Show immediate feedback that the button was clicked
+                  buildfire.dialog.toast({
+                      message: 'Opening file picker...',
+                      type: 'info',
+                      duration: 2000
+                  });
 
-                  var onProgress = function(progress) {
-                      console.log('[DEBUG] Upload progress:', progress);
-                  };
+                  try {
+                      var options = {
+                          allowMultipleFilesUpload: true,
+                          filter: [
+                              'video/mp4',
+                              'video/quicktime',
+                              'video/x-msvideo',
+                              'video/avi',
+                              'video/webm',
+                              'video/mov'
+                          ]
+                      };
 
-                  var onComplete = function(file) {
-                      console.log('[DEBUG] File upload complete:', file);
-                  };
+                      var onProgress = function(progress) {
+                          console.log('[DEBUG] Upload progress:', progress);
+                      };
 
-                  buildfire.services.publicFiles.showDialog(options, onProgress, onComplete, function(err, files) {
+                      var onComplete = function(file) {
+                          console.log('[DEBUG] File upload complete:', file);
+                      };
+
+                      buildfire.services.publicFiles.showDialog(options, onProgress, onComplete, function(err, files) {
                       console.log('[DEBUG] ========================================');
                       console.log('[DEBUG] publicFiles callback triggered!');
                       console.log('[DEBUG] Error:', err);
@@ -1881,6 +1924,13 @@
                           $scope.$apply();
                       }
                   });
+                  } catch (ex) {
+                      console.error('[ERROR] Exception calling publicFiles.showDialog:', ex);
+                      buildfire.dialog.toast({
+                          message: 'Error opening file picker: ' + ex.message,
+                          type: 'danger'
+                      });
+                  }
               } else {
                   // DESKTOP: Enhanced fallback to support both images AND videos
                   console.log('[DEBUG] Falling back to imageLib.showDialog (with image and video support)...');

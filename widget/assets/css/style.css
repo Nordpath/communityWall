@@ -307,6 +307,7 @@ button.btn--lg,
     left: 0;
     width: 100%;
     background: #fff;
+    transition: bottom 0.3s ease;
     z-index: 11;
 }
 
@@ -807,6 +808,15 @@ button.btn--lg,
 /* Bottom Message */
 .holder.bottom-post hr {
     margin: 0;
+}
+
+.holder.bottom-post {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transition: bottom 0.3s ease;
+    z-index: 50;
 }
 
 .holder.bottom-post .post-holder {
