@@ -33,10 +33,13 @@ This BuildFire plugin implements a platform-optimized file upload strategy with 
 - **Enforced by:** Client-side validation before upload
 
 **Implementation:**
-- Uses `buildfire.imageLib.showDialog` with HTML file input fallback
+- Uses `buildfire.imageLib.showDialog` with `showFiles: true` option
+- **Unified Experience:** BOTH camera (📷) and video (🎥) buttons allow selection of images AND videos
+- Automatically separates images and videos after selection
 - Pre-upload validation prevents unnecessary network traffic
-- Clear error messages when limits are exceeded
+- Clear success messages showing what was selected (e.g., "2 image(s) and 1 video(s) selected")
 - Optimized for web browser environment
+- Similar experience to modern social media apps
 
 ## Why Different Limits?
 
@@ -46,32 +49,37 @@ This BuildFire plugin implements a platform-optimized file upload strategy with 
 3. **Modern Hardware:** Mobile devices typically have fast cellular/WiFi connections
 4. **User Expectations:** Mobile users expect to share full-resolution media from their camera roll
 
-### Desktop Constraints (10MB/100MB limits)
+### Desktop Experience (10MB/100MB limits)
 1. **Browser Limitations:** Web browsers have less efficient file handling than native apps
 2. **Network Reliability:** Desktop uploads may occur over less reliable connections
 3. **User Experience:** Faster upload validation provides immediate feedback
 4. **Bandwidth Optimization:** Prevents unnecessary large file uploads that may fail
+5. **Unified Interface:** Both camera and video buttons support images AND videos for flexibility
 
 ## Technical Implementation
 
 ### File Selection Flow
 
 ```
-User clicks upload button
+User clicks camera 📷 or video 🎥 button
     ↓
 Check if BuildFire mobile API available
     ↓
-[YES - Mobile]                      [NO - Desktop]
-    ↓                                   ↓
-publicFiles.showDialog          imageLib.showDialog
-    ↓                                   ↓
-Native file picker                  HTML file input
-    ↓                                   ↓
-No size validation                  Validate < 10MB/100MB
-    ↓                                   ↓
-Upload to BuildFire                 Upload if valid
-    ↓                                   ↓
-Server enforces 1GB limit           Display error if too large
+[YES - Mobile]                              [NO - Desktop]
+    ↓                                           ↓
+publicFiles.showDialog                  imageLib.showDialog
+    ↓                                      (showFiles: true)
+Native file picker                              ↓
+    ↓                                  Select images AND/OR videos
+No size validation                              ↓
+    ↓                            Auto-separate images and videos
+Upload to BuildFire                             ↓
+    ↓                              Validate < 10MB/100MB per file
+Server enforces 1GB limit                       ↓
+                                        Upload if valid
+                                                ↓
+                            Display combined success message
+                         (e.g., "2 images and 1 video selected")
 ```
 
 ### Code References

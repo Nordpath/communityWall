@@ -1562,18 +1562,19 @@
           }
 
           /**
-           * Image upload handler with platform-specific file size limits
+           * Media upload handler (Camera button) - unified image and video selection
            *
            * MOBILE (iOS/Android):
            * - Uses BuildFire native file picker via publicFiles.showDialog
            * - No client-side validation - BuildFire server enforces 1GB limit
            * - Provides native OS file selection experience
-           * - Supports multiple image selection
+           * - Supports multiple file selection
            *
            * DESKTOP/WEB:
-           * - Falls back to imageLib.showDialog
-           * - Client-side validation applies 10MB limit per image
-           * - Pre-upload size checking prevents unnecessary uploads
+           * - Falls back to imageLib.showDialog with showFiles: true
+           * - Allows selection of BOTH images AND videos from one button
+           * - Automatically separates images and videos after selection
+           * - Unified experience similar to modern social media apps
            * - HTML file input as ultimate fallback
            */
           WidgetWall.selectImages = function () {
@@ -1673,7 +1674,8 @@
                   });
 
               } else {
-                  console.log('[DEBUG] Falling back to imageLib.showDialog (images only)...');
+                  // DESKTOP: Enhanced fallback to support both images AND videos
+                  console.log('[DEBUG] Falling back to imageLib.showDialog (with video support)...');
 
                   if (!buildfire.imageLib || !buildfire.imageLib.showDialog) {
                       console.error('[ERROR] No image/media upload API available!');
@@ -1681,17 +1683,21 @@
                       return;
                   }
 
-                  console.log('[DEBUG] About to call imageLib.showDialog...');
+                  console.log('[DEBUG] About to call imageLib.showDialog with image and video support...');
 
                   try {
-                      buildfire.imageLib.showDialog({multiSelection: true}, function(err, result) {
+                      buildfire.imageLib.showDialog({
+                          multiSelection: true,
+                          showIcons: false,
+                          showFiles: true  // Enable video file selection on desktop
+                      }, function(err, result) {
                       console.log('[DEBUG] ========================================');
                       console.log('[DEBUG] imageLib callback triggered!');
                       console.log('[DEBUG] Error:', err);
                       console.log('[DEBUG] Result:', result);
 
                       if (err) {
-                          console.error('[ERROR] Error selecting images:', err);
+                          console.error('[ERROR] Error selecting media:', err);
                           buildfire.dialog.toast({
                               message: 'Error: ' + (err.message || err),
                               type: 'danger'
@@ -1700,18 +1706,51 @@
                       }
 
                       if (result && result.cancelled) {
-                          console.log('[DEBUG] User cancelled image selection');
+                          console.log('[DEBUG] User cancelled media selection');
                           return;
                       }
 
                       if (result && result.selectedFiles && result.selectedFiles.length > 0) {
-                          console.log(`[DEBUG] SUCCESS: ${result.selectedFiles.length} images selected`);
-                          WidgetWall.selectedImages = result.selectedFiles;
-                          var count = result.selectedFiles.length;
-                          WidgetWall.selectedImagesText = count === 1 ? '1 image selected' : count + ' images selected';
+                          // Separate images and videos by file extension
+                          var images = [];
+                          var videos = [];
+
+                          result.selectedFiles.forEach(function(fileUrl) {
+                              var ext = fileUrl.split('.').pop().toLowerCase();
+                              var videoExtensions = ['mp4', 'mov', 'avi', 'webm', 'quicktime', 'm4v', 'mkv'];
+
+                              if (videoExtensions.indexOf(ext) >= 0) {
+                                  videos.push(fileUrl);
+                              } else {
+                                  images.push(fileUrl);
+                              }
+                          });
+
+                          console.log(`[DEBUG] SUCCESS: ${images.length} images, ${videos.length} videos selected`);
+
+                          // Update both images and videos
+                          if (images.length > 0) {
+                              WidgetWall.selectedImages = images;
+                              WidgetWall.selectedImagesText = images.length === 1 ? '1 image selected' : images.length + ' images selected';
+                          }
+
+                          if (videos.length > 0) {
+                              WidgetWall.selectedVideos = videos;
+                              WidgetWall.selectedVideosText = videos.length === 1 ? '1 video selected' : videos.length + ' videos selected';
+                          }
+
+                          var totalCount = images.length + videos.length;
+                          var message = '';
+                          if (images.length > 0 && videos.length > 0) {
+                              message = images.length + ' image(s) and ' + videos.length + ' video(s) selected';
+                          } else if (images.length > 0) {
+                              message = WidgetWall.selectedImagesText;
+                          } else {
+                              message = WidgetWall.selectedVideosText;
+                          }
 
                           buildfire.dialog.toast({
-                              message: WidgetWall.selectedImagesText,
+                              message: message,
                               type: 'success'
                           });
 
@@ -1719,13 +1758,13 @@
                               $scope.$apply();
                           }
                       } else {
-                          console.log('[DEBUG] No images selected');
+                          console.log('[DEBUG] No files selected');
                       }
                   });
                   } catch (ex) {
                       console.error('[ERROR] Exception calling imageLib.showDialog:', ex);
                       buildfire.dialog.toast({
-                          message: 'Error opening image selector: ' + ex.message,
+                          message: 'Error opening media selector: ' + ex.message,
                           type: 'danger'
                       });
                   }
@@ -1735,19 +1774,20 @@
           }
 
           /**
-           * Video upload handler with platform-specific file size limits
+           * Media upload handler (Video button) - unified image and video selection
            *
            * MOBILE (iOS/Android):
            * - Uses BuildFire native file picker via publicFiles.showDialog
            * - No client-side validation - BuildFire server enforces 1GB limit
            * - Provides native OS file selection experience
-           * - Supports multiple video selection
-           * - Accepts MP4, MOV, AVI, WebM, and other formats
+           * - Supports multiple file selection
+           * - Accepts MP4, MOV, AVI, WebM, and other video formats
            *
            * DESKTOP/WEB:
-           * - Falls back to imageLib.showDialog with video support
-           * - Client-side validation applies 100MB limit per video
-           * - Pre-upload size checking prevents unnecessary uploads
+           * - Falls back to imageLib.showDialog with showFiles: true
+           * - Allows selection of BOTH images AND videos from one button
+           * - Automatically separates images and videos after selection
+           * - Unified experience - both buttons work the same way on desktop
            * - HTML file input as ultimate fallback
            */
           WidgetWall.selectVideos = function () {
@@ -1842,32 +1882,33 @@
                       }
                   });
               } else {
-                  console.log('[DEBUG] Falling back to imageLib.showDialog for videos...');
+                  // DESKTOP: Enhanced fallback to support both images AND videos
+                  console.log('[DEBUG] Falling back to imageLib.showDialog (with image and video support)...');
 
                   if (!buildfire.imageLib || !buildfire.imageLib.showDialog) {
-                      console.error('[ERROR] No video upload API available!');
+                      console.error('[ERROR] No media upload API available!');
                       buildfire.dialog.toast({
-                          message: 'Video upload is not available. Please contact support.',
+                          message: 'Media upload is not available. Please contact support.',
                           type: 'warning'
                       });
                       return;
                   }
 
-                  console.log('[DEBUG] About to call imageLib.showDialog for videos...');
+                  console.log('[DEBUG] About to call imageLib.showDialog with image and video support...');
 
                   try {
                       buildfire.imageLib.showDialog({
                           multiSelection: true,
                           showIcons: false,
-                          showFiles: true
+                          showFiles: true  // Enable both image and video selection on desktop
                       }, function(err, result) {
                       console.log('[DEBUG] ========================================');
-                      console.log('[DEBUG] imageLib callback for videos triggered!');
+                      console.log('[DEBUG] imageLib callback for media triggered!');
                       console.log('[DEBUG] Error:', err);
                       console.log('[DEBUG] Result:', result);
 
                       if (err) {
-                          console.error('[ERROR] Error selecting videos:', err);
+                          console.error('[ERROR] Error selecting media:', err);
                           buildfire.dialog.toast({
                               message: 'Error: ' + (err.message || err),
                               type: 'danger'
@@ -1876,27 +1917,51 @@
                       }
 
                       if (result && result.cancelled) {
-                          console.log('[DEBUG] User cancelled video selection');
+                          console.log('[DEBUG] User cancelled media selection');
                           return;
                       }
 
                       if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                          // Separate images and videos by file extension
+                          var images = [];
                           var videos = [];
 
                           result.selectedFiles.forEach(function(fileUrl) {
                               var ext = fileUrl.split('.').pop().toLowerCase();
-                              if (['mp4', 'mov', 'avi', 'webm', 'quicktime', 'm4v', 'mkv'].indexOf(ext) >= 0) {
+                              var videoExtensions = ['mp4', 'mov', 'avi', 'webm', 'quicktime', 'm4v', 'mkv'];
+
+                              if (videoExtensions.indexOf(ext) >= 0) {
                                   videos.push(fileUrl);
+                              } else {
+                                  images.push(fileUrl);
                               }
                           });
 
+                          console.log(`[DEBUG] SUCCESS: ${images.length} images, ${videos.length} videos selected`);
+
+                          // Update both images and videos
+                          if (images.length > 0) {
+                              WidgetWall.selectedImages = images;
+                              WidgetWall.selectedImagesText = images.length === 1 ? '1 image selected' : images.length + ' images selected';
+                          }
+
                           if (videos.length > 0) {
-                              console.log(`[DEBUG] SUCCESS: ${videos.length} videos selected`);
                               WidgetWall.selectedVideos = videos;
                               WidgetWall.selectedVideosText = videos.length === 1 ? '1 video selected' : videos.length + ' videos selected';
+                          }
 
+                          var message = '';
+                          if (images.length > 0 && videos.length > 0) {
+                              message = images.length + ' image(s) and ' + videos.length + ' video(s) selected';
+                          } else if (videos.length > 0) {
+                              message = WidgetWall.selectedVideosText;
+                          } else if (images.length > 0) {
+                              message = WidgetWall.selectedImagesText;
+                          }
+
+                          if (videos.length > 0 || images.length > 0) {
                               buildfire.dialog.toast({
-                                  message: WidgetWall.selectedVideosText,
+                                  message: message,
                                   type: 'success'
                               });
 
@@ -1904,9 +1969,9 @@
                                   $scope.$apply();
                               }
                           } else {
-                              console.log('[DEBUG] No valid video files selected');
+                              console.log('[DEBUG] No valid media files selected');
                               buildfire.dialog.toast({
-                                  message: 'Please select a valid video file (MP4, MOV, AVI, WebM, etc.)',
+                                  message: 'Please select valid image or video files',
                                   type: 'warning'
                               });
                           }
@@ -1915,9 +1980,9 @@
                       }
                   });
                   } catch (ex) {
-                      console.error('[ERROR] Exception calling imageLib.showDialog for videos:', ex);
+                      console.error('[ERROR] Exception calling imageLib.showDialog for media:', ex);
                       buildfire.dialog.toast({
-                          message: 'Error opening video selector: ' + ex.message,
+                          message: 'Error opening media selector: ' + ex.message,
                           type: 'danger'
                       });
                   }
