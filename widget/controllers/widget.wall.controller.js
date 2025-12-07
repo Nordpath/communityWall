@@ -1556,7 +1556,9 @@
               WidgetWall.selectedVideos = [];
               WidgetWall.selectedImagesText = 'Add images';
               WidgetWall.selectedVideosText = 'Add videos';
-              $scope.$apply();
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
           }
 
           WidgetWall.selectImages = function () {
