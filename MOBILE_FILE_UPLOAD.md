@@ -32,14 +32,18 @@ This BuildFire plugin implements a platform-optimized file upload strategy with 
 - **Videos:** 100 MB per file (client-side validation)
 - **Enforced by:** Client-side validation before upload
 
-**Implementation:**
-- Uses `buildfire.imageLib.showDialog` with `showFiles: true` option
-- **Unified Experience:** BOTH camera (📷) and video (🎥) buttons allow selection of images AND videos
-- Automatically separates images and videos after selection
+**Implementation (3-tier fallback):**
+1. **Primary:** `buildfire.imageLib.showDialog` with `showFiles: true` option
+2. **Secondary:** Native HTML file input with validation
+3. **Upload:** `buildfire.imageLib.local.toPublicUrl` for images, `buildfire.services.publicFiles.uploadFile` for videos
+
+**Features:**
 - Pre-upload validation prevents unnecessary network traffic
-- Clear success messages showing what was selected (e.g., "2 image(s) and 1 video(s) selected")
+- Clear error messages for oversized files (shows file names)
+- Loading state during upload process
+- Automatic retry through BuildFire SDK
+- Clear success messages showing selection count
 - Optimized for web browser environment
-- Similar experience to modern social media apps
 
 ## Why Different Limits?
 
@@ -61,25 +65,29 @@ This BuildFire plugin implements a platform-optimized file upload strategy with 
 ### File Selection Flow
 
 ```
-User clicks camera 📷 or video 🎥 button
+User clicks camera or video button
     ↓
-Check if BuildFire mobile API available
+Check if buildfire.services.publicFiles available
     ↓
-[YES - Mobile]                              [NO - Desktop]
+[YES - Mobile/Modern]                       [NO - Check imageLib]
     ↓                                           ↓
-publicFiles.showDialog                  imageLib.showDialog
-    ↓                                      (showFiles: true)
-Native file picker                              ↓
-    ↓                                  Select images AND/OR videos
-No size validation                              ↓
-    ↓                            Auto-separate images and videos
-Upload to BuildFire                             ↓
-    ↓                              Validate < 10MB/100MB per file
-Server enforces 1GB limit                       ↓
-                                        Upload if valid
-                                                ↓
-                            Display combined success message
-                         (e.g., "2 images and 1 video selected")
+publicFiles.showDialog              Check if buildfire.imageLib available
+    ↓                                           ↓
+Native file picker                  [YES]                    [NO]
+    ↓                                 ↓                        ↓
+No client validation          imageLib.showDialog      HTML file input
+    ↓                                 ↓                        ↓
+Server enforces 1GB             Standard dialog          Native browser
+                                      ↓                   file picker
+                               Return URLs                     ↓
+                                                    Validate file sizes
+                                                    (10MB img/100MB vid)
+                                                           ↓
+                                                    [VALID]    [INVALID]
+                                                       ↓           ↓
+                                                  Upload file   Show error
+                                                       ↓        with names
+                                                  Return URLs
 ```
 
 ### Code References
@@ -93,9 +101,13 @@ FILE_UPLOAD: {
 }
 ```
 
-**Image Upload:** `widget/controllers/widget.wall.controller.js` - `WidgetWall.selectImages()`
+**Wall Controller:**
+- Image Upload: `widget/controllers/widget.wall.controller.js` - `WidgetWall.selectImages()`
+- Video Upload: `widget/controllers/widget.wall.controller.js` - `WidgetWall.selectVideos()`
 
-**Video Upload:** `widget/controllers/widget.wall.controller.js` - `WidgetWall.selectVideos()`
+**Thread Controller:**
+- Image Upload: `widget/controllers/widget.thread.controller.js` - `Thread.selectImages()`
+- Video Upload: `widget/controllers/widget.thread.controller.js` - `Thread.selectVideos()`
 
 ## Error Handling
 
