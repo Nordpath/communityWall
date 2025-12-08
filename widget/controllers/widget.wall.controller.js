@@ -1607,41 +1607,57 @@
            * - HTML file input as ultimate fallback
            */
           WidgetWall.selectImages = function () {
-              var maxSizeMB = FILE_UPLOAD.DESKTOP_IMAGE_MAX_SIZE || 10;
-              var maxSizeBytes = maxSizeMB * 1024 * 1024;
+              try {
+                  var maxSizeMB = FILE_UPLOAD.DESKTOP_IMAGE_MAX_SIZE || 10;
+                  var maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-              buildfire.getContext(function(err, context) {
-                  var isMobile = context && context.device && context.device.platform !== 'web';
-
-                  if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                      buildfire.services.publicFiles.showDialog(
-                          {
-                              allowMultipleFilesUpload: true,
-                              filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-                          },
-                          null,
-                          null,
-                          function(err, files) {
-                              if (err) {
-                                  console.error('[ImageUpload] Error from publicFiles:', err);
-                                  buildfire.dialog.toast({
-                                      message: 'Unable to open image picker. Please try again.',
-                                      type: 'warning'
-                                  });
-                                  WidgetWall.tryImageLibFallback(maxSizeBytes);
-                                  return;
-                              }
-                              if (!files || files.length === 0) return;
-
-                              WidgetWall.selectedImages = files.map(function(f) { return f.url; });
-                              WidgetWall.selectedImagesText = files.length === 1 ? '1 image selected' : files.length + ' images selected';
-                              if (!$scope.$$phase) $scope.$apply();
-                          }
-                      );
-                  } else {
+                  if (!buildfire || !buildfire.getContext) {
                       WidgetWall.tryImageLibFallback(maxSizeBytes);
+                      return;
                   }
-              });
+
+                  buildfire.getContext(function(err, context) {
+                      var isMobile = context && context.device && context.device.platform !== 'web';
+
+                      if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                          try {
+                              buildfire.services.publicFiles.showDialog(
+                                  {
+                                      allowMultipleFilesUpload: true,
+                                      filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                                  },
+                                  null,
+                                  null,
+                                  function(err, files) {
+                                      if (err) {
+                                          console.error('[ImageUpload] Error from publicFiles:', err);
+                                          buildfire.dialog.toast({
+                                              message: 'Unable to open image picker. Please try again.',
+                                              type: 'warning'
+                                          });
+                                          WidgetWall.tryImageLibFallback(maxSizeBytes);
+                                          return;
+                                      }
+                                      if (!files || files.length === 0) return;
+
+                                      WidgetWall.selectedImages = files.map(function(f) { return f.url; });
+                                      WidgetWall.selectedImagesText = files.length === 1 ? '1 image selected' : files.length + ' images selected';
+                                      if (!$scope.$$phase) $scope.$apply();
+                                  }
+                              );
+                          } catch (e) {
+                              console.error('[ImageUpload] Exception in publicFiles:', e);
+                              WidgetWall.tryImageLibFallback(maxSizeBytes);
+                          }
+                      } else {
+                          WidgetWall.tryImageLibFallback(maxSizeBytes);
+                      }
+                  });
+              } catch (e) {
+                  console.error('[ImageUpload] Exception:', e);
+                  var maxSizeBytes = (FILE_UPLOAD.DESKTOP_IMAGE_MAX_SIZE || 10) * 1024 * 1024;
+                  WidgetWall.tryImageLibFallback(maxSizeBytes);
+              }
           }
 
           WidgetWall.tryImageLibFallback = function(maxSizeBytes) {
@@ -1821,41 +1837,57 @@
            * - HTML file input as ultimate fallback
            */
           WidgetWall.selectVideos = function () {
-              var maxSizeMB = FILE_UPLOAD.DESKTOP_VIDEO_MAX_SIZE || 100;
-              var maxSizeBytes = maxSizeMB * 1024 * 1024;
+              try {
+                  var maxSizeMB = FILE_UPLOAD.DESKTOP_VIDEO_MAX_SIZE || 100;
+                  var maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-              buildfire.getContext(function(err, context) {
-                  var isMobile = context && context.device && context.device.platform !== 'web';
-
-                  if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                      buildfire.services.publicFiles.showDialog(
-                          {
-                              allowMultipleFilesUpload: true,
-                              filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
-                          },
-                          null,
-                          null,
-                          function(err, files) {
-                              if (err) {
-                                  console.error('[VideoUpload] Error from publicFiles:', err);
-                                  buildfire.dialog.toast({
-                                      message: 'Unable to open video picker. Please try again.',
-                                      type: 'warning'
-                                  });
-                                  WidgetWall.tryVideoLibFallback(maxSizeBytes);
-                                  return;
-                              }
-                              if (!files || files.length === 0) return;
-
-                              WidgetWall.selectedVideos = files.map(function(f) { return f.url; });
-                              WidgetWall.selectedVideosText = files.length === 1 ? '1 video selected' : files.length + ' videos selected';
-                              if (!$scope.$$phase) $scope.$apply();
-                          }
-                      );
-                  } else {
+                  if (!buildfire || !buildfire.getContext) {
                       WidgetWall.tryVideoLibFallback(maxSizeBytes);
+                      return;
                   }
-              });
+
+                  buildfire.getContext(function(err, context) {
+                      var isMobile = context && context.device && context.device.platform !== 'web';
+
+                      if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                          try {
+                              buildfire.services.publicFiles.showDialog(
+                                  {
+                                      allowMultipleFilesUpload: true,
+                                      filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
+                                  },
+                                  null,
+                                  null,
+                                  function(err, files) {
+                                      if (err) {
+                                          console.error('[VideoUpload] Error from publicFiles:', err);
+                                          buildfire.dialog.toast({
+                                              message: 'Unable to open video picker. Please try again.',
+                                              type: 'warning'
+                                          });
+                                          WidgetWall.tryVideoLibFallback(maxSizeBytes);
+                                          return;
+                                      }
+                                      if (!files || files.length === 0) return;
+
+                                      WidgetWall.selectedVideos = files.map(function(f) { return f.url; });
+                                      WidgetWall.selectedVideosText = files.length === 1 ? '1 video selected' : files.length + ' videos selected';
+                                      if (!$scope.$$phase) $scope.$apply();
+                                  }
+                              );
+                          } catch (e) {
+                              console.error('[VideoUpload] Exception in publicFiles:', e);
+                              WidgetWall.tryVideoLibFallback(maxSizeBytes);
+                          }
+                      } else {
+                          WidgetWall.tryVideoLibFallback(maxSizeBytes);
+                      }
+                  });
+              } catch (e) {
+                  console.error('[VideoUpload] Exception:', e);
+                  var maxSizeBytes = (FILE_UPLOAD.DESKTOP_VIDEO_MAX_SIZE || 100) * 1024 * 1024;
+                  WidgetWall.tryVideoLibFallback(maxSizeBytes);
+              }
           }
 
           WidgetWall.tryVideoLibFallback = function(maxSizeBytes) {
