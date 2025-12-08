@@ -1610,33 +1610,53 @@
               var maxSizeMB = FILE_UPLOAD.DESKTOP_IMAGE_MAX_SIZE || 10;
               var maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-              if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                  buildfire.services.publicFiles.showDialog(
-                      {
-                          allowMultipleFilesUpload: true,
-                          filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-                      },
-                      null,
-                      null,
-                      function(err, files) {
-                          if (err) {
-                              console.error('[ImageUpload] Error from publicFiles:', err);
-                              return;
-                          }
-                          if (!files || files.length === 0) return;
+              buildfire.getContext(function(err, context) {
+                  var isMobile = context && context.device && context.device.platform !== 'web';
 
-                          WidgetWall.selectedImages = files.map(function(f) { return f.url; });
-                          WidgetWall.selectedImagesText = files.length === 1 ? '1 image selected' : files.length + ' images selected';
-                          if (!$scope.$$phase) $scope.$apply();
-                      }
-                  );
-              } else if (buildfire.imageLib && buildfire.imageLib.showDialog) {
+                  if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                      buildfire.services.publicFiles.showDialog(
+                          {
+                              allowMultipleFilesUpload: true,
+                              filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                          },
+                          null,
+                          null,
+                          function(err, files) {
+                              if (err) {
+                                  console.error('[ImageUpload] Error from publicFiles:', err);
+                                  buildfire.dialog.toast({
+                                      message: 'Unable to open image picker. Please try again.',
+                                      type: 'warning'
+                                  });
+                                  WidgetWall.tryImageLibFallback(maxSizeBytes);
+                                  return;
+                              }
+                              if (!files || files.length === 0) return;
+
+                              WidgetWall.selectedImages = files.map(function(f) { return f.url; });
+                              WidgetWall.selectedImagesText = files.length === 1 ? '1 image selected' : files.length + ' images selected';
+                              if (!$scope.$$phase) $scope.$apply();
+                          }
+                      );
+                  } else {
+                      WidgetWall.tryImageLibFallback(maxSizeBytes);
+                  }
+              });
+          }
+
+          WidgetWall.tryImageLibFallback = function(maxSizeBytes) {
+              if (buildfire.imageLib && buildfire.imageLib.showDialog) {
                   buildfire.imageLib.showDialog({
                       multiSelection: true,
                       showIcons: false
                   }, function(err, result) {
                       if (err) {
                           console.error('[ImageUpload] Error from imageLib:', err);
+                          buildfire.dialog.toast({
+                              message: 'Unable to open image picker. Please try again.',
+                              type: 'warning'
+                          });
+                          WidgetWall.tryHtmlInputFallback(maxSizeBytes, 'image');
                           return;
                       }
                       if (!result || !result.selectedFiles || result.cancelled) return;
@@ -1646,6 +1666,14 @@
                       if (!$scope.$$phase) $scope.$apply();
                   });
               } else {
+                  WidgetWall.tryHtmlInputFallback(maxSizeBytes, 'image');
+              }
+          }
+
+          WidgetWall.tryHtmlInputFallback = function(maxSizeBytes, type) {
+              var maxSizeMB = maxSizeBytes / (1024 * 1024);
+
+              if (type === 'image') {
                   var input = document.createElement('input');
                   input.type = 'file';
                   input.accept = 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
@@ -1666,7 +1694,7 @@
 
                       if (oversizedFiles.length > 0) {
                           buildfire.dialog.toast({
-                              message: 'Images must be under ' + maxSizeMB + 'MB: ' + oversizedFiles.join(', '),
+                              message: 'Images must be under ' + Math.round(maxSizeMB) + 'MB: ' + oversizedFiles.join(', '),
                               type: 'warning'
                           });
                           if (validFiles.length === 0) return;
@@ -1704,67 +1732,7 @@
                       });
                   };
                   input.click();
-              }
-          }
-
-          /**
-           * Media upload handler (Video button) - unified image and video selection
-           *
-           * MOBILE (iOS/Android):
-           * - Uses BuildFire native file picker via publicFiles.showDialog
-           * - No client-side validation - BuildFire server enforces 1GB limit
-           * - Provides native OS file selection experience
-           * - Supports multiple file selection
-           * - Accepts MP4, MOV, AVI, WebM, and other video formats
-           *
-           * DESKTOP/WEB:
-           * - Falls back to imageLib.showDialog with showFiles: true
-           * - Allows selection of BOTH images AND videos from one button
-           * - Automatically separates images and videos after selection
-           * - Unified experience - both buttons work the same way on desktop
-           * - HTML file input as ultimate fallback
-           */
-          WidgetWall.selectVideos = function () {
-              var maxSizeMB = FILE_UPLOAD.DESKTOP_VIDEO_MAX_SIZE || 100;
-              var maxSizeBytes = maxSizeMB * 1024 * 1024;
-
-              if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                  buildfire.services.publicFiles.showDialog(
-                      {
-                          allowMultipleFilesUpload: true,
-                          filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
-                      },
-                      null,
-                      null,
-                      function(err, files) {
-                          if (err) {
-                              console.error('[VideoUpload] Error from publicFiles:', err);
-                              return;
-                          }
-                          if (!files || files.length === 0) return;
-
-                          WidgetWall.selectedVideos = files.map(function(f) { return f.url; });
-                          WidgetWall.selectedVideosText = files.length === 1 ? '1 video selected' : files.length + ' videos selected';
-                          if (!$scope.$$phase) $scope.$apply();
-                      }
-                  );
-              } else if (buildfire.imageLib && buildfire.imageLib.showDialog) {
-                  buildfire.imageLib.showDialog({
-                      multiSelection: true,
-                      showIcons: false,
-                      showFiles: true
-                  }, function(err, result) {
-                      if (err) {
-                          console.error('[VideoUpload] Error from imageLib:', err);
-                          return;
-                      }
-                      if (!result || !result.selectedFiles || result.cancelled) return;
-
-                      WidgetWall.selectedVideos = result.selectedFiles;
-                      WidgetWall.selectedVideosText = result.selectedFiles.length === 1 ? '1 video selected' : result.selectedFiles.length + ' videos selected';
-                      if (!$scope.$$phase) $scope.$apply();
-                  });
-              } else {
+              } else if (type === 'video') {
                   var input = document.createElement('input');
                   input.type = 'file';
                   input.accept = 'video/mp4,video/quicktime,video/x-msvideo,video/avi,video/webm,video/mov';
@@ -1785,7 +1753,7 @@
 
                       if (oversizedFiles.length > 0) {
                           buildfire.dialog.toast({
-                              message: 'Videos must be under ' + maxSizeMB + 'MB: ' + oversizedFiles.join(', '),
+                              message: 'Videos must be under ' + Math.round(maxSizeMB) + 'MB: ' + oversizedFiles.join(', '),
                               type: 'warning'
                           });
                           if (validFiles.length === 0) return;
@@ -1832,6 +1800,88 @@
                       });
                   };
                   input.click();
+              }
+          }
+
+          /**
+           * Media upload handler (Video button) - unified image and video selection
+           *
+           * MOBILE (iOS/Android):
+           * - Uses BuildFire native file picker via publicFiles.showDialog
+           * - No client-side validation - BuildFire server enforces 1GB limit
+           * - Provides native OS file selection experience
+           * - Supports multiple file selection
+           * - Accepts MP4, MOV, AVI, WebM, and other video formats
+           *
+           * DESKTOP/WEB:
+           * - Falls back to imageLib.showDialog with showFiles: true
+           * - Allows selection of BOTH images AND videos from one button
+           * - Automatically separates images and videos after selection
+           * - Unified experience - both buttons work the same way on desktop
+           * - HTML file input as ultimate fallback
+           */
+          WidgetWall.selectVideos = function () {
+              var maxSizeMB = FILE_UPLOAD.DESKTOP_VIDEO_MAX_SIZE || 100;
+              var maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+              buildfire.getContext(function(err, context) {
+                  var isMobile = context && context.device && context.device.platform !== 'web';
+
+                  if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                      buildfire.services.publicFiles.showDialog(
+                          {
+                              allowMultipleFilesUpload: true,
+                              filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
+                          },
+                          null,
+                          null,
+                          function(err, files) {
+                              if (err) {
+                                  console.error('[VideoUpload] Error from publicFiles:', err);
+                                  buildfire.dialog.toast({
+                                      message: 'Unable to open video picker. Please try again.',
+                                      type: 'warning'
+                                  });
+                                  WidgetWall.tryVideoLibFallback(maxSizeBytes);
+                                  return;
+                              }
+                              if (!files || files.length === 0) return;
+
+                              WidgetWall.selectedVideos = files.map(function(f) { return f.url; });
+                              WidgetWall.selectedVideosText = files.length === 1 ? '1 video selected' : files.length + ' videos selected';
+                              if (!$scope.$$phase) $scope.$apply();
+                          }
+                      );
+                  } else {
+                      WidgetWall.tryVideoLibFallback(maxSizeBytes);
+                  }
+              });
+          }
+
+          WidgetWall.tryVideoLibFallback = function(maxSizeBytes) {
+              if (buildfire.imageLib && buildfire.imageLib.showDialog) {
+                  buildfire.imageLib.showDialog({
+                      multiSelection: true,
+                      showIcons: false,
+                      showFiles: true
+                  }, function(err, result) {
+                      if (err) {
+                          console.error('[VideoUpload] Error from imageLib:', err);
+                          buildfire.dialog.toast({
+                              message: 'Unable to open video picker. Please try again.',
+                              type: 'warning'
+                          });
+                          WidgetWall.tryHtmlInputFallback(maxSizeBytes, 'video');
+                          return;
+                      }
+                      if (!result || !result.selectedFiles || result.cancelled) return;
+
+                      WidgetWall.selectedVideos = result.selectedFiles;
+                      WidgetWall.selectedVideosText = result.selectedFiles.length === 1 ? '1 video selected' : result.selectedFiles.length + ' videos selected';
+                      if (!$scope.$$phase) $scope.$apply();
+                  });
+              } else {
+                  WidgetWall.tryHtmlInputFallback(maxSizeBytes, 'video');
               }
           }
 

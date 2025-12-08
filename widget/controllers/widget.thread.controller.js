@@ -1189,34 +1189,53 @@
               var maxSizeMB = FILE_UPLOAD.DESKTOP_IMAGE_MAX_SIZE || 10;
               var maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-              if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                  buildfire.services.publicFiles.showDialog(
-                      {
-                          allowMultipleFilesUpload: true,
-                          filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-                      },
-                      null,
-                      null,
-                      function(err, files) {
-                          if (err) {
-                              console.error('[ImageUpload] Error from publicFiles:', err);
-                              return;
+              buildfire.getContext(function(err, context) {
+                  var isMobile = context && context.device && context.device.platform !== 'web';
+
+                  if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                      buildfire.services.publicFiles.showDialog(
+                          {
+                              allowMultipleFilesUpload: true,
+                              filter: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                          },
+                          null,
+                          null,
+                          function(err, files) {
+                              if (err) {
+                                  console.error('[ImageUpload] Error from publicFiles:', err);
+                                  buildfire.dialog.toast({
+                                      message: 'Unable to open image picker. Please try again.',
+                                      type: 'warning'
+                                  });
+                                  Thread.tryImageLibFallback(maxSizeBytes);
+                                  return;
+                              }
+                              if (!files || files.length === 0) return;
+                              Thread.selectedImages = files.map(function(f) { return f.url; });
+                              Thread.selectedImagesText = files.length === 1 ? '1 image' : files.length + ' images';
+                              if (!$scope.$$phase) $scope.$apply();
                           }
-                          if (!files || files.length === 0) return;
-                          Thread.selectedImages = files.map(function(f) { return f.url; });
-                          Thread.selectedImagesText = files.length === 1 ? '1 image' : files.length + ' images';
-                          if (!$scope.$$phase) $scope.$apply();
-                      }
-                  );
-              } else if (buildfire.imageLib && buildfire.imageLib.showDialog) {
+                      );
+                  } else {
+                      Thread.tryImageLibFallback(maxSizeBytes);
+                  }
+              });
+          }
+
+          Thread.tryImageLibFallback = function(maxSizeBytes) {
+              if (buildfire.imageLib && buildfire.imageLib.showDialog) {
                   buildfire.imageLib.showDialog({
                       multiSelection: true,
                       showIcons: false
                   }, function(err, result) {
                       if (err) {
                           console.error('[ImageUpload] Error from imageLib:', err);
+                          buildfire.dialog.toast({
+                              message: 'Unable to open image picker. Please try again.',
+                              type: 'warning'
+                          });
                           return;
-                      }
+                          }
                       if (!result || !result.selectedFiles || result.cancelled) return;
                       Thread.selectedImages = result.selectedFiles;
                       Thread.selectedImagesText = result.selectedFiles.length === 1 ? '1 image' : result.selectedFiles.length + ' images';
@@ -1288,26 +1307,41 @@
               var maxSizeMB = FILE_UPLOAD.DESKTOP_VIDEO_MAX_SIZE || 100;
               var maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-              if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                  buildfire.services.publicFiles.showDialog(
-                      {
-                          allowMultipleFilesUpload: true,
-                          filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
-                      },
-                      null,
-                      null,
-                      function(err, files) {
-                          if (err) {
-                              console.error('[VideoUpload] Error from publicFiles:', err);
-                              return;
+              buildfire.getContext(function(err, context) {
+                  var isMobile = context && context.device && context.device.platform !== 'web';
+
+                  if (isMobile && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                      buildfire.services.publicFiles.showDialog(
+                          {
+                              allowMultipleFilesUpload: true,
+                              filter: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi', 'video/webm', 'video/mov']
+                          },
+                          null,
+                          null,
+                          function(err, files) {
+                              if (err) {
+                                  console.error('[VideoUpload] Error from publicFiles:', err);
+                                  buildfire.dialog.toast({
+                                      message: 'Unable to open video picker. Please try again.',
+                                      type: 'warning'
+                                  });
+                                  Thread.tryVideoLibFallback(maxSizeBytes);
+                                  return;
+                              }
+                              if (!files || files.length === 0) return;
+                              Thread.selectedVideos = files.map(function(f) { return f.url; });
+                              Thread.selectedVideosText = files.length === 1 ? '1 video' : files.length + ' videos';
+                              if (!$scope.$$phase) $scope.$apply();
                           }
-                          if (!files || files.length === 0) return;
-                          Thread.selectedVideos = files.map(function(f) { return f.url; });
-                          Thread.selectedVideosText = files.length === 1 ? '1 video' : files.length + ' videos';
-                          if (!$scope.$$phase) $scope.$apply();
-                      }
-                  );
-              } else if (buildfire.imageLib && buildfire.imageLib.showDialog) {
+                      );
+                  } else {
+                      Thread.tryVideoLibFallback(maxSizeBytes);
+                  }
+              });
+          }
+
+          Thread.tryVideoLibFallback = function(maxSizeBytes) {
+              if (buildfire.imageLib && buildfire.imageLib.showDialog) {
                   buildfire.imageLib.showDialog({
                       multiSelection: true,
                       showIcons: false,
@@ -1315,6 +1349,10 @@
                   }, function(err, result) {
                       if (err) {
                           console.error('[VideoUpload] Error from imageLib:', err);
+                          buildfire.dialog.toast({
+                              message: 'Unable to open video picker. Please try again.',
+                              type: 'warning'
+                          });
                           return;
                       }
                       if (!result || !result.selectedFiles || result.cancelled) return;
