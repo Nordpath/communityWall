@@ -809,20 +809,27 @@
 
               buildfire.spinner.show();
 
-              const queryStringObj = {
+              const deepLinkData = {
                   postId: post.id
               };
 
               if (Thread.SocialItems.wid) {
-                  queryStringObj.wid = Thread.SocialItems.wid;
+                  deepLinkData.wid = Thread.SocialItems.wid;
               }
 
               if (Thread.SocialItems.pluginTitle) {
-                  queryStringObj.wTitle = Thread.SocialItems.pluginTitle;
+                  deepLinkData.wTitle = Thread.SocialItems.pluginTitle;
               }
 
-              buildfire.deeplink.template.get({
-                  data: queryStringObj
+              const shareTitle = Thread.SocialItems.context.title || 'Community Post';
+              const shareDescription = post.text ? decodeURIComponent(post.text).substring(0, 200) : 'Check out this post!';
+              const shareImage = post.imageUrl && post.imageUrl[0];
+
+              buildfire.deeplink.generateUrl({
+                  title: shareTitle,
+                  description: shareDescription,
+                  data: deepLinkData,
+                  imageUrl: shareImage
               }, (err, result) => {
                   buildfire.spinner.hide();
 
@@ -835,26 +842,102 @@
                       return;
                   }
 
-                  if (result && result.deeplink) {
-                      if (navigator.clipboard && navigator.clipboard.writeText) {
-                          navigator.clipboard.writeText(result.deeplink).then(() => {
-                              Buildfire.dialog.toast({
-                                  message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
-                                  type: 'success'
-                              });
-
-                              if (typeof Analytics !== 'undefined') {
-                                  Analytics.trackAction("post-shared");
-                              }
-                          }).catch((clipboardErr) => {
-                              console.error('Clipboard write failed:', clipboardErr);
-                              Thread.fallbackShare(result.deeplink, post);
-                          });
-                      } else {
-                          Thread.fallbackShare(result.deeplink, post);
-                      }
+                  if (result && result.url) {
+                      Thread.executeShare(result.url, shareTitle, shareDescription, shareImage, post);
                   }
               });
+          }
+
+          Thread.executeShare = function(url, title, description, image, post) {
+              buildfire.getContext((err, context) => {
+                  if (err) {
+                      console.error('Error getting context:', err);
+                      Thread.fallbackShare(url, post);
+                      return;
+                  }
+
+                  const isDesktop = context.device.platform === 'web';
+
+                  if (isDesktop) {
+                      buildfire.dialog.confirm({
+                          title: 'Share Post',
+                          message: description,
+                          confirmButton: { text: 'Copy Link' },
+                          cancelButton: { text: 'Cancel' }
+                      }, (err, isConfirmed) => {
+                          if (err) return console.error(err);
+                          if (isConfirmed) {
+                              if (navigator.clipboard && navigator.clipboard.writeText) {
+                                  navigator.clipboard.writeText(url).then(() => {
+                                      Buildfire.dialog.toast({
+                                          message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
+                                          type: 'success'
+                                      });
+
+                                      if (typeof Analytics !== 'undefined') {
+                                          Analytics.trackAction("post-shared");
+                                      }
+                                  }).catch((clipboardErr) => {
+                                      console.error('Clipboard write failed:', clipboardErr);
+                                      Thread.fallbackCopyToClipboard(url);
+                                  });
+                              } else {
+                                  Thread.fallbackCopyToClipboard(url);
+                              }
+                          }
+                      });
+                  } else {
+                      buildfire.device.share({
+                          subject: title,
+                          text: description,
+                          image: image,
+                          link: url
+                      }, (err, result) => {
+                          if (err) {
+                              console.error('Native share failed:', err);
+                              Thread.fallbackShare(url, post);
+                              return;
+                          }
+
+                          Buildfire.dialog.toast({
+                              message: Thread.SocialItems.languages.sharePostSuccess || "Post shared successfully!",
+                              type: 'success'
+                          });
+
+                          if (typeof Analytics !== 'undefined') {
+                              Analytics.trackAction("post-shared");
+                          }
+                      });
+                  }
+              });
+          }
+
+          Thread.fallbackCopyToClipboard = function(link) {
+              const tempInput = document.createElement('input');
+              tempInput.value = link;
+              document.body.appendChild(tempInput);
+              tempInput.select();
+              tempInput.setSelectionRange(0, 99999);
+
+              try {
+                  document.execCommand('copy');
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
+                      type: 'success'
+                  });
+
+                  if (typeof Analytics !== 'undefined') {
+                      Analytics.trackAction("post-shared");
+                  }
+              } catch (err) {
+                  console.error('Fallback copy failed:', err);
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.sharePostFail || "Unable to copy link. Please try again.",
+                      type: 'danger'
+                  });
+              } finally {
+                  document.body.removeChild(tempInput);
+              }
           }
 
           Thread.fallbackShare = function(link, post) {
