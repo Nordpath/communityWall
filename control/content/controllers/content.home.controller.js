@@ -747,7 +747,9 @@
                                 if (!event.post.videos) {
                                     event.post.videos = [];
                                 }
-                                ContentHome.posts.unshift(event.post);
+                                ContentHome.allPosts.unshift(event.post);
+                                ContentHome.updateCounts();
+                                ContentHome.applyFilter();
                             }
                             break;
                         case EVENTS.POST_LIKED:
@@ -793,9 +795,11 @@
                             if (!$scope.$$phase) $scope.$digest();
                             break;
                         case EVENTS.POST_DELETED:
-                            ContentHome.posts = ContentHome.posts.filter(function (el) {
+                            ContentHome.allPosts = ContentHome.allPosts.filter(function (el) {
                                 return el.id != event.id;
                             });
+                            ContentHome.updateCounts();
+                            ContentHome.applyFilter();
                             ContentHome.loading = false;
                             if (ContentHome.modalPopupThreadId == event._id)
                                 Modals.close('Post already deleted');
