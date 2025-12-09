@@ -9,6 +9,11 @@
              */
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|cdvfile|file):/);
 
+            /**
+             * To make video/image src urls safe (including blob URLs for uploads)
+             */
+            $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|blob|data|cdvfile|file):/);
+
 
             $routeProvider
                 .when('/', {

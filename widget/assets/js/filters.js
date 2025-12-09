@@ -52,9 +52,6 @@
         }])
         .filter('truncateAndFormat', ['$sce','Util', 'limitToFilter',
             function ($sce, Util, limitToFilter) {
-                // custom function to limit the post length + handle new lines
-                // created to handle edge cases of having HTML elements within the post
-                // instead of counting the HTML syntax, this function will only count the innerText
                 return function(input, limit, begin) {
                     let content = Util.isHTML(input) ?
                         Util.limitToHtmlSafely(input, limit) :
@@ -67,4 +64,10 @@
                 };
             }
         ])
+        .filter('trustAsResourceUrl', ['$sce', function($sce) {
+            return function(url) {
+                if (!url) return '';
+                return $sce.trustAsResourceUrl(url);
+            };
+        }])
 })(window.angular, window.location);
