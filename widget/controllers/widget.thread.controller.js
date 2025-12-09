@@ -830,26 +830,26 @@
               const rawImage = post.imageUrl && post.imageUrl[0];
               const shareImage = Util.getShareableImageUrl(rawImage);
 
-              buildfire.deeplink.generateUrl({
+              const deeplinkOptions = {
                   title: shareTitle,
                   description: shareDescription,
-                  data: deepLinkData,
-                  imageUrl: shareImage
-              }, (err, result) => {
+                  data: deepLinkData
+              };
+
+              if (shareImage) {
+                  deeplinkOptions.imageUrl = shareImage;
+              }
+
+              buildfire.deeplink.generateUrl(deeplinkOptions, (err, result) => {
                   buildfire.spinner.hide();
 
-                  if (err) {
+                  if (err || !result || !result.url) {
                       console.error('Error creating deep link:', err);
-                      Buildfire.dialog.toast({
-                          message: Thread.SocialItems.languages.sharePostFail || "Unable to share post. Please try again.",
-                          type: 'danger'
-                      });
+                      Thread.fallbackShare(null, post);
                       return;
                   }
 
-                  if (result && result.url) {
-                      Thread.executeShare(result.url, shareTitle, shareDescription, shareImage, post);
-                  }
+                  Thread.executeShare(result.url, shareTitle, shareDescription, shareImage, post);
               });
           }
 
@@ -946,12 +946,18 @@
           }
 
           Thread.fallbackShare = function(link, post) {
+              const shareText = post.text ? decodeURIComponent(post.text).substring(0, 200) : 'Check out this post!';
+              const shareTitle = Thread.SocialItems.context.title || 'Community Post';
+
               if (navigator.share) {
                   const shareData = {
-                      title: Thread.SocialItems.context.title || 'Community Post',
-                      text: post.text ? post.text.substring(0, 100) + (post.text.length > 100 ? '...' : '') : 'Check out this post!',
-                      url: link
+                      title: shareTitle,
+                      text: shareText
                   };
+
+                  if (link) {
+                      shareData.url = link;
+                  }
 
                   navigator.share(shareData).then(() => {
                       Buildfire.dialog.toast({
@@ -965,9 +971,13 @@
                   }).catch((shareErr) => {
                       if (shareErr.name !== 'AbortError') {
                           console.error('Share failed:', shareErr);
+                          Buildfire.dialog.toast({
+                              message: Thread.SocialItems.languages.sharePostFail || "Unable to share post.",
+                              type: 'danger'
+                          });
                       }
                   });
-              } else {
+              } else if (link) {
                   const tempInput = document.createElement('input');
                   tempInput.value = link;
                   document.body.appendChild(tempInput);
@@ -993,6 +1003,11 @@
                   } finally {
                       document.body.removeChild(tempInput);
                   }
+              } else {
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.sharePostFail || "Unable to share post. Please try again.",
+                      type: 'danger'
+                  });
               }
           }
 
