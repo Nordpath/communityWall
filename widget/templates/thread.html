@@ -198,7 +198,7 @@
                 <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
             </div>
         </div>
-        <div class="custom-post-actions">
+        <div class="custom-post-actions" ng-if="Thread.editingPost">
             <div class="custom-post-camera" ng-click="Thread.selectImages()">
                 <span class="camera-icon">📷</span>
                 <span class="camera-label">{{Thread.selectedImagesText}}</span>
