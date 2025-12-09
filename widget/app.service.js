@@ -1147,16 +1147,33 @@
                     if (data && data.result.length) {
                         const result = data.result.filter(newItem => !_this.items.some(existItem => existItem.id === newItem.id));
                         let newItems = result.map(item => {
+                            // Map postImages to images for template compatibility
+                            const mappedItem = {...item.data, id: item.id};
+
+                            // Ensure images array exists (map from postImages if needed)
+                            if (!mappedItem.images && mappedItem.postImages) {
+                                mappedItem.images = mappedItem.postImages;
+                            }
+                            if (!mappedItem.images) {
+                                mappedItem.images = [];
+                            }
+
+                            // Map postVideos to videos
+                            if (!mappedItem.videos && mappedItem.postVideos) {
+                                mappedItem.videos = mappedItem.postVideos;
+                            }
+                            if (!mappedItem.videos) {
+                                mappedItem.videos = [];
+                            }
+
                             console.log('[PostsDebug] Processing post:', item.id, {
-                                hasImages: !!(item.data.images && item.data.images.length),
-                                imagesCount: item.data.images ? item.data.images.length : 0,
-                                imagesData: item.data.images,
-                                hasImageUrl: !!(item.data.imageUrl),
-                                imageUrlData: item.data.imageUrl,
-                                hasVideos: !!(item.data.videos && item.data.videos.length),
-                                videosCount: item.data.videos ? item.data.videos.length : 0
+                                hasImages: !!(mappedItem.images && mappedItem.images.length),
+                                imagesCount: mappedItem.images ? mappedItem.images.length : 0,
+                                hasVideos: !!(mappedItem.videos && mappedItem.videos.length),
+                                videosCount: mappedItem.videos ? mappedItem.videos.length : 0
                             });
-                            return {...item.data, id: item.id};
+
+                            return mappedItem;
                         });
 
                         if (activeTab === 'popular') {

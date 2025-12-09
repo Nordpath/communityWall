@@ -186,7 +186,27 @@
                             return console.error(err);
                         }
                         if (data && data.result) {
-                            ContentHome.allPosts = data.result.map(item => ({ ...item.data, id: item.id }));
+                            ContentHome.allPosts = data.result.map(item => {
+                                const mappedItem = { ...item.data, id: item.id };
+
+                                // Map postImages to images for template compatibility
+                                if (!mappedItem.images && mappedItem.postImages) {
+                                    mappedItem.images = mappedItem.postImages;
+                                }
+                                if (!mappedItem.images) {
+                                    mappedItem.images = [];
+                                }
+
+                                // Map postVideos to videos
+                                if (!mappedItem.videos && mappedItem.postVideos) {
+                                    mappedItem.videos = mappedItem.postVideos;
+                                }
+                                if (!mappedItem.videos) {
+                                    mappedItem.videos = [];
+                                }
+
+                                return mappedItem;
+                            });
 
                             if (ContentHome.moderationEnabled && ContentHome.filterStatus === 'pending') {
                                 ContentHome.filterStatus = 'pending';
@@ -676,6 +696,20 @@
                     switch (event.name) {
                         case EVENTS.POST_CREATED:
                             if (event.post) {
+                                // Map postImages to images for template compatibility
+                                if (!event.post.images && event.post.postImages) {
+                                    event.post.images = event.post.postImages;
+                                }
+                                if (!event.post.images) {
+                                    event.post.images = [];
+                                }
+                                // Map postVideos to videos
+                                if (!event.post.videos && event.post.postVideos) {
+                                    event.post.videos = event.post.postVideos;
+                                }
+                                if (!event.post.videos) {
+                                    event.post.videos = [];
+                                }
                                 ContentHome.posts.unshift(event.post);
                             }
                             break;
