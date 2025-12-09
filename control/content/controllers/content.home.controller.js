@@ -536,6 +536,9 @@
 
             // Method for getting Post's and Comment's creation time in User Readable Time Format
             ContentHome.getDuration = function (timestamp) {
+                if (!timestamp) {
+                    return '';
+                }
                 return moment(timestamp.toString()).fromNow();
             };
 

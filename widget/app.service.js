@@ -155,7 +155,7 @@
                 },
                 resizeImage(imageUrl, options) {
                     console.log('[ImageDebug] resizeImage called with:', {
-                        imageUrl: imageUrl,
+                        imageUrl: imageUrl ? imageUrl.substring(0, 100) + '...' : imageUrl,
                         imageUrlType: typeof imageUrl,
                         imageUrlLength: imageUrl ? imageUrl.length : 0,
                         options: options
@@ -164,6 +164,15 @@
                     if (!imageUrl || imageUrl === '' || imageUrl === 'undefined' || imageUrl === 'null') {
                         console.error('[ImageDebug] Invalid imageUrl provided:', imageUrl);
                         return '';
+                    }
+
+                    // Check if image is a base64 data URL and if it's too long for imgix proxy
+                    const isBase64 = imageUrl.startsWith('data:image');
+                    const isTooLong = imageUrl.length > 8000; // imgix/URL limit consideration
+
+                    if (isBase64 && isTooLong) {
+                        console.warn('[ImageDebug] Base64 image too long for resizing, returning original');
+                        return imageUrl;
                     }
 
                     const calculateWidth = () => {
@@ -177,13 +186,13 @@
                     try {
                         const result = buildfire.imageLib.resizeImage(imageUrl, options);
                         console.log('[ImageDebug] resizeImage result:', {
-                            input: imageUrl,
-                            output: result,
+                            input: imageUrl.substring(0, 50) + '...',
+                            output: result ? result.substring(0, 100) + '...' : result,
                             outputType: typeof result
                         });
                         return result;
                     } catch (err) {
-                        console.error('[ImageDebug] resizeImage error:', err, 'for URL:', imageUrl);
+                        console.error('[ImageDebug] resizeImage error:', err);
                         return imageUrl;
                     }
                 },
