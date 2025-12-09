@@ -220,36 +220,48 @@
             <h5 class="titleBarTheme text-center" style="margin-top: 35px;">Something went wrong!! Please try again</h5>
         </div>
 
-        <div class="bottom-logo-container" ng-show="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl">
-            <div class="bottom-logo-mode" ng-if="WidgetWall.bottomLogo.displayMode === 'logo'" ng-click="WidgetWall.handleLogoClick()">
-                <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Logo">
-            </div>
-            <div class="bottom-banner-mode" ng-if="WidgetWall.bottomLogo.displayMode === 'banner'" ng-click="WidgetWall.handleLogoClick()">
+        <div class="fullscreen-compose" ng-show="WidgetWall.showFullScreenCompose">
+            <div class="fullscreen-compose-header" ng-if="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl" ng-click="WidgetWall.handleLogoClick()">
                 <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Banner">
             </div>
-        </div>
 
-        <div class="custom-post-dialog" ng-show="WidgetWall.showCustomPostDialog">
-            <div class="custom-post-overlay" ng-click="WidgetWall.closeCustomPostDialog()"></div>
-            <div class="custom-post-content">
-                <div class="custom-post-input-section">
+            <div class="fullscreen-compose-close" ng-click="WidgetWall.closeCustomPostDialog()">
+                <span class="material-icons">close</span>
+            </div>
+
+            <div class="fullscreen-compose-preview">
+                <div class="compose-loading" ng-show="WidgetWall.isUploadingMedia">
+                    <div class="loading-spinner"></div>
+                    <p>Uploading media...</p>
+                </div>
+
+                <div class="compose-media-preview" ng-hide="WidgetWall.isUploadingMedia">
+                    <div ng-repeat="image in WidgetWall.selectedImages track by $index" class="preview-image-container">
+                        <img ng-src="{{image}}" alt="Selected image">
+                    </div>
+                    <div ng-repeat="video in WidgetWall.selectedVideos track by $index" class="preview-video-container">
+                        <video controls playsinline>
+                            <source ng-src="{{video}}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fullscreen-compose-bottom">
+                <div class="compose-input-row">
                     <input type="text"
-                           class="custom-post-input"
+                           class="compose-input"
                            placeholder="Add message"
                            ng-model="WidgetWall.customPostText"
                            ng-keypress="WidgetWall.handlePostKeyPress($event)">
-                    <div class="custom-post-send" ng-click="WidgetWall.submitCustomPost()">
-                        <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
-                    </div>
                 </div>
-                <div class="custom-post-actions">
-                    <div class="custom-post-camera" ng-click="WidgetWall.selectImages()">
-                        <span class="camera-icon">📷</span>
-                        <span class="camera-label">Change selected</span>
+                <div class="compose-actions-row">
+                    <div class="compose-change-media" ng-click="WidgetWall.openMediaPickerFirst()">
+                        <span class="material-icons">photo_camera</span>
+                        <span class="change-label">Change selected</span>
                     </div>
-                    <div class="custom-post-video" ng-click="WidgetWall.selectVideos()">
-                        <span class="video-icon">🎥</span>
-                        <span class="video-label">Change selected</span>
+                    <div class="compose-send-btn" ng-click="WidgetWall.submitCustomPost()">
+                        <img src="assets/img/send(2).png" class="send-icon-img" alt="Send">
                     </div>
                 </div>
             </div>
