@@ -837,7 +837,8 @@
 
               const shareTitle = Thread.SocialItems.context.title || 'Community Post';
               const shareDescription = post.text ? decodeURIComponent(post.text).substring(0, 200) : 'Check out this post!';
-              const shareImage = post.imageUrl && post.imageUrl[0];
+              const rawImage = post.imageUrl && post.imageUrl[0];
+              const shareImage = Util.getShareableImageUrl(rawImage);
 
               buildfire.deeplink.generateUrl({
                   title: shareTitle,

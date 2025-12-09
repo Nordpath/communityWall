@@ -153,6 +153,11 @@
                         callback(null, context)
                     }
                 },
+                getShareableImageUrl(imageUrl) {
+                    if (!imageUrl) return null;
+                    if (imageUrl.startsWith('data:')) return null;
+                    return imageUrl;
+                },
                 resizeImage(imageUrl, options) {
                     console.log('[ImageDebug] resizeImage called with:', {
                         imageUrl: imageUrl ? imageUrl.substring(0, 100) + '...' : imageUrl,
