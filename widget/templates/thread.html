@@ -83,6 +83,9 @@
 
                 <script type="text/ng-template" id="comment-template.html">
                     <div class="comment-wrapper" ng-class="{'nested-comment': comment.parentCommentId, 'max-depth': comment.depth >= 3}">
+                        <div class="replying-to-badge" ng-if="comment.parentCommentId && comment.parentUserName">
+                            <span class="replying-to-text">Replying to @{{comment.parentUserName}}</span>
+                        </div>
                         <div class="social-comment-inner">
                             <div class="thread-dot head pointer"
                                  ng-click="comment.userId !== Thread.SocialItems.userDetails.userId && Thread.showMoreOptionsComment(comment)">
@@ -141,8 +144,20 @@
                             <span class="material-icons-outlined">more_vert</span>
                             </a>
                         </div>
-                        <div class="replies-container" ng-if="comment.replies && comment.replies.length > 0" ng-class="{'max-depth-container': comment.depth >= 2}">
-                            <div class="social-comment nested-reply" ng-repeat="comment in comment.replies" ng-include="'comment-template.html'">
+                        <div ng-if="comment.replies && comment.replies.length > 0 && comment.depth < 3">
+                            <div class="toggle-replies" ng-click="Thread.toggleReplies(comment)">
+                                <span class="toggle-replies-icon">{{comment.repliesHidden ? 'v' : '^'}}</span>
+                                <span class="toggle-replies-text">{{comment.repliesHidden ? 'Show' : 'Hide'}} replies</span>
+                            </div>
+                            <div class="replies-container" ng-if="!comment.repliesHidden" ng-class="{'max-depth-container': comment.depth >= 2}">
+                                <div class="social-comment nested-reply" ng-repeat="comment in comment.replies" ng-include="'comment-template.html'">
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="comment.replies && comment.replies.length > 0 && comment.depth >= 3">
+                            <div class="view-thread-btn" ng-click="Thread.openThreadModal(comment)">
+                                <span class="view-thread-icon material-icons-outlined">forum</span>
+                                <span class="view-thread-text">View thread ({{Thread.getTotalReplies(comment)}} {{Thread.getTotalReplies(comment) === 1 ? 'reply' : 'replies'}})</span>
                             </div>
                         </div>
                     </div>
@@ -207,3 +222,81 @@
         </div>
     </div>
 </div>
+
+<div class="thread-modal-overlay" ng-if="Thread.showThreadModal" ng-click="Thread.closeThreadModal()">
+    <div class="thread-modal" ng-click="$event.stopPropagation()">
+        <div class="thread-modal-header">
+            <span class="thread-modal-title">Thread</span>
+            <div class="thread-modal-close" ng-click="Thread.closeThreadModal()">
+                <span class="material-icons-outlined">close</span>
+            </div>
+        </div>
+        <div class="thread-modal-content">
+            <div class="social-comment" ng-repeat="comment in Thread.threadModalComments" ng-include="'modal-comment-template.html'">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="modal-comment-template.html">
+    <div class="comment-wrapper">
+        <div class="replying-to-badge" ng-if="comment.parentCommentId && comment.parentUserName">
+            <span class="replying-to-text">Replying to @{{comment.parentUserName}}</span>
+        </div>
+        <div class="social-comment-inner">
+            <div class="thread-dot head pointer">
+                <div class="media-holder pull-left">
+                    <img ng-if="comment.userDetails.imageUrl && !Thread.isBlockedUser(comment.userId)"
+                        load-image="1x1" data-final-src="{{comment.userDetails.imageUrl}}" crop-width="40"
+                        crop-height="40" crop-type="crop">
+                    <img ng-if="!(comment.userDetails.imageUrl) || Thread.isBlockedUser(comment.userId)"
+                        load-image="1x1" data-final-src="../../../styles/media/avatar-placeholder.png"
+                        data-img-type="local" crop-width="40" crop-height="40" crop-type="default">
+                </div>
+            </div>
+            <div class="comment-content ellipsis" style="max-width: 85%">
+                <div class="social-profile-photo pointer">
+                    <div class="social-copy">
+                        <a class="social-name text-primary">{{Thread.getDisplayName(comment.userId, comment.userDetails)}}</a>
+                        <div ng-if="comment.createdOn">
+                            <p class="time-ago opacity-seventy">
+                                {{Thread.getDuration(comment.createdOn) | convertTimeFormat}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-text copy">
+                    <p class="margin-zero body-text-theme" ng-if="!comment.deletedOn"
+                        ng-bind-html="Thread.util.injectAnchors(comment.comment)|newLine"></p>
+                    <p class="margin-zero" ng-if="comment.deletedOn">
+                        {{Thread.SocialItems.languages.messageDeleted ? Thread.SocialItems.languages.messageDeleted : "This message was deleted."}}
+                    </p>
+                </div>
+                <div class="post-media-container ellipsis" ng-if="comment.imageUrl.length > 0 || comment.videos.length > 0">
+                    <div class="post-media-wrapper text-center" style="max-height: none !important;">
+                        <img ng-repeat="image in comment.imageUrl track by $index" ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image">
+                        <div ng-repeat="video in comment.videos track by $index" class="post-videos-container">
+                            <video controls width="100%" playsinline>
+                                <source ng-src="{{video}}" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer">
+                    <a class="social-icon likes" ng-click="!Thread.isBlockedUser(comment.userId) && Thread.likeComment(comment, 'comment')">
+                        <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
+                        <span class="iconsTheme iconsFont"
+                            ng-class="{active: isItemLiked(comment, Thread.SocialItems.userDetails.userId)}">{{comment.likes.length}}</span>
+                    </a>
+                    <a class="social-icon reply-btn" ng-if="Thread.allowCreateThread && !comment.deletedOn" ng-click="Thread.closeThreadModal(); Thread.openCommentSection(comment)">
+                        <span class="material-icons-outlined">reply</span>
+                        <span class="reply-text">Reply</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="replies-container" ng-if="comment.replies && comment.replies.length > 0">
+            <div class="social-comment nested-reply" ng-repeat="comment in comment.replies" ng-include="'modal-comment-template.html'">
+            </div>
+        </div>
+    </div>
+</script>

@@ -174,13 +174,14 @@
 
               Thread.post.comments.forEach(comment => {
                   if (comment.parentCommentId && commentMap[comment.parentCommentId]) {
-                      commentMap[comment.parentCommentId].replies.push(comment);
+                      const parentComment = commentMap[comment.parentCommentId];
+                      comment.parentUserName = Thread.getDisplayName(parentComment.userId, parentComment.userDetails);
+                      parentComment.replies.push(comment);
                   } else {
                       rootComments.push(comment);
                   }
               });
 
-              // Add depth calculation for styling
               const setDepth = (comments, depth = 0) => {
                   comments.forEach(comment => {
                       comment.depth = depth;
@@ -192,6 +193,35 @@
               setDepth(rootComments);
 
               Thread.threadedComments = rootComments;
+          }
+
+          Thread.toggleReplies = function (comment) {
+              comment.repliesHidden = !comment.repliesHidden;
+              if (!$scope.$$phase) $scope.$apply();
+          }
+
+          Thread.getTotalReplies = function (comment) {
+              let count = 0;
+              const countReplies = (c) => {
+                  if (c.replies && c.replies.length > 0) {
+                      count += c.replies.length;
+                      c.replies.forEach(countReplies);
+                  }
+              };
+              countReplies(comment);
+              return count;
+          }
+
+          Thread.openThreadModal = function (comment) {
+              Thread.threadModalComments = [comment];
+              Thread.showThreadModal = true;
+              if (!$scope.$$phase) $scope.$apply();
+          }
+
+          Thread.closeThreadModal = function () {
+              Thread.showThreadModal = false;
+              Thread.threadModalComments = [];
+              if (!$scope.$$phase) $scope.$apply();
           }
 
           Thread.handleDeletedUsers = function () {
