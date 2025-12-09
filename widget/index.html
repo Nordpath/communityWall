@@ -150,14 +150,14 @@
                                                 <p ng-if="(post.text.trim().length>150 && post.seeMore)" class="text-info" ng-click="WidgetWall.seeLess(post)">Read Less</p>
                                         </p>
                                     </div>
-                                    <div class="post-media-container" ng-if="post.images.length > 0 || post.videos.length > 0">
+                                    <div class="post-media-container" ng-if="(post.images && post.images.length > 0) || (post.videos && post.videos.length > 0)">
                                         <div class="post-media-wrapper text-center" style="max-height: none !important;">
                                             <a ng-click="openThread($event,post)">
                                                 <div data-wrap="true">
-                                                    <div ng-repeat="image in post.images track by $index" class="post-images-container">
-                                                        <img  ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)">
+                                                    <div ng-repeat="image in post.images track by $index" class="post-images-container" ng-if="WidgetWall.isValidImageUrl(image)">
+                                                        <img ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)" onerror="console.error('[ImageError] Failed to load:', this.src); this.style.display='none';">
                                                     </div>
-                                                    <div ng-repeat="video in post.videos track by $index" class="post-videos-container">
+                                                    <div ng-repeat="video in post.videos track by $index" class="post-videos-container" ng-if="video && video !== ''">
                                                         <video controls width="100%" playsinline>
                                                             <source ng-src="{{video}}" type="video/mp4">
                                                         </video>
@@ -212,6 +212,12 @@
                     <div class="post-holder">
                         <div id="addBtn"></div>
                     </div>
+                </div>
+            </div>
+
+            <div class="bottom-logo-container" ng-if="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl" ng-click="WidgetWall.handleLogoClick()">
+                <div ng-class="{'bottom-banner-mode': WidgetWall.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': WidgetWall.bottomLogo.displayMode !== 'banner'}">
+                    <img ng-src="{{WidgetWall.bottomLogo.imageUrl}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
                 </div>
             </div>
         </div>

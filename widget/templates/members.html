@@ -48,3 +48,9 @@
     </div>
   </div>
 </div>
+
+<div class="bottom-logo-container" ng-if="Members.bottomLogo && Members.bottomLogo.enabled && Members.bottomLogo.imageUrl" ng-click="Members.handleLogoClick()">
+    <div ng-class="{'bottom-banner-mode': Members.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': Members.bottomLogo.displayMode !== 'banner'}">
+        <img ng-src="{{Members.bottomLogo.imageUrl}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+    </div>
+</div>

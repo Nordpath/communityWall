@@ -93,6 +93,20 @@
               }
           };
 
+          Thread.handleLogoClick = function () {
+              if (Thread.bottomLogo && Thread.bottomLogo.linkUrl) {
+                  var url = Thread.bottomLogo.linkUrl;
+                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                      url = 'https://' + url;
+                  }
+                  buildfire.analytics.trackAction('bottom_logo_clicked', {
+                      mode: Thread.bottomLogo.displayMode,
+                      url: url
+                  });
+                  buildfire.navigation.openWindow(url, '_blank');
+              }
+          };
+
           Thread.followLeaveGroupPermission = function () {
               if (Thread.SocialItems && Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.disableFollowLeaveGroup) {
                   Thread.allowFollowLeaveGroup = false;

@@ -169,6 +169,12 @@
     </div>
 </div>
 
+<div class="bottom-logo-container" ng-if="Thread.bottomLogo && Thread.bottomLogo.enabled && Thread.bottomLogo.imageUrl" ng-click="Thread.handleLogoClick()">
+    <div ng-class="{'bottom-banner-mode': Thread.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': Thread.bottomLogo.displayMode !== 'banner'}">
+        <img ng-src="{{Thread.bottomLogo.imageUrl}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+    </div>
+</div>
+
 <div class="custom-post-dialog" ng-show="Thread.showCustomPostDialog">
     <div class="custom-post-overlay" ng-click="Thread.closeCustomPostDialog()"></div>
     <div class="custom-post-content">

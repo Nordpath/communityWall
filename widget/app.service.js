@@ -154,6 +154,18 @@
                     }
                 },
                 resizeImage(imageUrl, options) {
+                    console.log('[ImageDebug] resizeImage called with:', {
+                        imageUrl: imageUrl,
+                        imageUrlType: typeof imageUrl,
+                        imageUrlLength: imageUrl ? imageUrl.length : 0,
+                        options: options
+                    });
+
+                    if (!imageUrl || imageUrl === '' || imageUrl === 'undefined' || imageUrl === 'null') {
+                        console.error('[ImageDebug] Invalid imageUrl provided:', imageUrl);
+                        return '';
+                    }
+
                     const calculateWidth = () => {
                         const windowWidth = window.innerWidth;
                         return { width: windowWidth };
@@ -161,9 +173,19 @@
                     if (!options) {
                         options = calculateWidth();
                     }
-                    return buildfire.imageLib.resizeImage(
-                        imageUrl, options
-                    );
+
+                    try {
+                        const result = buildfire.imageLib.resizeImage(imageUrl, options);
+                        console.log('[ImageDebug] resizeImage result:', {
+                            input: imageUrl,
+                            output: result,
+                            outputType: typeof result
+                        });
+                        return result;
+                    } catch (err) {
+                        console.error('[ImageDebug] resizeImage error:', err, 'for URL:', imageUrl);
+                        return imageUrl;
+                    }
                 },
             }
         }])
@@ -1091,6 +1113,8 @@
                     activeTab = 'newest';
                 }
 
+                console.log('[PostsDebug] getPosts called with activeTab:', activeTab);
+
                 let pageSize = _this.pageSize,
                     page = _this.page;
                 let searchOptions = {
@@ -1101,12 +1125,28 @@
                     recordCount: true
                 }
 
+                console.log('[PostsDebug] Search options:', searchOptions);
+
                 buildfire.publicData.search(searchOptions, 'posts', (error, data) => {
-                    if (error) return console.log(error);
+                    if (error) {
+                        console.error('[PostsDebug] Search error:', error);
+                        return console.log(error);
+                    }
+
+                    console.log('[PostsDebug] Search returned:', data ? data.result.length : 0, 'results');
 
                     if (data && data.result.length) {
                         const result = data.result.filter(newItem => !_this.items.some(existItem => existItem.id === newItem.id));
                         let newItems = result.map(item => {
+                            console.log('[PostsDebug] Processing post:', item.id, {
+                                hasImages: !!(item.data.images && item.data.images.length),
+                                imagesCount: item.data.images ? item.data.images.length : 0,
+                                imagesData: item.data.images,
+                                hasImageUrl: !!(item.data.imageUrl),
+                                imageUrlData: item.data.imageUrl,
+                                hasVideos: !!(item.data.videos && item.data.videos.length),
+                                videosCount: item.data.videos ? item.data.videos.length : 0
+                            });
                             return {...item.data, id: item.id};
                         });
 

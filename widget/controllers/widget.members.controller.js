@@ -22,9 +22,40 @@
             Members.setTimeoutSearrch = null;
             Members.memberSkeletonContainer = '.wallMembers'
             $scope.searchInput = "";
+            Members.bottomLogo = {};
+
+            Members.loadBottomLogoConfig = function () {
+                buildfire.datastore.get('Social', function (err, result) {
+                    if (err) {
+                        console.error('Error loading bottom logo config:', err);
+                        return;
+                    }
+                    if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
+                        Members.bottomLogo = result.data.appSettings.bottomLogo;
+                        if (!$scope.$$phase) {
+                            $scope.$apply();
+                        }
+                    }
+                });
+            };
+
+            Members.handleLogoClick = function () {
+                if (Members.bottomLogo && Members.bottomLogo.linkUrl) {
+                    var url = Members.bottomLogo.linkUrl;
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                    }
+                    buildfire.analytics.trackAction('bottom_logo_clicked', {
+                        mode: Members.bottomLogo.displayMode,
+                        url: url
+                    });
+                    buildfire.navigation.openWindow(url, '_blank');
+                }
+            };
 
             Members.init = function () {
                 $rootScope.showThread = false;
+                Members.loadBottomLogoConfig();
                 Buildfire.appearance.getAppTheme((err, obj) => {
                     if (err) return console.log(err);
                     document.getElementsByClassName("glyphicon")[0].style.setProperty("color", obj.colors.icons);

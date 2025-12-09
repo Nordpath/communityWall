@@ -345,10 +345,44 @@
               WidgetWall.SocialItems.showMorePosts = false;
               WidgetWall.postsLoaded = false;
 
+              WidgetWall.updateFabVisibility(tab);
+
               WidgetWall.getPosts(() => {
                   WidgetWall.postsLoaded = true;
                   $scope.$digest();
               });
+          }
+
+          WidgetWall.updateFabVisibility = function (tab) {
+              var fabElement = document.getElementById('addBtn');
+              if (!fabElement) return;
+
+              if (tab === 'myPosts') {
+                  fabElement.classList.add('fab-hidden-tab');
+              } else {
+                  fabElement.classList.remove('fab-hidden-tab');
+              }
+          }
+
+          WidgetWall.handleImageError = function (event, imageUrl, postId) {
+              console.error('[ImageError] Image failed to load:', {
+                  imageUrl: imageUrl,
+                  postId: postId,
+                  errorEvent: event,
+                  targetSrc: event && event.target ? event.target.src : 'unknown',
+                  timestamp: new Date().toISOString()
+              });
+              if (event && event.target) {
+                  event.target.style.display = 'none';
+              }
+          }
+
+          WidgetWall.isValidImageUrl = function (url) {
+              if (!url || url === '' || url === 'undefined' || url === 'null') {
+                  console.warn('[ImageValidation] Invalid URL detected:', url);
+                  return false;
+              }
+              return true;
           }
 
           WidgetWall.getPosts = function (callback = null)  {
@@ -877,44 +911,72 @@
           };
 
           WidgetWall.init = function () {
-
+              console.log('[Performance] Init started at:', Date.now());
               WidgetWall.startSkeleton();
+
+              var settingsPromise = new Promise(function(resolve, reject) {
+                  WidgetWall.SocialItems.getSettings(function(err, result) {
+                      if (err) reject(err);
+                      else resolve(result);
+                  });
+              });
+
+              var blockedUsersPromise = new Promise(function(resolve) {
+                  WidgetWall.getBlockedUsers(function(error, res) {
+                      if (error) console.log("Error while fetching blocked users ", error);
+                      resolve(res || []);
+                  });
+              });
+
+              var userPromise = new Promise(function(resolve) {
+                  WidgetWall.SocialItems.authenticateUserWOLogin(null, function(err, user) {
+                      if (err) {
+                          console.error("Getting user failed.", err);
+                          resolve(null);
+                      } else {
+                          resolve(user);
+                      }
+                  });
+              });
+
               WidgetWall.loadBottomLogoConfig();
-              WidgetWall.SocialItems.getSettings((err, result) => {
-                  if (err) {
-                      WidgetWall.stopSkeleton();
-                      return console.error("Fetching settings failed.", err);
-                  }
-                  if (result) {
+
+              Promise.all([settingsPromise, blockedUsersPromise, userPromise])
+                  .then(function(results) {
+                      console.log('[Performance] All parallel calls completed at:', Date.now());
+                      var result = results[0];
+                      var blockedUsers = results[1];
+                      var user = results[2];
+
+                      if (!result) {
+                          WidgetWall.stopSkeleton();
+                          return console.error("Fetching settings failed - no result");
+                      }
+
                       WidgetWall.SocialItems.items = [];
+                      WidgetWall.SocialItems.blockedUsers = blockedUsers;
+
                       WidgetWall.setSettings(result);
                       WidgetWall.showHidePrivateChat();
                       WidgetWall.followLeaveGroupPermission();
                       WidgetWall.setAppTheme();
-                      WidgetWall.getBlockedUsers((error, res) => {
-                          if (err) console.log("Error while fetching blocked users ", err);
-                          if (res) WidgetWall.SocialItems.blockedUsers = res;
+                      WidgetWall.SocialItems.checkBlockedUsers();
 
-                          WidgetWall.SocialItems.authenticateUserWOLogin(null, (err, user) => {
-                              if (err) {
-                                WidgetWall.stopSkeleton();
-                                return console.error("Getting user failed.", err);
-                              }
-                              WidgetWall.setSettings(result);
-                              WidgetWall.SocialItems.checkBlockedUsers();
-                              WidgetWall.getPosts(()=>{
-                                  if (user) {
-                                      WidgetWall.checkFollowingStatus(user);
-                                      WidgetWall.checkForPrivateChat();
-                                      WidgetWall.checkForDeeplinks();
-                                  } else {
-                                      WidgetWall.groupFollowingStatus = false;
-                                  }
-                              });
-                          });
+                      WidgetWall.getPosts(function() {
+                          console.log('[Performance] Posts loaded at:', Date.now());
+                          if (user) {
+                              WidgetWall.checkFollowingStatus(user);
+                              WidgetWall.checkForPrivateChat();
+                              WidgetWall.checkForDeeplinks();
+                          } else {
+                              WidgetWall.groupFollowingStatus = false;
+                          }
                       });
-                  }
-              });
+                  })
+                  .catch(function(err) {
+                      console.error('[Performance] Init error:', err);
+                      WidgetWall.stopSkeleton();
+                  });
           };
 
           WidgetWall.init();
@@ -1601,11 +1663,26 @@
           }
 
           WidgetWall.processSelectedFiles = function(files) {
+              console.log('[ImageUpload] processSelectedFiles called with', files.length, 'files');
+              console.log('[ImageUpload] Environment:', {
+                  hasImageLib: !!(buildfire && buildfire.imageLib),
+                  hasLocalToPublicUrl: !!(buildfire && buildfire.imageLib && buildfire.imageLib.local && buildfire.imageLib.local.toPublicUrl),
+                  hasPublicFiles: !!(buildfire && buildfire.services && buildfire.services.publicFiles),
+                  platform: navigator.platform,
+                  userAgent: navigator.userAgent
+              });
+
               var imageFiles = [];
               var videoFiles = [];
 
               for (var i = 0; i < files.length; i++) {
                   var file = files[i];
+                  console.log('[ImageUpload] File ' + i + ':', {
+                      name: file.name,
+                      type: file.type,
+                      size: file.size,
+                      lastModified: file.lastModified
+                  });
                   if (file.type.startsWith('image/')) {
                       imageFiles.push(file);
                   } else if (file.type.startsWith('video/')) {
@@ -1613,43 +1690,67 @@
                   }
               }
 
-              var imagePromises = imageFiles.map(function(file) {
+              console.log('[ImageUpload] Categorized:', imageFiles.length, 'images,', videoFiles.length, 'videos');
+
+              var imagePromises = imageFiles.map(function(file, index) {
                   return new Promise(function(resolve, reject) {
+                      console.log('[ImageUpload] Processing image ' + index + ':', file.name);
                       var reader = new FileReader();
                       reader.onload = function(event) {
                           var base64 = event.target.result;
+                          console.log('[ImageUpload] FileReader success for image ' + index + ', base64 length:', base64 ? base64.length : 0);
+
                           if (buildfire && buildfire.imageLib && buildfire.imageLib.local && buildfire.imageLib.local.toPublicUrl) {
+                              console.log('[ImageUpload] Calling toPublicUrl for image ' + index);
                               buildfire.imageLib.local.toPublicUrl(base64, function(err, url) {
-                                  if (err) resolve(base64);
-                                  else resolve(url);
+                                  if (err) {
+                                      console.error('[ImageUpload] toPublicUrl ERROR for image ' + index + ':', err);
+                                      console.log('[ImageUpload] Falling back to base64 for image ' + index);
+                                      resolve(base64);
+                                  } else {
+                                      console.log('[ImageUpload] toPublicUrl SUCCESS for image ' + index + ':', {
+                                          urlLength: url ? url.length : 0,
+                                          urlPreview: url ? url.substring(0, 100) + '...' : 'null'
+                                      });
+                                      resolve(url);
+                                  }
                               });
                           } else {
+                              console.log('[ImageUpload] toPublicUrl not available, using base64 for image ' + index);
                               resolve(base64);
                           }
                       };
-                      reader.onerror = function() { resolve(null); };
+                      reader.onerror = function(err) {
+                          console.error('[ImageUpload] FileReader ERROR for image ' + index + ':', err);
+                          resolve(null);
+                      };
                       reader.readAsDataURL(file);
                   });
               });
 
-              var videoPromises = videoFiles.map(function(file) {
+              var videoPromises = videoFiles.map(function(file, index) {
                   return new Promise(function(resolve, reject) {
+                      console.log('[ImageUpload] Processing video ' + index + ':', file.name);
                       if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFile) {
+                          console.log('[ImageUpload] Using publicFiles.uploadFile for video ' + index);
                           buildfire.services.publicFiles.uploadFile(
                               file,
                               { allowMultipleFilesUpload: false },
                               function(err, result) {
                                   if (err) {
+                                      console.error('[ImageUpload] publicFiles.uploadFile ERROR for video ' + index + ':', err);
                                       var reader = new FileReader();
                                       reader.onload = function(event) { resolve(event.target.result); };
                                       reader.onerror = function() { resolve(null); };
                                       reader.readAsDataURL(file);
                                   } else {
+                                      console.log('[ImageUpload] publicFiles.uploadFile SUCCESS for video ' + index + ':', result);
                                       resolve(result.url);
                                   }
                               }
                           );
                       } else {
+                          console.log('[ImageUpload] publicFiles not available for video ' + index);
                           var reader = new FileReader();
                           reader.onload = function(event) { resolve(event.target.result); };
                           reader.onerror = function() { resolve(null); };
@@ -1659,22 +1760,30 @@
               });
 
               Promise.all(imagePromises).then(function(imageUrls) {
-                  WidgetWall.selectedImages = imageUrls.filter(function(url) { return url !== null; });
+                  console.log('[ImageUpload] All image promises resolved:', imageUrls);
+                  WidgetWall.selectedImages = imageUrls.filter(function(url) { return url !== null && url !== '' && url !== 'undefined'; });
+                  console.log('[ImageUpload] Filtered selectedImages:', WidgetWall.selectedImages.length);
                   if (WidgetWall.selectedImages.length > 0) {
                       WidgetWall.selectedImagesText = WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images';
                   }
 
                   return Promise.all(videoPromises);
               }).then(function(videoUrls) {
-                  WidgetWall.selectedVideos = videoUrls.filter(function(url) { return url !== null; });
+                  console.log('[ImageUpload] All video promises resolved:', videoUrls);
+                  WidgetWall.selectedVideos = videoUrls.filter(function(url) { return url !== null && url !== '' && url !== 'undefined'; });
                   if (WidgetWall.selectedVideos.length > 0) {
                       WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
                   }
 
+                  console.log('[ImageUpload] FINAL state:', {
+                      selectedImages: WidgetWall.selectedImages,
+                      selectedVideos: WidgetWall.selectedVideos
+                  });
+
                   WidgetWall.isUploadingMedia = false;
                   if (!$scope.$$phase) $scope.$apply();
               }).catch(function(err) {
-                  console.error('[MediaUpload] Error:', err);
+                  console.error('[ImageUpload] Promise chain ERROR:', err);
                   WidgetWall.isUploadingMedia = false;
                   if (!$scope.$$phase) $scope.$apply();
               });
