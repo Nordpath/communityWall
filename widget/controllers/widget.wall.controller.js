@@ -1963,7 +1963,9 @@
                                       console.error('Error adding feed post: ', err);
                                       return;
                                   }
-                                  followThread();
+                                  if (r && r.id) {
+                                      followThread(r.id);
+                                  }
                               });
                           }
                       })
@@ -1971,7 +1973,11 @@
               });
           }
 
-          const followThread = () =>{
+          const followThread = (postId) =>{
+              if (!postId) {
+                  console.error('followThread: postId is required');
+                  return;
+              }
               WidgetWall.SocialItems.authenticateUser(null, (err, userData) => {
                   if (err) return console.error("Getting user failed.", err);
                   if (userData) {
@@ -1980,7 +1986,7 @@
                               SubscribedUsersData.followThread({
                                   userId: userData._id,
                                   wallId: WidgetWall.SocialItems.wid,
-                                  post: WidgetWall.SocialItems.items[0].id
+                                  post: postId
                               });
                           }
                       });
