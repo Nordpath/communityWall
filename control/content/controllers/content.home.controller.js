@@ -205,6 +205,25 @@
                                     mappedItem.videos = [];
                                 }
 
+                                // Map comments' postImages to imageUrl
+                                if (mappedItem.comments && Array.isArray(mappedItem.comments)) {
+                                    mappedItem.comments = mappedItem.comments.map(function(comment) {
+                                        if (!comment.imageUrl && comment.postImages) {
+                                            comment.imageUrl = comment.postImages;
+                                        }
+                                        if (!comment.imageUrl) {
+                                            comment.imageUrl = [];
+                                        }
+                                        if (!comment.videos && comment.postVideos) {
+                                            comment.videos = comment.postVideos;
+                                        }
+                                        if (!comment.videos) {
+                                            comment.videos = [];
+                                        }
+                                        return comment;
+                                    });
+                                }
+
                                 return mappedItem;
                             });
 
@@ -518,7 +537,25 @@
                             console.log('Success in Content get Load more Comments---------', data);
                             if (data && data.data && data.data.result) {
                                 thread.uniqueLinksOfComments = thread.uniqueLinksOfComments || [];
-                                thread.comments = thread.comments && !viewComment ? thread.comments.concat(data.data.result) : data.data.result;
+
+                                // Map postImages to imageUrl for each comment
+                                const mappedComments = data.data.result.map(function(comment) {
+                                    if (!comment.imageUrl && comment.postImages) {
+                                        comment.imageUrl = comment.postImages;
+                                    }
+                                    if (!comment.imageUrl) {
+                                        comment.imageUrl = [];
+                                    }
+                                    if (!comment.videos && comment.postVideos) {
+                                        comment.videos = comment.postVideos;
+                                    }
+                                    if (!comment.videos) {
+                                        comment.videos = [];
+                                    }
+                                    return comment;
+                                });
+
+                                thread.comments = thread.comments && !viewComment ? thread.comments.concat(mappedComments) : mappedComments;
                                 thread.moreComments = thread.comments && thread.comments.length < thread.commentsCount ? false : true;
                                 thread.comments.forEach(function (commentData) {
                                     if (thread.uniqueLinksOfComments.indexOf(commentData.threadId + "cmt" + commentData._id) == -1) {
@@ -733,6 +770,22 @@
                         case EVENTS.COMMENT_ADDED:
                             ContentHome.posts.some(function (el) {
                                 if (el.id == event.id) {
+                                    // Map postImages to imageUrl for comment template compatibility
+                                    if (event.comment) {
+                                        if (!event.comment.imageUrl && event.comment.postImages) {
+                                            event.comment.imageUrl = event.comment.postImages;
+                                        }
+                                        if (!event.comment.imageUrl) {
+                                            event.comment.imageUrl = [];
+                                        }
+                                        // Map postVideos to videos
+                                        if (!event.comment.videos && event.comment.postVideos) {
+                                            event.comment.videos = event.comment.postVideos;
+                                        }
+                                        if (!event.comment.videos) {
+                                            event.comment.videos = [];
+                                        }
+                                    }
                                     el.comments.push(event.comment)
                                     return true;
                                 }
