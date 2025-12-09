@@ -568,9 +568,6 @@
                       // Add options based on user conditions
                       if (comment.userId === Thread.SocialItems.userDetails.userId) {
                           drawerOptions.listItems.push({
-                              id: 'editComment',
-                              text: Thread.SocialItems.languages.editComment || 'Edit Comment'
-                          }, {
                               id: 'deleteComment',
                               text: Thread.SocialItems.languages.deleteComment
                           });
@@ -597,20 +594,13 @@
                           if (err) return console.error("Error opening drawer.", err);
                           if (result) {
                               switch (result.id) {
-                                  case 'editComment':
-                                      // Call the edit comment function
-                                      Thread.editComment(comment);
-                                      break;
                                   case 'deleteComment':
-                                      // Call the existing deleteComment function
                                       Thread.deleteComment(comment);
                                       break;
                                   case 'reportComment':
-                                      // Call the existing reportComment function
                                       Thread.reportComment(comment);
                                       break;
                                   case 'blockUser':
-                                      // Call the existing block function
                                       Thread.blockUser(comment.userId, comment.userDetails);
                                       break;
                               }
@@ -1132,7 +1122,6 @@
           Thread.selectedVideos = [];
           Thread.selectedImagesText = 'Add Images';
           Thread.selectedVideosText = 'Add Videos';
-          Thread.editingComment = null;
           Thread.editingPost = null;
 
           Thread.openCommentSection = function (parentComment = null) {
@@ -1146,7 +1135,6 @@
                       Thread.selectedVideos = [];
                       Thread.selectedImagesText = 'Add Images';
                       Thread.selectedVideosText = 'Add Videos';
-                      Thread.editingComment = null;
                       Thread.editingPost = null;
                       $scope.$apply();
                   }
@@ -1161,7 +1149,6 @@
               Thread.selectedVideos = [];
               Thread.selectedImagesText = 'Add Images';
               Thread.selectedVideosText = 'Add Videos';
-              Thread.editingComment = null;
               Thread.editingPost = null;
               if (!$scope.$$phase) $scope.$apply();
           }
@@ -1182,9 +1169,7 @@
                   return;
               }
 
-              if (Thread.editingComment) {
-                  Thread.updateComment();
-              } else if (Thread.editingPost) {
+              if (Thread.editingPost) {
                   Thread.updatePost();
               } else {
                   Thread.comment = Thread.customPostText;
@@ -1312,18 +1297,6 @@
               if (!$scope.$$phase) $scope.$apply();
           }
 
-          Thread.editComment = function (comment) {
-              Thread.editingComment = comment;
-              Thread.customPostText = comment.comment ? decodeURIComponent(comment.comment) : '';
-              Thread.selectedImages = comment.imageUrl || [];
-              Thread.selectedVideos = comment.videos || [];
-              Thread.selectedImagesText = Thread.selectedImages.length > 0 ? (Thread.selectedImages.length === 1 ? '1 image' : Thread.selectedImages.length + ' images') : 'Add Images';
-              Thread.selectedVideosText = Thread.selectedVideos.length > 0 ? (Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos') : 'Add Videos';
-              Thread.showCustomPostDialog = true;
-              Thread.replyingToComment = null;
-              if (!$scope.$$phase) $scope.$apply();
-          }
-
           Thread.updatePost = function () {
               Thread.post.text = Thread.customPostText;
               Thread.post.imageUrl = Thread.selectedImages || [];
@@ -1341,32 +1314,6 @@
                   console.error('Error updating post:', err);
                   Buildfire.dialog.toast({
                       message: Thread.SocialItems.languages.postUpdateFail || "Failed to update post",
-                      type: 'danger'
-                  });
-              });
-          }
-
-          Thread.updateComment = function () {
-              const comment = Thread.editingComment;
-              comment.comment = Thread.customPostText.replace(/[#&%+!@^*()-]/g, function (match) {
-                  return encodeURIComponent(match);
-              });
-              comment.imageUrl = Thread.selectedImages || [];
-              comment.videos = Thread.selectedVideos || [];
-              comment.lastUpdatedOn = new Date();
-
-              SocialDataStore.updateComment(Thread.post.id, comment).then(() => {
-                  Buildfire.dialog.toast({
-                      message: Thread.SocialItems.languages.commentUpdateSuccess || "Comment updated successfully",
-                      type: 'success'
-                  });
-                  Thread.organizeThreadedComments();
-                  Thread.closeCustomPostDialog();
-                  if (!$scope.$$phase) $scope.$apply();
-              }).catch((err) => {
-                  console.error('Error updating comment:', err);
-                  Buildfire.dialog.toast({
-                      message: Thread.SocialItems.languages.commentUpdateFail || "Failed to update comment",
                       type: 'danger'
                   });
               });
