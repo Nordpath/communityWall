@@ -158,8 +158,7 @@
                                                         <img ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)" onerror="console.error('[ImageError] Failed to load:', this.src); this.style.display='none';">
                                                     </div>
                                                     <div ng-repeat="video in post.videos track by $index" class="post-videos-container" ng-if="video && video !== ''">
-                                                        <video controls width="100%" playsinline>
-                                                            <source ng-src="{{video}}" type="video/mp4">
+                                                        <video controls width="100%" playsinline ng-src="{{video}}">
                                                         </video>
                                                     </div>
                                                 </div>
@@ -246,8 +245,7 @@
                         <img ng-src="{{image}}" alt="Selected image">
                     </div>
                     <div ng-repeat="video in WidgetWall.selectedVideos track by $index" class="preview-video-container">
-                        <video controls playsinline>
-                            <source ng-src="{{video}}" type="video/mp4">
+                        <video controls playsinline ng-src="{{video}}">
                         </video>
                     </div>
                 </div>

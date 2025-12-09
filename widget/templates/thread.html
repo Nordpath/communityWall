@@ -45,8 +45,7 @@
                             <img ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, Thread.post.imageUrl)">
                         </div>
                         <div ng-repeat="video in Thread.post.videos track by $index" class="post-videos-container">
-                            <video controls width="100%" playsinline>
-                                <source ng-src="{{video}}" type="video/mp4">
+                            <video controls width="100%" playsinline ng-src="{{video}}">
                             </video>
                         </div>
                     </div>
@@ -120,8 +119,7 @@
                                     <div class="post-media-wrapper text-center" style="max-height: none !important;">
                                         <img ng-repeat="image in comment.imageUrl track by $index" ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, comment.imageUrl)">
                                         <div ng-repeat="video in comment.videos track by $index" class="post-videos-container">
-                                            <video controls width="100%" playsinline>
-                                                <source ng-src="{{video}}" type="video/mp4">
+                                            <video controls width="100%" playsinline ng-src="{{video}}">
                                             </video>
                                         </div>
                                     </div>
@@ -275,8 +273,7 @@
                     <div class="post-media-wrapper text-center" style="max-height: none !important;">
                         <img ng-repeat="image in comment.imageUrl track by $index" ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image">
                         <div ng-repeat="video in comment.videos track by $index" class="post-videos-container">
-                            <video controls width="100%" playsinline>
-                                <source ng-src="{{video}}" type="video/mp4">
+                            <video controls width="100%" playsinline ng-src="{{video}}">
                             </video>
                         </div>
                     </div>
