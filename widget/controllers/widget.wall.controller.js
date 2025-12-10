@@ -1694,93 +1694,149 @@
 
               var imagePromises = imageFiles.map(function(file, index) {
                   return new Promise(function(resolve, reject) {
-                      console.log('[ImageUpload] Processing image ' + index + ':', file.name);
-                      var reader = new FileReader();
-                      reader.onload = function(event) {
-                          var base64 = event.target.result;
-                          console.log('[ImageUpload] FileReader success for image ' + index + ', base64 length:', base64 ? base64.length : 0);
+                      console.log('[ImageUpload] Processing image ' + index + ':', file.name, 'Size:', file.size);
 
-                          if (buildfire && buildfire.imageLib && buildfire.imageLib.local && buildfire.imageLib.local.toPublicUrl) {
-                              console.log('[ImageUpload] Calling toPublicUrl for image ' + index);
-                              buildfire.imageLib.local.toPublicUrl(base64, function(err, url) {
-                                  if (err) {
-                                      console.error('[ImageUpload] toPublicUrl ERROR for image ' + index + ':', err);
-                                      console.log('[ImageUpload] Falling back to base64 for image ' + index);
-                                      resolve(base64);
-                                  } else {
-                                      console.log('[ImageUpload] toPublicUrl SUCCESS for image ' + index + ':', {
-                                          urlLength: url ? url.length : 0,
-                                          urlPreview: url ? url.substring(0, 100) + '...' : 'null'
-                                      });
-                                      resolve(url);
-                                  }
-                              });
-                          } else {
-                              console.log('[ImageUpload] toPublicUrl not available, using base64 for image ' + index);
-                              resolve(base64);
-                          }
-                      };
-                      reader.onerror = function(err) {
-                          console.error('[ImageUpload] FileReader ERROR for image ' + index + ':', err);
+                      // Check if image is too large (max 1GB, but recommend smaller)
+                      var maxFileSize = 1024 * 1024 * 1024; // 1GB
+                      if (file.size > maxFileSize) {
+                          console.error('[ImageUpload] Image exceeds 1GB limit');
+                          buildfire.dialog.toast({
+                              message: 'Image is too large. Maximum size is 1GB.',
+                              type: 'danger'
+                          });
                           resolve(null);
-                      };
-                      reader.readAsDataURL(file);
-                  });
-              });
+                          return;
+                      }
 
-              var videoPromises = videoFiles.map(function(file, index) {
-                  return new Promise(function(resolve, reject) {
-                      console.log('[ImageUpload] Processing video ' + index + ':', file.name);
+                      // Prefer publicFiles.uploadFiles for better performance and reliability
+                      if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFiles) {
+                          console.log('[ImageUpload] Using publicFiles.uploadFiles for image ' + index);
 
-                      // Check if file is too large for base64 (max 5MB for safety)
-                      var maxSizeForBase64 = 5 * 1024 * 1024; // 5MB
-                      var shouldUseFileUpload = file.size > maxSizeForBase64;
-
-                      if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFile) {
-                          console.log('[ImageUpload] Using publicFiles.uploadFile for video ' + index);
-                          buildfire.services.publicFiles.uploadFile(
-                              file,
+                          buildfire.services.publicFiles.uploadFiles(
+                              [file],
                               { allowMultipleFilesUpload: false },
-                              function(err, result) {
+                              function(progress) {
+                                  console.log('[ImageUpload] Upload progress for image ' + index + ':', progress);
+                              },
+                              function(completed) {
+                                  console.log('[ImageUpload] Upload completed for image ' + index + ':', completed);
+                              },
+                              function(err, uploadedFiles) {
                                   if (err) {
-                                      console.error('[ImageUpload] publicFiles.uploadFile ERROR for video ' + index + ':', err);
-                                      if (!shouldUseFileUpload) {
-                                          // Fallback to base64 only for small files
+                                      console.error('[ImageUpload] publicFiles.uploadFiles ERROR for image ' + index + ':', err);
+                                      // Fallback to base64 for small images only
+                                      if (file.size < 5 * 1024 * 1024) { // 5MB
+                                          console.log('[ImageUpload] Falling back to base64 for small image');
                                           var reader = new FileReader();
                                           reader.onload = function(event) { resolve(event.target.result); };
                                           reader.onerror = function() { resolve(null); };
                                           reader.readAsDataURL(file);
                                       } else {
-                                          console.error('[ImageUpload] Video too large and upload failed');
                                           buildfire.dialog.toast({
-                                              message: 'Video upload failed. File is too large.',
+                                              message: 'Image upload failed.',
                                               type: 'danger'
                                           });
                                           resolve(null);
                                       }
+                                  } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
+                                      console.log('[ImageUpload] publicFiles.uploadFiles SUCCESS for image ' + index + ':', uploadedFiles[0]);
+                                      resolve(uploadedFiles[0].url);
                                   } else {
-                                      console.log('[ImageUpload] publicFiles.uploadFile SUCCESS for video ' + index + ':', result);
-                                      resolve(result.url);
+                                      console.error('[ImageUpload] Upload completed but status is not success');
+                                      buildfire.dialog.toast({
+                                          message: 'Image upload failed.',
+                                          type: 'danger'
+                                      });
+                                      resolve(null);
                                   }
                               }
                           );
                       } else {
-                          console.log('[ImageUpload] publicFiles not available for video ' + index);
+                          console.log('[ImageUpload] publicFiles not available, using legacy imageLib method');
+                          // Legacy fallback for older BuildFire versions
+                          var reader = new FileReader();
+                          reader.onload = function(event) {
+                              var base64 = event.target.result;
 
-                          if (shouldUseFileUpload) {
-                              console.error('[ImageUpload] Video too large for direct upload (size:', file.size, ')');
-                              buildfire.dialog.toast({
-                                  message: 'Video is too large. Maximum size is ' + Math.round(maxSizeForBase64 / 1024 / 1024) + 'MB without file upload service.',
-                                  type: 'danger'
-                              });
+                              if (buildfire && buildfire.imageLib && buildfire.imageLib.local && buildfire.imageLib.local.toPublicUrl) {
+                                  buildfire.imageLib.local.toPublicUrl(base64, function(err, url) {
+                                      if (err) {
+                                          console.error('[ImageUpload] toPublicUrl ERROR:', err);
+                                          resolve(file.size < 5 * 1024 * 1024 ? base64 : null);
+                                      } else {
+                                          resolve(url);
+                                      }
+                                  });
+                              } else {
+                                  resolve(file.size < 5 * 1024 * 1024 ? base64 : null);
+                              }
+                          };
+                          reader.onerror = function(err) {
+                              console.error('[ImageUpload] FileReader ERROR:', err);
                               resolve(null);
-                          } else {
-                              // Only use base64 for small videos
-                              var reader = new FileReader();
-                              reader.onload = function(event) { resolve(event.target.result); };
-                              reader.onerror = function() { resolve(null); };
-                              reader.readAsDataURL(file);
-                          }
+                          };
+                          reader.readAsDataURL(file);
+                      }
+                  });
+              });
+
+              var videoPromises = videoFiles.map(function(file, index) {
+                  return new Promise(function(resolve, reject) {
+                      console.log('[ImageUpload] Processing video ' + index + ':', file.name, 'Size:', file.size);
+
+                      // Check if file is too large (BuildFire supports up to 1GB)
+                      var maxFileSize = 1024 * 1024 * 1024; // 1GB
+                      if (file.size > maxFileSize) {
+                          console.error('[ImageUpload] Video exceeds 1GB limit');
+                          buildfire.dialog.toast({
+                              message: 'Video is too large. Maximum size is 1GB.',
+                              type: 'danger'
+                          });
+                          resolve(null);
+                          return;
+                      }
+
+                      // Use BuildFire's publicFiles.uploadFiles API (correct method name)
+                      if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFiles) {
+                          console.log('[ImageUpload] Using publicFiles.uploadFiles for video ' + index);
+
+                          buildfire.services.publicFiles.uploadFiles(
+                              [file], // Array of files
+                              { allowMultipleFilesUpload: false }, // Options
+                              function(progress) {
+                                  console.log('[ImageUpload] Upload progress for video ' + index + ':', progress);
+                              }, // onProgress
+                              function(completed) {
+                                  console.log('[ImageUpload] Upload completed for video ' + index + ':', completed);
+                              }, // onComplete
+                              function(err, uploadedFiles) {
+                                  if (err) {
+                                      console.error('[ImageUpload] publicFiles.uploadFiles ERROR for video ' + index + ':', err);
+                                      buildfire.dialog.toast({
+                                          message: err.message || 'Video upload failed. Please try again.',
+                                          type: 'danger'
+                                      });
+                                      resolve(null);
+                                  } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
+                                      console.log('[ImageUpload] publicFiles.uploadFiles SUCCESS for video ' + index + ':', uploadedFiles[0]);
+                                      resolve(uploadedFiles[0].url);
+                                  } else {
+                                      console.error('[ImageUpload] Upload completed but file status is not success');
+                                      buildfire.dialog.toast({
+                                          message: 'Video upload failed.',
+                                          type: 'danger'
+                                      });
+                                      resolve(null);
+                                  }
+                              } // callback
+                          );
+                      } else {
+                          console.error('[ImageUpload] publicFiles.uploadFiles not available');
+                          buildfire.dialog.toast({
+                              message: 'Video upload service is not available. Please contact support.',
+                              type: 'danger'
+                          });
+                          resolve(null);
                       }
                   });
               });
