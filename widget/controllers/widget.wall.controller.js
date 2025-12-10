@@ -1731,6 +1731,11 @@
               var videoPromises = videoFiles.map(function(file, index) {
                   return new Promise(function(resolve, reject) {
                       console.log('[ImageUpload] Processing video ' + index + ':', file.name);
+
+                      // Check if file is too large for base64 (max 5MB for safety)
+                      var maxSizeForBase64 = 5 * 1024 * 1024; // 5MB
+                      var shouldUseFileUpload = file.size > maxSizeForBase64;
+
                       if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFile) {
                           console.log('[ImageUpload] Using publicFiles.uploadFile for video ' + index);
                           buildfire.services.publicFiles.uploadFile(
@@ -1739,10 +1744,20 @@
                               function(err, result) {
                                   if (err) {
                                       console.error('[ImageUpload] publicFiles.uploadFile ERROR for video ' + index + ':', err);
-                                      var reader = new FileReader();
-                                      reader.onload = function(event) { resolve(event.target.result); };
-                                      reader.onerror = function() { resolve(null); };
-                                      reader.readAsDataURL(file);
+                                      if (!shouldUseFileUpload) {
+                                          // Fallback to base64 only for small files
+                                          var reader = new FileReader();
+                                          reader.onload = function(event) { resolve(event.target.result); };
+                                          reader.onerror = function() { resolve(null); };
+                                          reader.readAsDataURL(file);
+                                      } else {
+                                          console.error('[ImageUpload] Video too large and upload failed');
+                                          buildfire.dialog.toast({
+                                              message: 'Video upload failed. File is too large.',
+                                              type: 'danger'
+                                          });
+                                          resolve(null);
+                                      }
                                   } else {
                                       console.log('[ImageUpload] publicFiles.uploadFile SUCCESS for video ' + index + ':', result);
                                       resolve(result.url);
@@ -1751,10 +1766,21 @@
                           );
                       } else {
                           console.log('[ImageUpload] publicFiles not available for video ' + index);
-                          var reader = new FileReader();
-                          reader.onload = function(event) { resolve(event.target.result); };
-                          reader.onerror = function() { resolve(null); };
-                          reader.readAsDataURL(file);
+
+                          if (shouldUseFileUpload) {
+                              console.error('[ImageUpload] Video too large for direct upload (size:', file.size, ')');
+                              buildfire.dialog.toast({
+                                  message: 'Video is too large. Maximum size is ' + Math.round(maxSizeForBase64 / 1024 / 1024) + 'MB without file upload service.',
+                                  type: 'danger'
+                              });
+                              resolve(null);
+                          } else {
+                              // Only use base64 for small videos
+                              var reader = new FileReader();
+                              reader.onload = function(event) { resolve(event.target.result); };
+                              reader.onerror = function() { resolve(null); };
+                              reader.readAsDataURL(file);
+                          }
                       }
                   });
               });
