@@ -83,9 +83,13 @@
                 </div>
                 <div class="plugin-banner clearfix margin-bottom-fifteen">
                     <div class="hes-gallery post-images" data-wrap="true" data-img-count="{{post.images.length}}" ng-init="initHesGallery()">
-                        <img ng-repeat="image in post.images" ng-src="{{ContentHome.util.resizeImage(image)}}" data-alt="Post image">
+                        <img ng-repeat="image in post.images" ng-src="{{image}}" data-alt="Post image" style="max-width: 100%; height: auto;" onerror="console.error('[ImageError] Failed to load:', this.src);">
                     </div>
-                    
+                    <div ng-if="post.videos && post.videos.length > 0" class="post-videos">
+                        <video ng-repeat="video in post.videos" controls style="max-width: 100%; max-height: 300px;">
+                            <source ng-src="{{video}}" type="video/mp4">
+                        </video>
+                    </div>
                 </div>
                 
                 <div class="social-footer">

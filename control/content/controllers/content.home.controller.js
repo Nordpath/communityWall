@@ -189,13 +189,30 @@
                             ContentHome.allPosts = data.result.map(item => {
                                 const mappedItem = { ...item.data, id: item.id };
 
+                                console.log('[ContentDebug] Raw post data:', {
+                                    id: item.id,
+                                    images: item.data.images,
+                                    postImages: item.data.postImages,
+                                    imageUrl: item.data.imageUrl
+                                });
+
                                 // Map postImages to images for template compatibility
                                 if (!mappedItem.images && mappedItem.postImages) {
                                     mappedItem.images = mappedItem.postImages;
                                 }
+                                // Also check imageUrl field (some posts store images there)
+                                if ((!mappedItem.images || mappedItem.images.length === 0) && mappedItem.imageUrl) {
+                                    if (Array.isArray(mappedItem.imageUrl)) {
+                                        mappedItem.images = mappedItem.imageUrl;
+                                    } else if (typeof mappedItem.imageUrl === 'string' && mappedItem.imageUrl) {
+                                        mappedItem.images = [mappedItem.imageUrl];
+                                    }
+                                }
                                 if (!mappedItem.images) {
                                     mappedItem.images = [];
                                 }
+
+                                console.log('[ContentDebug] Mapped images:', mappedItem.images);
 
                                 // Map postVideos to videos
                                 if (!mappedItem.videos && mappedItem.postVideos) {

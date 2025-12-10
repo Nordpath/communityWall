@@ -67,6 +67,18 @@
                     return decodeURIComponent(results[2].replace(/\+/g, " "));
                 },
                 resizeImage(imageUrl, options) {
+                    if (!imageUrl) return '';
+
+                    if (imageUrl.startsWith('data:')) {
+                        return imageUrl;
+                    }
+
+                    if (imageUrl.includes('usercontent.buildfire.com') ||
+                        imageUrl.includes('storage.buildfire.com') ||
+                        imageUrl.includes('s3.amazonaws.com')) {
+                        return imageUrl;
+                    }
+
                     const calculateWidth = () => {
                         const windowWidth = window.innerWidth;
                         const windowHeight = window.innerHeight;
@@ -75,9 +87,11 @@
                     if (!options) {
                         options = calculateWidth();
                     }
-                    return buildfire.imageLib.resizeImage(
-                        imageUrl, options
-                    );
+                    try {
+                        return buildfire.imageLib.resizeImage(imageUrl, options);
+                    } catch (e) {
+                        return imageUrl;
+                    }
                 }
             }
         }])
