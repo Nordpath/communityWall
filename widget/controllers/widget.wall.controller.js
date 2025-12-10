@@ -1635,19 +1635,8 @@
           }
 
           WidgetWall.openMediaPickerFirst = function() {
-              var input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'image/*,video/*';
-              input.multiple = true;
-              input.style.display = 'none';
-              document.body.appendChild(input);
-
-              input.onchange = function(e) {
-                  var files = e.target.files;
-                  document.body.removeChild(input);
-
-                  if (!files || files.length === 0) return;
-
+              if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                  console.log('[MediaPicker] Using publicFiles.showDialog');
                   WidgetWall.isUploadingMedia = true;
                   WidgetWall.showFullScreenCompose = true;
                   WidgetWall.customPostText = '';
@@ -1656,10 +1645,85 @@
                   WidgetWall.editingPost = null;
                   if (!$scope.$$phase) $scope.$apply();
 
-                  WidgetWall.processSelectedFiles(files);
-              };
+                  buildfire.services.publicFiles.showDialog(
+                      { allowMultipleFilesUpload: true },
+                      function(onProgress) {
+                          console.log('[MediaPicker] Upload progress:', onProgress);
+                      },
+                      function(onComplete) {
+                          console.log('[MediaPicker] File complete:', onComplete);
+                      },
+                      function(err, files) {
+                          console.log('[MediaPicker] showDialog callback:', err, files);
+                          if (err) {
+                              console.error('[MediaPicker] showDialog error:', err);
+                              WidgetWall.isUploadingMedia = false;
+                              WidgetWall.showFullScreenCompose = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                              return;
+                          }
 
-              input.click();
+                          if (!files || files.length === 0) {
+                              WidgetWall.isUploadingMedia = false;
+                              WidgetWall.showFullScreenCompose = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                              return;
+                          }
+
+                          files.forEach(function(file) {
+                              if (file.status === 'success' && file.url) {
+                                  if (file.type && file.type.startsWith('video/')) {
+                                      WidgetWall.selectedVideos.push(file.url);
+                                  } else {
+                                      WidgetWall.selectedImages.push(file.url);
+                                  }
+                              }
+                          });
+
+                          if (WidgetWall.selectedImages.length > 0) {
+                              WidgetWall.selectedImagesText = WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images';
+                          }
+                          if (WidgetWall.selectedVideos.length > 0) {
+                              WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
+                          }
+
+                          console.log('[MediaPicker] Final state:', {
+                              images: WidgetWall.selectedImages,
+                              videos: WidgetWall.selectedVideos
+                          });
+
+                          WidgetWall.isUploadingMedia = false;
+                          if (!$scope.$$phase) $scope.$apply();
+                      }
+                  );
+              } else {
+                  console.log('[MediaPicker] showDialog not available, using file input fallback');
+                  var input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*,video/*';
+                  input.multiple = true;
+                  input.style.display = 'none';
+                  document.body.appendChild(input);
+
+                  input.onchange = function(e) {
+                      var files = e.target.files;
+                      document.body.removeChild(input);
+
+                      if (!files || files.length === 0) return;
+
+                      WidgetWall.isUploadingMedia = true;
+                      WidgetWall.showFullScreenCompose = true;
+                      WidgetWall.customPostText = '';
+                      WidgetWall.selectedImages = [];
+                      WidgetWall.selectedVideos = [];
+                      WidgetWall.editingPost = null;
+                      if (!$scope.$$phase) $scope.$apply();
+
+                      WidgetWall.processSelectedFiles(files);
+                  };
+
+                  input.click();
+              }
           }
 
           WidgetWall.processSelectedFiles = function(files) {
@@ -1893,103 +1957,154 @@
           }
 
           WidgetWall.selectImages = function () {
-              var input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'image/*';
-              input.multiple = true;
-              input.style.display = 'none';
-              document.body.appendChild(input);
-
-              input.onchange = function(e) {
-                  var files = e.target.files;
-                  document.body.removeChild(input);
-
-                  if (!files || files.length === 0) return;
-
+              if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                  console.log('[ImageSelect] Using publicFiles.showDialog');
                   WidgetWall.isUploadingMedia = true;
                   if (!$scope.$$phase) $scope.$apply();
 
-                  var imagePromises = Array.from(files).map(function(file) {
-                      return new Promise(function(resolve) {
-                          var reader = new FileReader();
-                          reader.onload = function(event) {
-                              var base64 = event.target.result;
-                              if (buildfire && buildfire.imageLib && buildfire.imageLib.local && buildfire.imageLib.local.toPublicUrl) {
-                                  buildfire.imageLib.local.toPublicUrl(base64, function(err, url) {
-                                      resolve(err ? base64 : url);
-                                  });
-                              } else {
-                                  resolve(base64);
-                              }
-                          };
-                          reader.onerror = function() { resolve(null); };
-                          reader.readAsDataURL(file);
-                      });
-                  });
+                  buildfire.services.publicFiles.showDialog(
+                      {
+                          allowMultipleFilesUpload: true,
+                          filter: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/*']
+                      },
+                      function(onProgress) {
+                          console.log('[ImageSelect] Upload progress:', onProgress);
+                      },
+                      function(onComplete) {
+                          console.log('[ImageSelect] File complete:', onComplete);
+                      },
+                      function(err, files) {
+                          console.log('[ImageSelect] showDialog callback:', err, files);
+                          if (err) {
+                              console.error('[ImageSelect] showDialog error:', err);
+                              WidgetWall.isUploadingMedia = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                              return;
+                          }
 
-                  Promise.all(imagePromises).then(function(urls) {
-                      WidgetWall.selectedImages = urls.filter(function(url) { return url !== null; });
-                      WidgetWall.selectedImagesText = WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images';
-                      WidgetWall.isUploadingMedia = false;
+                          if (files && files.length > 0) {
+                              files.forEach(function(file) {
+                                  if (file.status === 'success' && file.url) {
+                                      WidgetWall.selectedImages.push(file.url);
+                                  }
+                              });
+                              WidgetWall.selectedImagesText = WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images';
+                          }
+
+                          WidgetWall.isUploadingMedia = false;
+                          if (!$scope.$$phase) $scope.$apply();
+                      }
+                  );
+              } else {
+                  console.log('[ImageSelect] showDialog not available, using file input fallback');
+                  var input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.multiple = true;
+                  input.style.display = 'none';
+                  document.body.appendChild(input);
+
+                  input.onchange = function(e) {
+                      var files = e.target.files;
+                      document.body.removeChild(input);
+
+                      if (!files || files.length === 0) return;
+
+                      WidgetWall.isUploadingMedia = true;
                       if (!$scope.$$phase) $scope.$apply();
-                  });
-              };
 
-              input.click();
+                      var imagePromises = Array.from(files).map(function(file) {
+                          return new Promise(function(resolve) {
+                              var reader = new FileReader();
+                              reader.onload = function(event) {
+                                  var base64 = event.target.result;
+                                  if (buildfire && buildfire.imageLib && buildfire.imageLib.local && buildfire.imageLib.local.toPublicUrl) {
+                                      buildfire.imageLib.local.toPublicUrl(base64, function(err, url) {
+                                          resolve(err ? base64 : url);
+                                      });
+                                  } else {
+                                      resolve(base64);
+                                  }
+                              };
+                              reader.onerror = function() { resolve(null); };
+                              reader.readAsDataURL(file);
+                          });
+                      });
+
+                      Promise.all(imagePromises).then(function(urls) {
+                          WidgetWall.selectedImages = urls.filter(function(url) { return url !== null; });
+                          WidgetWall.selectedImagesText = WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images';
+                          WidgetWall.isUploadingMedia = false;
+                          if (!$scope.$$phase) $scope.$apply();
+                      });
+                  };
+
+                  input.click();
+              }
           }
 
           WidgetWall.selectVideos = function () {
-              var input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'video/*';
-              input.multiple = true;
-              input.style.display = 'none';
-              document.body.appendChild(input);
-
-              input.onchange = function(e) {
-                  var files = e.target.files;
-                  document.body.removeChild(input);
-
-                  if (!files || files.length === 0) return;
-
+              if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
+                  console.log('[VideoSelect] Using publicFiles.showDialog');
                   WidgetWall.isUploadingMedia = true;
                   if (!$scope.$$phase) $scope.$apply();
 
-                  var videoPromises = Array.from(files).map(function(file) {
-                      return new Promise(function(resolve) {
-                          if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFile) {
-                              buildfire.services.publicFiles.uploadFile(
-                                  file,
-                                  { allowMultipleFilesUpload: false },
-                                  function(err, result) {
-                                      if (err) {
-                                          var reader = new FileReader();
-                                          reader.onload = function(event) { resolve(event.target.result); };
-                                          reader.onerror = function() { resolve(null); };
-                                          reader.readAsDataURL(file);
-                                      } else {
-                                          resolve(result.url);
-                                      }
-                                  }
-                              );
-                          } else {
-                              var reader = new FileReader();
-                              reader.onload = function(event) { resolve(event.target.result); };
-                              reader.onerror = function() { resolve(null); };
-                              reader.readAsDataURL(file);
+                  buildfire.services.publicFiles.showDialog(
+                      {
+                          allowMultipleFilesUpload: true,
+                          filter: ['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg', 'video/avi', 'video/*']
+                      },
+                      function(onProgress) {
+                          console.log('[VideoSelect] Upload progress:', onProgress);
+                      },
+                      function(onComplete) {
+                          console.log('[VideoSelect] File complete:', onComplete);
+                      },
+                      function(err, files) {
+                          console.log('[VideoSelect] showDialog callback:', err, files);
+                          if (err) {
+                              console.error('[VideoSelect] showDialog error:', err);
+                              WidgetWall.isUploadingMedia = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                              return;
                           }
-                      });
-                  });
 
-                  Promise.all(videoPromises).then(function(urls) {
-                      WidgetWall.selectedVideos = urls.filter(function(url) { return url !== null; });
-                      WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
-                      WidgetWall.isUploadingMedia = false;
+                          if (files && files.length > 0) {
+                              files.forEach(function(file) {
+                                  if (file.status === 'success' && file.url) {
+                                      WidgetWall.selectedVideos.push(file.url);
+                                  }
+                              });
+                              WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
+                          }
+
+                          WidgetWall.isUploadingMedia = false;
+                          if (!$scope.$$phase) $scope.$apply();
+                      }
+                  );
+              } else {
+                  console.log('[VideoSelect] showDialog not available, using file input fallback');
+                  var input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'video/*';
+                  input.multiple = true;
+                  input.style.display = 'none';
+                  document.body.appendChild(input);
+
+                  input.onchange = function(e) {
+                      var files = e.target.files;
+                      document.body.removeChild(input);
+
+                      if (!files || files.length === 0) return;
+
+                      WidgetWall.isUploadingMedia = true;
                       if (!$scope.$$phase) $scope.$apply();
-                  });
-              };
 
-              input.click();
+                      WidgetWall.processSelectedFiles(files);
+                  };
+
+                  input.click();
+              }
           }
 
           WidgetWall.handlePostKeyPress = function (event) {
