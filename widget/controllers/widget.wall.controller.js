@@ -1831,10 +1831,11 @@
                               } // callback
                           );
                       } else {
-                          console.error('[ImageUpload] publicFiles.uploadFiles not available');
+                          console.error('[ImageUpload] publicFiles.uploadFiles not available - this requires the BuildFire app environment and user must be logged in');
                           buildfire.dialog.toast({
-                              message: 'Video upload service is not available. Please contact support.',
-                              type: 'danger'
+                              message: 'Video upload requires the BuildFire app. Please test in the actual app.',
+                              type: 'warning',
+                              duration: 5000
                           });
                           resolve(null);
                       }
