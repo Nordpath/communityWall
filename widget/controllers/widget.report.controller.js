@@ -13,6 +13,88 @@
             type: 'list-item-avatar, list-item-two-line, image'
         });
 
+        Report.imageGallery = {
+            show: false,
+            images: [],
+            currentIndex: 0
+        };
+
+        Report.closeImageGallery = function (event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            Report.imageGallery.show = false;
+            Report.imageGallery.images = [];
+            Report.imageGallery.currentIndex = 0;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        };
+
+        Report.prevImage = function (event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            if (Report.imageGallery.currentIndex > 0) {
+                Report.imageGallery.currentIndex--;
+            } else {
+                Report.imageGallery.currentIndex = Report.imageGallery.images.length - 1;
+            }
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        };
+
+        Report.nextImage = function (event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            if (Report.imageGallery.currentIndex < Report.imageGallery.images.length - 1) {
+                Report.imageGallery.currentIndex++;
+            } else {
+                Report.imageGallery.currentIndex = 0;
+            }
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        };
+
+        Report.goToImage = function (event, index) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            Report.imageGallery.currentIndex = index;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        };
+
+        Report.downloadImage = function (event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            var imageUrl = Report.imageGallery.images[Report.imageGallery.currentIndex];
+            if (imageUrl) {
+                window.open(imageUrl, '_blank');
+            }
+        };
+
+        $scope.$on('openImageGallery', function(event, data) {
+            if (data && data.images && data.images.length) {
+                Report.imageGallery.images = data.images;
+                Report.imageGallery.currentIndex = data.index || 0;
+                Report.imageGallery.show = true;
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            }
+        });
+
         Report.init = function () {
             Report.skeletonPost.start();
             Buildfire.services.reportAbuse.triggerWidgetReadyForAdminResponse();

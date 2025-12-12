@@ -772,6 +772,77 @@
               enabled: false
           };
 
+          WidgetWall.imageGallery = {
+              show: false,
+              images: [],
+              currentIndex: 0
+          };
+
+          WidgetWall.closeImageGallery = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              WidgetWall.imageGallery.show = false;
+              WidgetWall.imageGallery.images = [];
+              WidgetWall.imageGallery.currentIndex = 0;
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          WidgetWall.prevImage = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              if (WidgetWall.imageGallery.currentIndex > 0) {
+                  WidgetWall.imageGallery.currentIndex--;
+              } else {
+                  WidgetWall.imageGallery.currentIndex = WidgetWall.imageGallery.images.length - 1;
+              }
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          WidgetWall.nextImage = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              if (WidgetWall.imageGallery.currentIndex < WidgetWall.imageGallery.images.length - 1) {
+                  WidgetWall.imageGallery.currentIndex++;
+              } else {
+                  WidgetWall.imageGallery.currentIndex = 0;
+              }
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          WidgetWall.goToImage = function (event, index) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              WidgetWall.imageGallery.currentIndex = index;
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          WidgetWall.downloadImage = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              var imageUrl = WidgetWall.imageGallery.images[WidgetWall.imageGallery.currentIndex];
+              if (imageUrl) {
+                  window.open(imageUrl, '_blank');
+              }
+          };
+
           WidgetWall.loadBottomLogoConfig = function () {
               buildfire.datastore.get('Social', function (err, result) {
                   if (err) {
@@ -2857,6 +2928,29 @@
                   }
               }
           }
+
+          $scope.$on('openImageGallery', function(event, data) {
+              if (data && data.images && data.images.length) {
+                  WidgetWall.imageGallery.images = data.images;
+                  WidgetWall.imageGallery.currentIndex = data.index || 0;
+                  WidgetWall.imageGallery.show = true;
+                  if (!$scope.$$phase) {
+                      $scope.$apply();
+                  }
+              }
+          });
+
+          document.addEventListener('keydown', function(e) {
+              if (WidgetWall.imageGallery.show) {
+                  if (e.key === 'Escape') {
+                      WidgetWall.closeImageGallery();
+                  } else if (e.key === 'ArrowLeft') {
+                      WidgetWall.prevImage();
+                  } else if (e.key === 'ArrowRight') {
+                      WidgetWall.nextImage();
+                  }
+              }
+          });
 
           // On Login
           Buildfire.auth.onLogin(function (user) {

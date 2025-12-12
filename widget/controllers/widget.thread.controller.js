@@ -24,6 +24,88 @@
               type: 'list-item-avatar, list-item-two-line'
           });
 
+          Thread.imageGallery = {
+              show: false,
+              images: [],
+              currentIndex: 0
+          };
+
+          Thread.closeImageGallery = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              Thread.imageGallery.show = false;
+              Thread.imageGallery.images = [];
+              Thread.imageGallery.currentIndex = 0;
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          Thread.prevImage = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              if (Thread.imageGallery.currentIndex > 0) {
+                  Thread.imageGallery.currentIndex--;
+              } else {
+                  Thread.imageGallery.currentIndex = Thread.imageGallery.images.length - 1;
+              }
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          Thread.nextImage = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              if (Thread.imageGallery.currentIndex < Thread.imageGallery.images.length - 1) {
+                  Thread.imageGallery.currentIndex++;
+              } else {
+                  Thread.imageGallery.currentIndex = 0;
+              }
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          Thread.goToImage = function (event, index) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              Thread.imageGallery.currentIndex = index;
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          Thread.downloadImage = function (event) {
+              if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+              }
+              var imageUrl = Thread.imageGallery.images[Thread.imageGallery.currentIndex];
+              if (imageUrl) {
+                  window.open(imageUrl, '_blank');
+              }
+          };
+
+          $scope.$on('openImageGallery', function(event, data) {
+              if (data && data.images && data.images.length) {
+                  Thread.imageGallery.images = data.images;
+                  Thread.imageGallery.currentIndex = data.index || 0;
+                  Thread.imageGallery.show = true;
+                  if (!$scope.$$phase) {
+                      $scope.$apply();
+                  }
+              }
+          });
+
           Thread.showHideCommentBox = function () {
               if (Thread.SocialItems && Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.allowSideThreadTags &&
                 Thread.SocialItems.appSettings.sideThreadUserTags && Thread.SocialItems.appSettings.sideThreadUserTags.length > 0

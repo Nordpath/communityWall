@@ -271,6 +271,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Image Gallery Modal -->
+    <div id="imageGalleryModal" class="image-gallery-modal" ng-show="WidgetWall.imageGallery.show" ng-click="WidgetWall.closeImageGallery($event)">
+        <div class="gallery-close" ng-click="WidgetWall.closeImageGallery($event)">
+            <span class="material-icons">close</span>
+        </div>
+
+        <div class="gallery-download" ng-click="WidgetWall.downloadImage($event)">
+            <span class="material-icons">download</span>
+        </div>
+
+        <div class="gallery-counter">
+            {{WidgetWall.imageGallery.currentIndex + 1}} / {{WidgetWall.imageGallery.images.length}}
+        </div>
+
+        <div class="gallery-content" ng-click="$event.stopPropagation()">
+            <div class="gallery-prev" ng-show="WidgetWall.imageGallery.images.length > 1" ng-click="WidgetWall.prevImage($event)">
+                <span class="material-icons">chevron_left</span>
+            </div>
+
+            <div class="gallery-image-container">
+                <img ng-src="{{WidgetWall.imageGallery.images[WidgetWall.imageGallery.currentIndex]}}"
+                     alt="Gallery image"
+                     class="gallery-image">
+            </div>
+
+            <div class="gallery-next" ng-show="WidgetWall.imageGallery.images.length > 1" ng-click="WidgetWall.nextImage($event)">
+                <span class="material-icons">chevron_right</span>
+            </div>
+        </div>
+
+        <div class="gallery-thumbnails" ng-show="WidgetWall.imageGallery.images.length > 1">
+            <div ng-repeat="img in WidgetWall.imageGallery.images track by $index"
+                 class="gallery-thumbnail"
+                 ng-class="{'active': $index === WidgetWall.imageGallery.currentIndex}"
+                 ng-click="WidgetWall.goToImage($event, $index)">
+                <img ng-src="{{WidgetWall.util.resizeImage(img)}}" alt="Thumbnail {{$index + 1}}">
+            </div>
+        </div>
+    </div>
+
     <script>
         buildfire.appearance.titlebar.show();
     </script>

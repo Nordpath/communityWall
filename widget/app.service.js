@@ -1341,10 +1341,10 @@
                     event.preventDefault();
                     event.stopPropagation();
 
-                    var imageUrl = images[index];
-                    if (imageUrl) {
-                        window.open(imageUrl, '_blank');
-                    }
+                    $rootScope.$broadcast('openImageGallery', {
+                        images: images,
+                        index: index
+                    });
                 }
             };
 

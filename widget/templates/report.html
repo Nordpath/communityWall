@@ -52,3 +52,43 @@
         </div>
     </div>
 </div>
+
+<!-- Image Gallery Modal -->
+<div id="imageGalleryModal" class="image-gallery-modal" ng-show="Report.imageGallery.show" ng-click="Report.closeImageGallery($event)">
+    <div class="gallery-close" ng-click="Report.closeImageGallery($event)">
+        <span class="material-icons">close</span>
+    </div>
+
+    <div class="gallery-download" ng-click="Report.downloadImage($event)">
+        <span class="material-icons">download</span>
+    </div>
+
+    <div class="gallery-counter">
+        {{Report.imageGallery.currentIndex + 1}} / {{Report.imageGallery.images.length}}
+    </div>
+
+    <div class="gallery-content" ng-click="$event.stopPropagation()">
+        <div class="gallery-prev" ng-show="Report.imageGallery.images.length > 1" ng-click="Report.prevImage($event)">
+            <span class="material-icons">chevron_left</span>
+        </div>
+
+        <div class="gallery-image-container">
+            <img ng-src="{{Report.imageGallery.images[Report.imageGallery.currentIndex]}}"
+                 alt="Gallery image"
+                 class="gallery-image">
+        </div>
+
+        <div class="gallery-next" ng-show="Report.imageGallery.images.length > 1" ng-click="Report.nextImage($event)">
+            <span class="material-icons">chevron_right</span>
+        </div>
+    </div>
+
+    <div class="gallery-thumbnails" ng-show="Report.imageGallery.images.length > 1">
+        <div ng-repeat="img in Report.imageGallery.images track by $index"
+             class="gallery-thumbnail"
+             ng-class="{'active': $index === Report.imageGallery.currentIndex}"
+             ng-click="Report.goToImage($event, $index)">
+            <img ng-src="{{Report.util.resizeImage(img)}}" alt="Thumbnail {{$index + 1}}">
+        </div>
+    </div>
+</div>

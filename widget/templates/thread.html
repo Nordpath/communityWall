@@ -236,6 +236,46 @@
     </div>
 </div>
 
+<!-- Image Gallery Modal -->
+<div id="imageGalleryModal" class="image-gallery-modal" ng-show="Thread.imageGallery.show" ng-click="Thread.closeImageGallery($event)">
+    <div class="gallery-close" ng-click="Thread.closeImageGallery($event)">
+        <span class="material-icons">close</span>
+    </div>
+
+    <div class="gallery-download" ng-click="Thread.downloadImage($event)">
+        <span class="material-icons">download</span>
+    </div>
+
+    <div class="gallery-counter">
+        {{Thread.imageGallery.currentIndex + 1}} / {{Thread.imageGallery.images.length}}
+    </div>
+
+    <div class="gallery-content" ng-click="$event.stopPropagation()">
+        <div class="gallery-prev" ng-show="Thread.imageGallery.images.length > 1" ng-click="Thread.prevImage($event)">
+            <span class="material-icons">chevron_left</span>
+        </div>
+
+        <div class="gallery-image-container">
+            <img ng-src="{{Thread.imageGallery.images[Thread.imageGallery.currentIndex]}}"
+                 alt="Gallery image"
+                 class="gallery-image">
+        </div>
+
+        <div class="gallery-next" ng-show="Thread.imageGallery.images.length > 1" ng-click="Thread.nextImage($event)">
+            <span class="material-icons">chevron_right</span>
+        </div>
+    </div>
+
+    <div class="gallery-thumbnails" ng-show="Thread.imageGallery.images.length > 1">
+        <div ng-repeat="img in Thread.imageGallery.images track by $index"
+             class="gallery-thumbnail"
+             ng-class="{'active': $index === Thread.imageGallery.currentIndex}"
+             ng-click="Thread.goToImage($event, $index)">
+            <img ng-src="{{Thread.util.resizeImage(img)}}" alt="Thumbnail {{$index + 1}}">
+        </div>
+    </div>
+</div>
+
 <script type="text/ng-template" id="modal-comment-template.html">
     <div class="comment-wrapper">
         <div class="replying-to-badge" ng-if="comment.parentCommentId && comment.parentUserName">
