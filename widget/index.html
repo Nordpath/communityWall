@@ -152,17 +152,15 @@
                                     </div>
                                     <div class="post-media-container" ng-if="(post.images && post.images.length > 0) || (post.videos && post.videos.length > 0)">
                                         <div class="post-media-wrapper text-center" style="max-height: none !important;">
-                                            <a ng-click="openThread($event,post)">
-                                                <div data-wrap="true">
-                                                    <div ng-repeat="image in post.images track by $index" class="post-images-container" ng-if="WidgetWall.isValidImageUrl(image)">
-                                                        <img ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)" onerror="console.error('[ImageError] Failed to load:', this.src); this.style.display='none';">
-                                                    </div>
-                                                    <div ng-repeat="video in post.videos track by $index" class="post-videos-container" ng-if="video && video !== ''">
-                                                        <video controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
-                                                        </video>
-                                                    </div>
+                                            <div data-wrap="true">
+                                                <div ng-repeat="image in post.images track by $index" class="post-images-container" ng-if="WidgetWall.isValidImageUrl(image)">
+                                                    <img ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)" onerror="console.error('[ImageError] Failed to load:', this.src); this.style.display='none';">
                                                 </div>
-                                            </a>
+                                                <div ng-repeat="video in post.videos track by $index" class="post-videos-container" ng-if="video && video !== ''">
+                                                    <video controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
+                                                    </video>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div ng-show="post.userId" class="footer clearfix">

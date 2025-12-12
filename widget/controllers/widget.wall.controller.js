@@ -2930,10 +2930,12 @@
           }
 
           $scope.$on('openImageGallery', function(event, data) {
+              console.log('[WallController] openImageGallery event received:', data);
               if (data && data.images && data.images.length) {
                   WidgetWall.imageGallery.images = data.images;
                   WidgetWall.imageGallery.currentIndex = data.index || 0;
                   WidgetWall.imageGallery.show = true;
+                  console.log('[WallController] Gallery state set:', WidgetWall.imageGallery);
                   if (!$scope.$$phase) {
                       $scope.$apply();
                   }

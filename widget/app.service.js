@@ -1337,14 +1337,18 @@
             }
 
             SocialItems.prototype.previewImage = function(event, index, images) {
+                console.log('[PreviewImage] Called with:', { index: index, imagesLength: images ? images.length : 0, images: images });
                 if (images && images.length) {
                     event.preventDefault();
                     event.stopPropagation();
 
+                    console.log('[PreviewImage] Broadcasting openImageGallery event');
                     $rootScope.$broadcast('openImageGallery', {
                         images: images,
                         index: index
                     });
+                } else {
+                    console.log('[PreviewImage] No images to preview');
                 }
             };
 
