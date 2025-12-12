@@ -2490,7 +2490,7 @@
               buildfire.spinner.show();
 
               const deepLinkData = {
-                  postId: post.id
+                  postId: String(post.id)
               };
 
               if (WidgetWall.SocialItems.wid) {
@@ -2504,7 +2504,10 @@
               const shareTitle = WidgetWall.sanitizeShareText(WidgetWall.SocialItems.context.title) || 'Community Post';
               const postText = post.text || '';
               const sanitizedPostText = WidgetWall.sanitizeShareText(postText);
-              const shareDescription = sanitizedPostText ? sanitizedPostText.substring(0, 200) : 'Check out this post!';
+              let shareDescription = sanitizedPostText ? sanitizedPostText.substring(0, 200) : '';
+              if (!shareDescription || shareDescription.length < 10) {
+                  shareDescription = 'Check out this post on ' + shareTitle;
+              }
 
               const rawImage = post.imageUrl && post.imageUrl[0];
               const shareImage = util.getShareableImageUrl(rawImage);
