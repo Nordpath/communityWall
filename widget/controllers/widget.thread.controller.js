@@ -970,35 +970,27 @@
                   }
 
                   const isDesktop = context.device.platform === 'web';
+                  const canUseWebShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function' && window.isSecureContext;
 
                   if (isDesktop) {
-                      buildfire.dialog.confirm({
-                          title: 'Share Post',
-                          message: description,
-                          confirmButton: { text: 'Copy Link' },
-                          cancelButton: { text: 'Cancel' }
-                      }, (err, isConfirmed) => {
-                          if (err) return console.error(err);
-                          if (isConfirmed) {
-                              if (navigator.clipboard && navigator.clipboard.writeText) {
-                                  navigator.clipboard.writeText(url).then(() => {
-                                      Buildfire.dialog.toast({
-                                          message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
-                                          type: 'success'
-                                      });
-
-                                      if (typeof Analytics !== 'undefined') {
-                                          Analytics.trackAction("post-shared");
-                                      }
-                                  }).catch((clipboardErr) => {
-                                      console.error('Clipboard write failed:', clipboardErr);
-                                      Thread.fallbackCopyToClipboard(url);
-                                  });
-                              } else {
-                                  Thread.fallbackCopyToClipboard(url);
+                      if (canUseWebShare) {
+                          const shareData = { title: title, text: description, url: url };
+                          navigator.share(shareData).then(() => {
+                              Buildfire.dialog.toast({
+                                  message: Thread.SocialItems.languages.sharePostSuccess || "Post shared successfully!",
+                                  type: 'success'
+                              });
+                              if (typeof Analytics !== 'undefined') {
+                                  Analytics.trackAction("post-shared");
                               }
-                          }
-                      });
+                          }).catch((shareErr) => {
+                              if (shareErr.name === 'AbortError') return;
+                              console.log('Web Share not available, falling back to clipboard');
+                              Thread.showCopyLinkDialog(url, description);
+                          });
+                      } else {
+                          Thread.showCopyLinkDialog(url, description);
+                      }
                   } else {
                       buildfire.device.share({
                           subject: title,
@@ -1023,6 +1015,77 @@
                       });
                   }
               });
+          }
+
+          Thread.showCopyLinkDialog = function(url, description) {
+              buildfire.dialog.confirm({
+                  title: 'Share Post',
+                  message: description,
+                  confirmButton: { text: 'Copy Link' },
+                  cancelButton: { text: 'Cancel' }
+              }, (err, isConfirmed) => {
+                  if (err) return console.error(err);
+                  if (isConfirmed) {
+                      Thread.copyToClipboard(url);
+                  }
+              });
+          }
+
+          Thread.copyToClipboard = function(url) {
+              var copySuccess = function() {
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
+                      type: 'success'
+                  });
+                  if (typeof Analytics !== 'undefined') {
+                      Analytics.trackAction("post-shared");
+                  }
+              };
+
+              var copyFail = function() {
+                  Buildfire.dialog.toast({
+                      message: Thread.SocialItems.languages.sharePostFail || "Unable to copy link. Please try again.",
+                      type: 'danger'
+                  });
+              };
+
+              if (window.isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard.writeText(url).then(copySuccess).catch(function() {
+                      Thread.legacyCopyToClipboard(url, copySuccess, copyFail);
+                  });
+              } else {
+                  Thread.legacyCopyToClipboard(url, copySuccess, copyFail);
+              }
+          }
+
+          Thread.legacyCopyToClipboard = function(text, onSuccess, onFail) {
+              var textArea = document.createElement('textarea');
+              textArea.value = text;
+              textArea.style.position = 'fixed';
+              textArea.style.top = '0';
+              textArea.style.left = '0';
+              textArea.style.width = '2em';
+              textArea.style.height = '2em';
+              textArea.style.padding = '0';
+              textArea.style.border = 'none';
+              textArea.style.outline = 'none';
+              textArea.style.boxShadow = 'none';
+              textArea.style.background = 'transparent';
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              try {
+                  var successful = document.execCommand('copy');
+                  if (successful) {
+                      onSuccess();
+                  } else {
+                      onFail();
+                  }
+              } catch (err) {
+                  console.error('Legacy copy failed:', err);
+                  onFail();
+              }
+              document.body.removeChild(textArea);
           }
 
           Thread.fallbackCopyToClipboard = function(link) {
