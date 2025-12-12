@@ -964,7 +964,21 @@
                   deeplinkOptions.imageUrl = shareImage;
               }
 
+              var deeplinkTimedOut = false;
+              var deeplinkCompleted = false;
+              var timeoutId = setTimeout(function() {
+                  if (!deeplinkCompleted) {
+                      deeplinkTimedOut = true;
+                      buildfire.spinner.hide();
+                      console.warn('[SharePost] Deep link generation timed out after 10 seconds');
+                      Thread.fallbackShare(null, post);
+                  }
+              }, 10000);
+
               buildfire.deeplink.generateUrl(deeplinkOptions, (err, result) => {
+                  if (deeplinkTimedOut) return;
+                  deeplinkCompleted = true;
+                  clearTimeout(timeoutId);
                   buildfire.spinner.hide();
 
                   if (err || !result || !result.url) {

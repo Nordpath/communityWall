@@ -156,6 +156,7 @@
                 getShareableImageUrl(imageUrl) {
                     if (!imageUrl) return null;
                     if (imageUrl.startsWith('data:')) return null;
+                    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) return null;
                     return imageUrl;
                 },
                 resizeImage(imageUrl, options) {
