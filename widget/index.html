@@ -240,9 +240,15 @@
 
                 <div class="compose-media-preview" ng-hide="WidgetWall.isUploadingMedia">
                     <div ng-repeat="image in WidgetWall.selectedImages track by $index" class="preview-image-container">
+                        <span class="preview-remove-btn" ng-click="WidgetWall.removeImage($index)">
+                            <span class="material-icons">close</span>
+                        </span>
                         <img ng-src="{{image}}" alt="Selected image">
                     </div>
                     <div ng-repeat="video in WidgetWall.selectedVideos track by $index" class="preview-video-container">
+                        <span class="preview-remove-btn" ng-click="WidgetWall.removeVideo($index)">
+                            <span class="material-icons">close</span>
+                        </span>
                         <video controls playsinline ng-src="{{video | trustAsResourceUrl}}">
                         </video>
                     </div>

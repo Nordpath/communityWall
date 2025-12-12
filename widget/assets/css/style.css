@@ -2239,7 +2239,9 @@ a.comments .iconsTheme.iconsFont {
     overflow: auto;
 }
 
-.preview-image-container {
+.preview-image-container,
+.preview-video-container {
+    position: relative;
     width: 100%;
     max-width: 400px;
 }
@@ -2251,9 +2253,28 @@ a.comments .iconsTheme.iconsFont {
     object-fit: contain;
 }
 
-.preview-video-container {
-    width: 100%;
-    max-width: 400px;
+.preview-remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.preview-remove-btn .material-icons {
+    color: #fff;
+    font-size: 18px;
+}
+
+.preview-remove-btn:active {
+    background: rgba(0, 0, 0, 0.8);
 }
 
 .preview-video-container video {

@@ -540,70 +540,84 @@
               let listItems = [];
               let userId = post.userId;
               Thread.modalPopupThreadId = post.id;
-              Thread.SocialItems.authenticateUser(null, (err, userData) => {
-                  if (err) { buildfire.spinner.hide(); return console.error("Getting user failed.", err); }
-                  if (userData) {
-                      // Add options based on user conditions
-                      if (post.userId === Thread.SocialItems.userDetails.userId) {
-                          listItems.push(
-                            {
-                                id: 'deletePost',
-                                text: Thread.SocialItems.languages.deletePost
-                            }
-                          );
-                      } else {
-                          listItems.push(
-                            {
-                                id: 'reportPost',
-                                text: Thread.SocialItems.languages.reportPost
-                            },
-                            {
-                                id: 'blockUser',
-                                text: Thread.SocialItems.languages.blockUser
-                            }
-                          );
+
+              function buildMenuItems(isFollowing, canChat) {
+                  if (post.userId === Thread.SocialItems.userDetails.userId) {
+                      listItems.push({ id: 'deletePost', text: Thread.SocialItems.languages.deletePost });
+                  } else {
+                      listItems.push({ id: 'reportPost', text: Thread.SocialItems.languages.reportPost });
+                      listItems.push({ id: 'blockUser', text: Thread.SocialItems.languages.blockUser });
+                  }
+
+                  if (Thread.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != Thread.SocialItems.userDetails.userId) {
+                      listItems.push({ text: isFollowing ? 'Unfollow' : 'Follow' });
+                  }
+
+                  if (Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.seeProfile == true && post.userId != Thread.SocialItems.userDetails.userId) {
+                      listItems.push({ text: 'See Profile' });
+                  }
+
+                  var showDM = false;
+                  if (post.userId != Thread.SocialItems.userDetails.userId && !Thread.SocialItems.isPrivateChat) {
+                      if (Thread.SocialItems.appSettings && !Thread.SocialItems.appSettings.allowChat &&
+                          ((Thread.SocialItems.appSettings && !Thread.SocialItems.appSettings.disablePrivateChat) || Thread.SocialItems.appSettings.disablePrivateChat == false)) {
+                          showDM = true;
+                      } else if (Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.allowChat == "allUsers") {
+                          showDM = true;
+                      } else if (Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.allowChat == "selectedUsers" && canChat) {
+                          showDM = true;
                       }
-                  } else { buildfire.spinner.hide(); return false; }
+                  }
+                  if (showDM) listItems.push({ text: 'Send Direct Message' });
 
-                  Follows.isFollowingUser(userId, (err, r) => {
-                      if (Thread.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != Thread.SocialItems.userDetails.userId)
-                          listItems.push({
-                              text: r ? 'Unfollow' : 'Follow'
-                          });
+                  Thread.ContinueDrawer(post, listItems);
+              }
 
-                      if (Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.seeProfile == true && post.userId != Thread.SocialItems.userDetails.userId)
-                          listItems.push({
-                              text: 'See Profile'
-                          });
+              function proceedWithMenu() {
+                  var isFollowing = false;
+                  var canChat = false;
+                  var pendingCalls = 0;
+                  var needsFollowCheck = Thread.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != Thread.SocialItems.userDetails.userId;
+                  var needsChatCheck = Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.allowChat == "selectedUsers" &&
+                      !Thread.SocialItems.isPrivateChat && post.userId != Thread.SocialItems.userDetails.userId;
 
-                      if (Thread.SocialItems.appSettings && !Thread.SocialItems.appSettings.allowChat && !Thread.SocialItems.isPrivateChat
-                        && post.userId != Thread.SocialItems.userDetails.userId && ((Thread.SocialItems.appSettings && !Thread.SocialItems.appSettings.disablePrivateChat) || Thread.SocialItems.appSettings.disablePrivateChat == false)) {
-                          listItems.push({
-                              text: 'Send Direct Message'
-                          });
-                      }
+                  if (needsFollowCheck) pendingCalls++;
+                  if (needsChatCheck) pendingCalls++;
 
-                      if (Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.allowChat == "allUsers" && !Thread.SocialItems.isPrivateChat
-                        && post.userId != Thread.SocialItems.userDetails.userId)
-                          listItems.push({
-                              text: 'Send Direct Message'
-                          });
+                  function checkComplete() {
+                      pendingCalls--;
+                      if (pendingCalls <= 0) buildMenuItems(isFollowing, canChat);
+                  }
 
-                      if (Thread.SocialItems.appSettings && Thread.SocialItems.appSettings.allowChat == "selectedUsers" && !Thread.SocialItems.isPrivateChat
-                        && post.userId != Thread.SocialItems.userDetails.userId) {
-                          SubscribedUsersData.checkIfCanChat(userId, (err, response) => {
-                              if (response) {
-                                  listItems.push({
-                                      text: 'Send Direct Message'
-                                  });
-                              }
-                              Thread.ContinueDrawer(post, listItems)
-                          })
-                      } else {
-                          Thread.ContinueDrawer(post, listItems)
-                      }
+                  if (pendingCalls === 0) {
+                      buildMenuItems(isFollowing, canChat);
+                      return;
+                  }
+
+                  if (needsFollowCheck) {
+                      Follows.isFollowingUser(userId, (err, r) => {
+                          isFollowing = r;
+                          checkComplete();
+                      });
+                  }
+
+                  if (needsChatCheck) {
+                      SubscribedUsersData.checkIfCanChat(userId, (err, response) => {
+                          canChat = response;
+                          checkComplete();
+                      });
+                  }
+              }
+
+              if (Thread.SocialItems.userDetails && Thread.SocialItems.userDetails.userId) {
+                  proceedWithMenu();
+              } else {
+                  Thread.SocialItems.authenticateUser(null, (err, userData) => {
+                      if (err) { buildfire.spinner.hide(); return console.error("Getting user failed.", err); }
+                      if (!userData) { buildfire.spinner.hide(); return false; }
+                      proceedWithMenu();
                   });
-              });
+              }
           }
 
           Thread.ContinueDrawer = function (post, listItems) {
@@ -1341,6 +1355,19 @@
               if (!$scope.$$phase) $scope.$apply();
           }
 
+          Thread.removeImage = function (index) {
+              Thread.selectedImages.splice(index, 1);
+              Thread.selectedImagesText = Thread.selectedImages.length === 0 ? 'Add Images' :
+                  (Thread.selectedImages.length === 1 ? '1 image' : Thread.selectedImages.length + ' images');
+              if (!$scope.$$phase) $scope.$apply();
+          }
+
+          Thread.removeVideo = function (index) {
+              Thread.selectedVideos.splice(index, 1);
+              Thread.selectedVideosText = Thread.selectedVideos.length === 0 ? 'Add Videos' :
+                  (Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos');
+              if (!$scope.$$phase) $scope.$apply();
+          }
 
           Thread.handlePostKeyPress = function (event) {
               if (event.keyCode === 13) {

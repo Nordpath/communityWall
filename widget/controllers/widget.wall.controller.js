@@ -659,81 +659,88 @@
               let listItems = [];
               let userId = post.userId;
               WidgetWall.modalPopupThreadId = post.id;
-              WidgetWall.SocialItems.authenticateUser(null, (err, userData) => {
-                  if (err) { buildfire.spinner.hide(); return console.error("Getting user failed.", err); }
-                  if (userData) {
-                      WidgetWall.checkFollowingStatus();
-                      // Add options based on user conditions
-                      if (post.userId === WidgetWall.SocialItems.userDetails.userId) {
-                          listItems.push(
-                            {
-                                id: 'deletePost',
-                                text: WidgetWall.SocialItems.languages.deletePost
-                            }
-                          );
-                      } else {
-                          listItems.push(
-                            {
-                                id: 'reportPost',
-                                text: WidgetWall.SocialItems.languages.reportPost
-                            }
-                          );
+
+              function buildMenuItems(isFollowing, canChat) {
+                  if (post.userId === WidgetWall.SocialItems.userDetails.userId) {
+                      listItems.push({ id: 'deletePost', text: WidgetWall.SocialItems.languages.deletePost });
+                  } else {
+                      listItems.push({ id: 'reportPost', text: WidgetWall.SocialItems.languages.reportPost });
+                  }
+
+                  if (WidgetWall.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != WidgetWall.SocialItems.userDetails.userId) {
+                      listItems.push({ text: isFollowing ? 'Unfollow' : 'Follow' });
+                  }
+
+                  if (WidgetWall.SocialItems.appSettings.seeProfile && post.userId != WidgetWall.SocialItems.userDetails.userId) {
+                      listItems.push({ text: "See Profile" });
+                  }
+
+                  var showDM = false;
+                  if (post.userId != WidgetWall.SocialItems.userDetails.userId && !WidgetWall.SocialItems.isPrivateChat) {
+                      if (WidgetWall.SocialItems.appSettings && !WidgetWall.SocialItems.appSettings.allowChat &&
+                          ((WidgetWall.SocialItems.appSettings && !WidgetWall.SocialItems.appSettings.disablePrivateChat) || WidgetWall.SocialItems.appSettings.disablePrivateChat == false)) {
+                          showDM = true;
+                      } else if (WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowChat == "allUsers") {
+                          showDM = true;
+                      } else if (WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowChat == "selectedUsers" && canChat) {
+                          showDM = true;
                       }
-                  } else { buildfire.spinner.hide(); return false; }
+                  }
+                  if (showDM) listItems.push({ text: 'Send Direct Message' });
 
-                  Follows.isFollowingUser(userId, (err, r) => {
-                      if (WidgetWall.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != WidgetWall.SocialItems.userDetails.userId)
-                          listItems.push({
-                              text: r ? 'Unfollow' : 'Follow'
-                          });
+                  if (post.userId != WidgetWall.SocialItems.userDetails.userId) {
+                      listItems.push({ id: 'blockUser', text: WidgetWall.SocialItems.languages.blockUser });
+                  }
 
-                      if (WidgetWall.SocialItems.appSettings.seeProfile && post.userId != WidgetWall.SocialItems.userDetails.userId)
-                          listItems.push({
-                              text: "See Profile"
-                          })
+                  WidgetWall.ContinueDrawer(post, listItems);
+              }
 
-                      if (WidgetWall.SocialItems.appSettings && !WidgetWall.SocialItems.appSettings.allowChat && !WidgetWall.SocialItems.isPrivateChat
-                        && post.userId != WidgetWall.SocialItems.userDetails.userId && ((WidgetWall.SocialItems.appSettings && !WidgetWall.SocialItems.appSettings.disablePrivateChat) || WidgetWall.SocialItems.appSettings.disablePrivateChat == false)){
-                          listItems.push({
-                              text: 'Send Direct Message'
-                          });
-                      }
+              function proceedWithMenu() {
+                  WidgetWall.checkFollowingStatus();
+                  var isFollowing = false;
+                  var canChat = false;
+                  var pendingCalls = 0;
+                  var needsFollowCheck = WidgetWall.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != WidgetWall.SocialItems.userDetails.userId;
+                  var needsChatCheck = WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowChat == "selectedUsers" &&
+                      !WidgetWall.SocialItems.isPrivateChat && post.userId != WidgetWall.SocialItems.userDetails.userId;
 
-                      if (WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowChat == "allUsers" && !WidgetWall.SocialItems.isPrivateChat
-                        && post.userId != WidgetWall.SocialItems.userDetails.userId)
-                          listItems.push({
-                              text: 'Send Direct Message'
-                          });
+                  if (needsFollowCheck) pendingCalls++;
+                  if (needsChatCheck) pendingCalls++;
 
-                      if (WidgetWall.SocialItems.appSettings && WidgetWall.SocialItems.appSettings.allowChat == "selectedUsers" && !WidgetWall.SocialItems.isPrivateChat
-                        && post.userId != WidgetWall.SocialItems.userDetails.userId) {
-                          SubscribedUsersData.checkIfCanChat(userId, (err, response) => {
-                              if (response) {
-                                  listItems.push({
-                                      text: 'Send Direct Message'
-                                  });
-                              }
-                              listItems.push(
-                                  {
-                                      id: 'blockUser',
-                                      text: WidgetWall.SocialItems.languages.blockUser
-                                  }
-                              );
-                              WidgetWall.ContinueDrawer(post, listItems)
-                          })
-                      } else {
-                          if (post.userId != WidgetWall.SocialItems.userDetails.userId) {
-                              listItems.push(
-                                  {
-                                      id: 'blockUser',
-                                      text: WidgetWall.SocialItems.languages.blockUser
-                                  }
-                              );
-                          }
-                          WidgetWall.ContinueDrawer(post, listItems)
-                      }
+                  function checkComplete() {
+                      pendingCalls--;
+                      if (pendingCalls <= 0) buildMenuItems(isFollowing, canChat);
+                  }
+
+                  if (pendingCalls === 0) {
+                      buildMenuItems(isFollowing, canChat);
+                      return;
+                  }
+
+                  if (needsFollowCheck) {
+                      Follows.isFollowingUser(userId, (err, r) => {
+                          isFollowing = r;
+                          checkComplete();
+                      });
+                  }
+
+                  if (needsChatCheck) {
+                      SubscribedUsersData.checkIfCanChat(userId, (err, response) => {
+                          canChat = response;
+                          checkComplete();
+                      });
+                  }
+              }
+
+              if (WidgetWall.SocialItems.userDetails && WidgetWall.SocialItems.userDetails.userId) {
+                  proceedWithMenu();
+              } else {
+                  WidgetWall.SocialItems.authenticateUser(null, (err, userData) => {
+                      if (err) { buildfire.spinner.hide(); return console.error("Getting user failed.", err); }
+                      if (!userData) { buildfire.spinner.hide(); return false; }
+                      proceedWithMenu();
                   });
-              });
+              }
           }
 
           WidgetWall.ContinueDrawer = function (post, listItems) {
@@ -2023,6 +2030,20 @@
               if (!$scope.$$phase) {
                   $scope.$apply();
               }
+          }
+
+          WidgetWall.removeImage = function (index) {
+              WidgetWall.selectedImages.splice(index, 1);
+              WidgetWall.selectedImagesText = WidgetWall.selectedImages.length === 0 ? 'Add images' :
+                  (WidgetWall.selectedImages.length === 1 ? '1 image' : WidgetWall.selectedImages.length + ' images');
+              if (!$scope.$$phase) $scope.$apply();
+          }
+
+          WidgetWall.removeVideo = function (index) {
+              WidgetWall.selectedVideos.splice(index, 1);
+              WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 0 ? 'Add videos' :
+                  (WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos');
+              if (!$scope.$$phase) $scope.$apply();
           }
 
           WidgetWall.selectImages = function () {
