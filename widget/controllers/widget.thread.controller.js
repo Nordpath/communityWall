@@ -464,10 +464,6 @@
                       if (post.userId === Thread.SocialItems.userDetails.userId) {
                           listItems.push(
                             {
-                                id: 'editPost',
-                                text: Thread.SocialItems.languages.editPost || 'Edit Post'
-                            },
-                            {
                                 id: 'deletePost',
                                 text: Thread.SocialItems.languages.deletePost
                             }

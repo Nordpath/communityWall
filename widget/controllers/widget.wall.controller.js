@@ -666,10 +666,6 @@
                       if (post.userId === WidgetWall.SocialItems.userDetails.userId) {
                           listItems.push(
                             {
-                                id: 'editPost',
-                                text: WidgetWall.SocialItems.languages.editPost || 'Edit Post'
-                            },
-                            {
                                 id: 'deletePost',
                                 text: WidgetWall.SocialItems.languages.deletePost
                             }
