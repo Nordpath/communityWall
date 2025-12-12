@@ -2512,13 +2512,15 @@
 
               buildfire.spinner.show();
 
-              const deepLinkData = {
-                  postId: String(post.id)
-              };
-
-              if (WidgetWall.SocialItems.wid) {
-                  deepLinkData.wid = String(WidgetWall.SocialItems.wid);
+              var wallId = WidgetWall.SocialItems.wid;
+              if (!wallId || wallId === '') {
+                  wallId = WidgetWall.SocialItems.context.instanceId;
               }
+
+              const deepLinkData = {
+                  postId: String(post.id),
+                  wid: String(wallId)
+              };
 
               if (WidgetWall.SocialItems.pluginTitle) {
                   deepLinkData.wTitle = String(WidgetWall.SocialItems.pluginTitle);

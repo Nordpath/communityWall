@@ -937,16 +937,18 @@
 
               buildfire.spinner.show();
 
-              const deepLinkData = {
-                  postId: post.id
-              };
-
-              if (Thread.SocialItems.wid) {
-                  deepLinkData.wid = Thread.SocialItems.wid;
+              var wallId = Thread.SocialItems.wid;
+              if (!wallId || wallId === '') {
+                  wallId = Thread.SocialItems.context.instanceId;
               }
 
+              const deepLinkData = {
+                  postId: String(post.id),
+                  wid: String(wallId)
+              };
+
               if (Thread.SocialItems.pluginTitle) {
-                  deepLinkData.wTitle = Thread.SocialItems.pluginTitle;
+                  deepLinkData.wTitle = String(Thread.SocialItems.pluginTitle);
               }
 
               const shareTitle = Thread.SocialItems.context.title || 'Community Post';
