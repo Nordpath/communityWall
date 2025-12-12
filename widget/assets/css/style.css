@@ -682,6 +682,7 @@ button.btn--lg,
 .footer-right {
     display: flex;
     align-items: center;
+    padding-right: 60px;
 }
 .status-footer .social-icon,
 .footer .social-icon {
