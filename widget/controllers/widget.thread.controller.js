@@ -786,20 +786,28 @@
                 })
           }
           Thread.likeThread = function (post) {
-              Thread.SocialItems.authenticateUser(null, (err, userData) => {
+              Thread.SocialItems.authenticateUser(null, function(err, userData) {
                   if (err) return console.error("Getting user failed.", err);
                   if (userData) {
-                      let liked = post.likes.find(element => element === Thread.SocialItems.userDetails.userId);
-                      let index = post.likes.indexOf(Thread.SocialItems.userDetails.userId);
+                      var liked = post.likes.find(function(element) { return element === Thread.SocialItems.userDetails.userId; });
+                      var index = post.likes.indexOf(Thread.SocialItems.userDetails.userId);
                       if (liked !== undefined) {
-                          post.likes.splice(index, 1)
+                          post.likes.splice(index, 1);
+                          post.likesCount = post.likes.length;
+                          if (post._buildfire && post._buildfire.index) {
+                              post._buildfire.index.number1 = post.likes.length;
+                          }
                           Buildfire.messaging.sendMessageToControl({
                               'name': EVENTS.POST_UNLIKED,
                               'id': post.id,
                               'userId': Thread.SocialItems.userDetails.userId
                           });
                       } else {
-                          post.likes.push(Thread.SocialItems.userDetails.userId);
+                          post.likes = DataUtils.array.addToLimited(post.likes || [], Thread.SocialItems.userDetails.userId, 10000);
+                          post.likesCount = post.likes.length;
+                          if (post._buildfire && post._buildfire.index) {
+                              post._buildfire.index.number1 = post.likes.length;
+                          }
                           Buildfire.messaging.sendMessageToControl({
                               'name': EVENTS.POST_LIKED,
                               'id': post.id,
@@ -807,10 +815,10 @@
                           });
                       }
 
-                      SocialDataStore.updatePost(post).then(() => {
+                      SocialDataStore.updatePost(post).then(function() {
                           if (!liked)
                               Thread.scheduleNotification(post, 'likedPost');
-                      }, (err) => console.log(err));
+                      }, function(err) { console.error('Error updating post:', err); });
                   }
               });
           }

@@ -2341,37 +2341,45 @@
           }
 
           WidgetWall.likeThread = function (post) {
-              WidgetWall.SocialItems.authenticateUser(null, (err, userData) => {
+              WidgetWall.SocialItems.authenticateUser(null, function(err, userData) {
                   if (err) return console.error("Getting user failed.", err);
                   if (userData) {
                       if (WidgetWall.SocialItems.userBanned) return;
-                      let liked = post.likes.find(element => element === WidgetWall.SocialItems.userDetails.userId);
-                      let index = post.likes.indexOf(WidgetWall.SocialItems.userDetails.userId)
-                      let postUpdate = WidgetWall.SocialItems.items.find(element => element.id === post.id)
+                      var liked = post.likes.find(function(element) { return element === WidgetWall.SocialItems.userDetails.userId; });
+                      var index = post.likes.indexOf(WidgetWall.SocialItems.userDetails.userId);
+                      var postUpdate = WidgetWall.SocialItems.items.find(function(element) { return element.id === post.id; });
                       if (liked !== undefined) {
-                          post.likes.splice(index, 1)
+                          post.likes.splice(index, 1);
+                          post.likesCount = post.likes.length;
+                          if (post._buildfire && post._buildfire.index) {
+                              post._buildfire.index.number1 = post.likes.length;
+                          }
                           Buildfire.messaging.sendMessageToControl({
                               'name': EVENTS.POST_UNLIKED,
                               'id': postUpdate.id,
                               'userId': liked
                           });
                       } else {
-                          post.likes.push(WidgetWall.SocialItems.userDetails.userId);
+                          post.likes = DataUtils.array.addToLimited(post.likes || [], WidgetWall.SocialItems.userDetails.userId, 10000);
+                          post.likesCount = post.likes.length;
+                          if (post._buildfire && post._buildfire.index) {
+                              post._buildfire.index.number1 = post.likes.length;
+                          }
                           Buildfire.messaging.sendMessageToControl({
                               'name': EVENTS.POST_LIKED,
                               'id': postUpdate.id,
                               'userId': liked
                           });
                       }
-                      SocialDataStore.updatePost(post).then(() => {
+                      SocialDataStore.updatePost(post).then(function() {
                           SubscribedUsersData.getGroupFollowingStatus(post.userId, WidgetWall.SocialItems.wid, WidgetWall.SocialItems.context.instanceId, function (err, status) {
                               if (status.length &&
                                 status[0].data && !status[0].data.leftWall && !liked) {
                                   Analytics.trackAction("post-liked");
-                                  WidgetWall.scheduleNotification(post, 'like')
-                              };
+                                  WidgetWall.scheduleNotification(post, 'like');
+                              }
                           });
-                      }, (err) => console.log(err));
+                      }, function(err) { console.error('Error updating post:', err); });
                   }
               });
           }
