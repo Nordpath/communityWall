@@ -2518,20 +2518,19 @@
           WidgetWall.sharePost = function (post) {
               if (!post || !post.id) return;
 
+              console.log("[SharePost] Starting...", post.id);
+
               buildfire.spinner.show();
 
-              var wallId = WidgetWall.SocialItems.wid || '';
-
-              const deepLinkData = {
-                  postId: String(post.id)
+              const deeplinkData = {
+                  data: {
+                      itemId: post.id
+                  }
               };
 
+              var wallId = WidgetWall.SocialItems.wid || '';
               if (wallId && wallId !== '') {
-                  deepLinkData.wid = String(wallId);
-              }
-
-              if (WidgetWall.SocialItems.pluginTitle) {
-                  deepLinkData.wTitle = String(WidgetWall.SocialItems.pluginTitle);
+                  deeplinkData.data.wid = String(wallId);
               }
 
               const shareTitle = WidgetWall.sanitizeShareText(WidgetWall.SocialItems.context.title) || 'Community Post';
@@ -2542,59 +2541,22 @@
                   shareDescription = 'Check out this post on ' + shareTitle;
               }
 
-              const rawImage = post.imageUrl && post.imageUrl[0];
-              const shareImage = util.getShareableImageUrl(rawImage);
-
-              const deeplinkOptions = {
-                  title: shareTitle.substring(0, 100),
-                  description: shareDescription,
-                  data: deepLinkData
-              };
-
-              if (shareImage) {
-                  deeplinkOptions.imageUrl = shareImage;
-              }
-
-              console.log('[SharePost] Deeplink options:', {
-                  title: deeplinkOptions.title,
-                  description: deeplinkOptions.description,
-                  descriptionLength: deeplinkOptions.description.length,
-                  hasImage: !!deeplinkOptions.imageUrl,
-                  imageUrlPreview: deeplinkOptions.imageUrl ? deeplinkOptions.imageUrl.substring(0, 100) : 'none',
-                  data: deeplinkOptions.data,
-                  dataKeys: Object.keys(deeplinkOptions.data),
-                  wallId: wallId,
-                  isMainWall: !wallId || wallId === ''
-              });
-
-              var deeplinkTimedOut = false;
-              var deeplinkCompleted = false;
-              var timeoutId = setTimeout(function() {
-                  if (!deeplinkCompleted) {
-                      deeplinkTimedOut = true;
-                      buildfire.spinner.hide();
-                      console.warn('[SharePost] Deep link generation timed out after 10 seconds');
-                      WidgetWall.fallbackShare(null, post);
-                  }
-              }, 10000);
-
-              buildfire.deeplink.generateUrl(deeplinkOptions, (err, result) => {
-                  if (deeplinkTimedOut) return;
-                  deeplinkCompleted = true;
-                  clearTimeout(timeoutId);
+              buildfire.deeplink.generateUrl(deeplinkData, (err, result) => {
                   buildfire.spinner.hide();
 
                   if (err || !result || !result.url) {
-                      console.warn('[SharePost] Deep link generation failed, using fallback share:', {
-                          error: err,
-                          errorMessage: err && err.message ? err.message : 'Unknown error'
-                      });
+                      console.error("[SharePost] Deep link failed", err);
 
-                      WidgetWall.fallbackShare(null, post);
+                      buildfire.device.share({
+                          subject: shareTitle,
+                          text: shareDescription
+                      });
                       return;
                   }
 
-                  WidgetWall.executeShare(result.url, shareTitle, shareDescription, shareImage, post);
+                  console.log("[SharePost] Deep link success:", result.url);
+
+                  WidgetWall.executeShare(result.url, shareTitle, shareDescription, null, post);
               });
           }
 
