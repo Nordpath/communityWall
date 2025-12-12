@@ -655,11 +655,12 @@
           }
 
           WidgetWall.openBottomDrawer = function (post) {
+              buildfire.spinner.show();
               let listItems = [];
               let userId = post.userId;
               WidgetWall.modalPopupThreadId = post.id;
               WidgetWall.SocialItems.authenticateUser(null, (err, userData) => {
-                  if (err) return console.error("Getting user failed.", err);
+                  if (err) { buildfire.spinner.hide(); return console.error("Getting user failed.", err); }
                   if (userData) {
                       WidgetWall.checkFollowingStatus();
                       // Add options based on user conditions
@@ -678,7 +679,7 @@
                             }
                           );
                       }
-                  } else return false;
+                  } else { buildfire.spinner.hide(); return false; }
 
                   Follows.isFollowingUser(userId, (err, r) => {
                       if (WidgetWall.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != WidgetWall.SocialItems.userDetails.userId)
@@ -736,6 +737,7 @@
           }
 
           WidgetWall.ContinueDrawer = function (post, listItems) {
+              buildfire.spinner.hide();
               let userId = post.userId;
               if (listItems.length == 0) return;
               Buildfire.components.drawer.open({

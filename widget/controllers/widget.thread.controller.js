@@ -536,11 +536,12 @@
           }
 
           Thread.openBottomDrawer = function (post) {
+              buildfire.spinner.show();
               let listItems = [];
               let userId = post.userId;
               Thread.modalPopupThreadId = post.id;
               Thread.SocialItems.authenticateUser(null, (err, userData) => {
-                  if (err) return console.error("Getting user failed.", err);
+                  if (err) { buildfire.spinner.hide(); return console.error("Getting user failed.", err); }
                   if (userData) {
                       // Add options based on user conditions
                       if (post.userId === Thread.SocialItems.userDetails.userId) {
@@ -562,7 +563,7 @@
                             }
                           );
                       }
-                  } else return false;
+                  } else { buildfire.spinner.hide(); return false; }
 
                   Follows.isFollowingUser(userId, (err, r) => {
                       if (Thread.SocialItems.appSettings.allowCommunityFeedFollow == true && post.userId != Thread.SocialItems.userDetails.userId)
@@ -606,6 +607,7 @@
           }
 
           Thread.ContinueDrawer = function (post, listItems) {
+              buildfire.spinner.hide();
               let userId = post.userId;
               if (listItems.length == 0) return;
               Buildfire.components.drawer.open({
