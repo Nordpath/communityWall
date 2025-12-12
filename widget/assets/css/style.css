@@ -682,7 +682,6 @@ button.btn--lg,
 .footer-right {
     display: flex;
     align-items: center;
-    padding-right: 60px;
 }
 .status-footer .social-icon,
 .footer .social-icon {
@@ -1891,7 +1890,7 @@ a.comments .iconsTheme.iconsFont {
 
 #addBtn, #addCommentBtn {
     position: fixed;
-    bottom: 20px;
+    bottom: 80px;
     right: 1.5rem;
     z-index: 150;
     transition: transform 0.3s ease, opacity 0.3s ease;
