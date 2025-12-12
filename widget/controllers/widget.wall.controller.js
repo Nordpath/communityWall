@@ -2512,15 +2512,15 @@
 
               buildfire.spinner.show();
 
-              var wallId = WidgetWall.SocialItems.wid;
-              if (!wallId || wallId === '') {
-                  wallId = WidgetWall.SocialItems.context.instanceId;
-              }
+              var wallId = WidgetWall.SocialItems.wid || '';
 
               const deepLinkData = {
-                  postId: String(post.id),
-                  wid: String(wallId)
+                  postId: String(post.id)
               };
+
+              if (wallId && wallId !== '') {
+                  deepLinkData.wid = String(wallId);
+              }
 
               if (WidgetWall.SocialItems.pluginTitle) {
                   deepLinkData.wTitle = String(WidgetWall.SocialItems.pluginTitle);
@@ -2549,10 +2549,14 @@
 
               console.log('[SharePost] Deeplink options:', {
                   title: deeplinkOptions.title,
+                  description: deeplinkOptions.description,
                   descriptionLength: deeplinkOptions.description.length,
                   hasImage: !!deeplinkOptions.imageUrl,
                   imageUrlPreview: deeplinkOptions.imageUrl ? deeplinkOptions.imageUrl.substring(0, 100) : 'none',
-                  dataKeys: Object.keys(deeplinkOptions.data)
+                  data: deeplinkOptions.data,
+                  dataKeys: Object.keys(deeplinkOptions.data),
+                  wallId: wallId,
+                  isMainWall: !wallId || wallId === ''
               });
 
               var deeplinkTimedOut = false;
@@ -2575,12 +2579,10 @@
                   if (err || !result || !result.url) {
                       console.error('[SharePost] Error creating deep link:', {
                           error: err,
+                          errorMessage: err && err.message ? err.message : 'Unknown error',
+                          errorCode: err && err.code ? err.code : 'No code',
                           result: result,
-                          deeplinkOptions: {
-                              title: deeplinkOptions.title,
-                              description: deeplinkOptions.description.substring(0, 50) + '...',
-                              hasImage: !!deeplinkOptions.imageUrl
-                          }
+                          fullDeeplinkOptions: deeplinkOptions
                       });
 
                       WidgetWall.fallbackShare(null, post);

@@ -937,15 +937,15 @@
 
               buildfire.spinner.show();
 
-              var wallId = Thread.SocialItems.wid;
-              if (!wallId || wallId === '') {
-                  wallId = Thread.SocialItems.context.instanceId;
-              }
+              var wallId = Thread.SocialItems.wid || '';
 
               const deepLinkData = {
-                  postId: String(post.id),
-                  wid: String(wallId)
+                  postId: String(post.id)
               };
+
+              if (wallId && wallId !== '') {
+                  deepLinkData.wid = String(wallId);
+              }
 
               if (Thread.SocialItems.pluginTitle) {
                   deepLinkData.wTitle = String(Thread.SocialItems.pluginTitle);
