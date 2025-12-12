@@ -2544,10 +2544,7 @@
                           }
                       });
 
-                      Buildfire.dialog.toast({
-                          message: WidgetWall.SocialItems.languages.sharePostFail || 'Unable to share post. Please try again.',
-                          type: 'danger'
-                      });
+                      WidgetWall.fallbackShare(null, post);
                       return;
                   }
 
