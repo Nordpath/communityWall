@@ -2577,12 +2577,9 @@
                   buildfire.spinner.hide();
 
                   if (err || !result || !result.url) {
-                      console.error('[SharePost] Error creating deep link:', {
+                      console.warn('[SharePost] Deep link generation failed, using fallback share:', {
                           error: err,
-                          errorMessage: err && err.message ? err.message : 'Unknown error',
-                          errorCode: err && err.code ? err.code : 'No code',
-                          result: result,
-                          fullDeeplinkOptions: deeplinkOptions
+                          errorMessage: err && err.message ? err.message : 'Unknown error'
                       });
 
                       WidgetWall.fallbackShare(null, post);
