@@ -2423,20 +2423,23 @@
               };
 
               if (WidgetWall.SocialItems.wid) {
-                  deepLinkData.wid = WidgetWall.SocialItems.wid;
+                  deepLinkData.wid = String(WidgetWall.SocialItems.wid);
               }
 
               if (WidgetWall.SocialItems.pluginTitle) {
-                  deepLinkData.wTitle = WidgetWall.SocialItems.pluginTitle;
+                  deepLinkData.wTitle = String(WidgetWall.SocialItems.pluginTitle);
               }
 
-              const shareTitle = WidgetWall.SocialItems.context.title || 'Community Post';
-              const shareDescription = post.text ? decodeURIComponent(post.text).substring(0, 200) : 'Check out this post!';
+              const shareTitle = WidgetWall.sanitizeShareText(WidgetWall.SocialItems.context.title) || 'Community Post';
+              const postText = post.text || '';
+              const sanitizedPostText = WidgetWall.sanitizeShareText(postText);
+              const shareDescription = sanitizedPostText ? sanitizedPostText.substring(0, 200) : 'Check out this post!';
+
               const rawImage = post.imageUrl && post.imageUrl[0];
               const shareImage = util.getShareableImageUrl(rawImage);
 
               const deeplinkOptions = {
-                  title: shareTitle,
+                  title: shareTitle.substring(0, 100),
                   description: shareDescription,
                   data: deepLinkData
               };
@@ -2445,12 +2448,32 @@
                   deeplinkOptions.imageUrl = shareImage;
               }
 
+              console.log('[SharePost] Deeplink options:', {
+                  title: deeplinkOptions.title,
+                  descriptionLength: deeplinkOptions.description.length,
+                  hasImage: !!deeplinkOptions.imageUrl,
+                  imageUrlPreview: deeplinkOptions.imageUrl ? deeplinkOptions.imageUrl.substring(0, 100) : 'none',
+                  dataKeys: Object.keys(deeplinkOptions.data)
+              });
+
               buildfire.deeplink.generateUrl(deeplinkOptions, (err, result) => {
                   buildfire.spinner.hide();
 
                   if (err || !result || !result.url) {
-                      console.error('Error creating deep link:', err);
-                      WidgetWall.fallbackShare(null, post);
+                      console.error('[SharePost] Error creating deep link:', {
+                          error: err,
+                          result: result,
+                          deeplinkOptions: {
+                              title: deeplinkOptions.title,
+                              description: deeplinkOptions.description.substring(0, 50) + '...',
+                              hasImage: !!deeplinkOptions.imageUrl
+                          }
+                      });
+
+                      Buildfire.dialog.toast({
+                          message: WidgetWall.SocialItems.languages.sharePostFail || 'Unable to share post. Please try again.',
+                          type: 'danger'
+                      });
                       return;
                   }
 
@@ -2550,9 +2573,42 @@
               }
           }
 
+          WidgetWall.sanitizeShareText = function(text) {
+              if (!text || typeof text !== 'string') return '';
+
+              try {
+                  let sanitized = text;
+
+                  if (text.includes('%')) {
+                      try {
+                          sanitized = decodeURIComponent(text);
+                      } catch (e) {
+                          sanitized = text;
+                      }
+                  }
+
+                  const tempDiv = document.createElement('div');
+                  tempDiv.innerHTML = sanitized;
+                  sanitized = tempDiv.textContent || tempDiv.innerText || '';
+
+                  sanitized = sanitized
+                      .replace(/[\r\n\t]+/g, ' ')
+                      .replace(/\s+/g, ' ')
+                      .replace(/[^\x20-\x7E\u00A0-\u024F]/g, '')
+                      .trim();
+
+                  return sanitized;
+              } catch (error) {
+                  console.error('[SharePost] Error sanitizing text:', error);
+                  return '';
+              }
+          };
+
           WidgetWall.fallbackShare = function(link, post) {
-              const shareText = post.text ? decodeURIComponent(post.text).substring(0, 200) : 'Check out this post!';
-              const shareTitle = WidgetWall.SocialItems.context.title || 'Community Post';
+              const postText = post && post.text ? post.text : '';
+              const sanitizedPostText = WidgetWall.sanitizeShareText(postText);
+              const shareText = sanitizedPostText ? sanitizedPostText.substring(0, 200) : 'Check out this post!';
+              const shareTitle = WidgetWall.sanitizeShareText(WidgetWall.SocialItems.context.title) || 'Community Post';
 
               if (navigator.share) {
                   const shareData = {
