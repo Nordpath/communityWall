@@ -799,6 +799,28 @@ button.btn--lg,
 
  }
 
+.comment-status-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.comment-status-footer .footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.comment-more-options {
+    padding: 0.25rem !important;
+    margin-left: auto;
+}
+
+.comment-more-options .material-icons-outlined {
+    font-size: 20px;
+    opacity: 0.7;
+}
+
 
 
 .social-comment hr.small {

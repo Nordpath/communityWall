@@ -124,23 +124,25 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer">
-                                    <a class="social-icon likes" ng-click="!Thread.isBlockedUser(comment.userId) && Thread.likeComment(comment, 'comment')">
-                                        <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
-                                        <span class="iconsTheme iconsFont"
-                                            ng-class="{active: isItemLiked(comment, Thread.SocialItems.userDetails.userId)}">{{comment.likes.length}}</span>
-                                    </a>
-                                    <a class="social-icon reply-btn" ng-if="Thread.allowCreateThread && !comment.deletedOn" ng-click="Thread.openCommentSection(comment)">
-                                        <span class="material-icons-outlined">reply</span>
-                                        <span class="reply-text">Reply</span>
+                                <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer comment-status-footer">
+                                    <div class="footer-left">
+                                        <a class="social-icon likes" ng-click="!Thread.isBlockedUser(comment.userId) && Thread.likeComment(comment, 'comment')">
+                                            <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
+                                            <span class="iconsTheme iconsFont"
+                                                ng-class="{active: isItemLiked(comment, Thread.SocialItems.userDetails.userId)}">{{comment.likes.length}}</span>
+                                        </a>
+                                        <a class="social-icon reply-btn" ng-if="Thread.allowCreateThread && !comment.deletedOn" ng-click="Thread.openCommentSection(comment)">
+                                            <span class="material-icons-outlined">reply</span>
+                                            <span class="reply-text">Reply</span>
+                                        </a>
+                                    </div>
+                                    <a class="social-icon comment-more-options"
+                                       ng-if="comment.userId == Thread.SocialItems.userDetails.userId && comment.commentId"
+                                       ng-click="Thread.showMoreOptionsComment(comment)">
+                                        <span class="material-icons-outlined">more_vert</span>
                                     </a>
                                 </div>
                             </div>
-                            <a class="social-icon margin-one-rem margin-top-zero margin-bottom-zero"
-                            ng-hide = "comment.userId != Thread.SocialItems.userDetails.userId || !comment.commentId"
-                            ng-click="Thread.showMoreOptionsComment(comment)" style="height: 2rem; margin-top: 0.75rem;">
-                            <span class="material-icons-outlined">more_vert</span>
-                            </a>
                         </div>
                         <div ng-if="comment.replies && comment.replies.length > 0 && comment.depth < 3">
                             <div class="toggle-replies" ng-click="Thread.toggleReplies(comment)">
@@ -318,15 +320,22 @@
                         </div>
                     </div>
                 </div>
-                <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer">
-                    <a class="social-icon likes" ng-click="!Thread.isBlockedUser(comment.userId) && Thread.likeComment(comment, 'comment')">
-                        <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
-                        <span class="iconsTheme iconsFont"
-                            ng-class="{active: isItemLiked(comment, Thread.SocialItems.userDetails.userId)}">{{comment.likes.length}}</span>
-                    </a>
-                    <a class="social-icon reply-btn" ng-if="Thread.allowCreateThread && !comment.deletedOn" ng-click="Thread.closeThreadModal(); Thread.openCommentSection(comment)">
-                        <span class="material-icons-outlined">reply</span>
-                        <span class="reply-text">Reply</span>
+                <div ng-show="comment.threadId && !comment.deletedOn" class="status-footer comment-status-footer">
+                    <div class="footer-left">
+                        <a class="social-icon likes" ng-click="!Thread.isBlockedUser(comment.userId) && Thread.likeComment(comment, 'comment')">
+                            <i class="material-icons-outlined" ng-class="{notActive: !isItemLiked(comment, Thread.SocialItems.userDetails.userId) }" aria-hidden="true">{{!isItemLiked(comment, Thread.SocialItems.userDetails.userId)?"favorite_border":"favorite"}}</i>
+                            <span class="iconsTheme iconsFont"
+                                ng-class="{active: isItemLiked(comment, Thread.SocialItems.userDetails.userId)}">{{comment.likes.length}}</span>
+                        </a>
+                        <a class="social-icon reply-btn" ng-if="Thread.allowCreateThread && !comment.deletedOn" ng-click="Thread.closeThreadModal(); Thread.openCommentSection(comment)">
+                            <span class="material-icons-outlined">reply</span>
+                            <span class="reply-text">Reply</span>
+                        </a>
+                    </div>
+                    <a class="social-icon comment-more-options"
+                       ng-if="comment.userId == Thread.SocialItems.userDetails.userId && comment.commentId"
+                       ng-click="Thread.showMoreOptionsComment(comment)">
+                        <span class="material-icons-outlined">more_vert</span>
                     </a>
                 </div>
             </div>
