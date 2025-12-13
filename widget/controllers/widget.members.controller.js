@@ -39,17 +39,36 @@
                 });
             };
 
-            Members.handleLogoClick = function () {
-                if (Members.bottomLogo && Members.bottomLogo.linkUrl) {
-                    var url = Members.bottomLogo.linkUrl;
-                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                        url = 'https://' + url;
+            Members.getBannerStyle = function () {
+                if (!Members.bottomLogo) return {};
+
+                var style = {};
+
+                if (Members.bottomLogo.displayMode === 'banner') {
+                    var height = Members.bottomLogo.bannerHeight || 90;
+                    style.height = height + 'px';
+
+                    if (Members.bottomLogo.bannerBgColor) {
+                        style.background = Members.bottomLogo.bannerBgColor;
                     }
-                    buildfire.analytics.trackAction('bottom_logo_clicked', {
-                        mode: Members.bottomLogo.displayMode,
-                        url: url
-                    });
-                    buildfire.navigation.openWindow(url, '_blank');
+                }
+
+                return style;
+            };
+
+            Members.handleLogoClick = function () {
+                if (Members.bottomLogo) {
+                    var url = Members.bottomLogo.sponsorUrl || Members.bottomLogo.linkUrl;
+                    if (url) {
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                        }
+                        buildfire.analytics.trackAction('bottom_logo_clicked', {
+                            mode: Members.bottomLogo.displayMode,
+                            url: url
+                        });
+                        buildfire.navigation.openWindow(url, '_blank');
+                    }
                 }
             };
 

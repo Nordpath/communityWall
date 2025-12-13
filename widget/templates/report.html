@@ -53,6 +53,12 @@
     </div>
 </div>
 
+<div class="bottom-logo-container" ng-if="Report.bottomLogo && Report.bottomLogo.enabled && Report.bottomLogo.sponsorLogo" ng-click="Report.handleLogoClick()">
+    <div ng-class="{'bottom-banner-mode': Report.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': Report.bottomLogo.displayMode !== 'banner'}" ng-style="Report.getBannerStyle()">
+        <img ng-src="{{Report.bottomLogo.sponsorLogo}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+    </div>
+</div>
+
 <!-- Image Gallery Modal -->
 <div id="imageGalleryModal" class="image-gallery-modal" ng-show="Report.imageGallery.show" ng-click="Report.closeImageGallery($event)">
     <div class="gallery-close" ng-click="Report.closeImageGallery($event)">

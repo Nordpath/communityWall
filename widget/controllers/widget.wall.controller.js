@@ -931,9 +931,26 @@
               }
           };
 
+          WidgetWall.getBannerStyle = function () {
+              if (!WidgetWall.bottomLogo) return {};
+
+              var style = {};
+
+              if (WidgetWall.bottomLogo.displayMode === 'banner') {
+                  var height = WidgetWall.bottomLogo.bannerHeight || 90;
+                  style.height = height + 'px';
+
+                  if (WidgetWall.bottomLogo.bannerBgColor) {
+                      style.background = WidgetWall.bottomLogo.bannerBgColor;
+                  }
+              }
+
+              return style;
+          };
+
           WidgetWall.handleLogoClick = function () {
-              if (WidgetWall.bottomLogo.linkUrl) {
-                  var url = WidgetWall.bottomLogo.linkUrl;
+              var url = WidgetWall.bottomLogo.sponsorUrl || WidgetWall.bottomLogo.linkUrl;
+              if (url) {
                   if (!url.startsWith('http://') && !url.startsWith('https://')) {
                       url = 'https://' + url;
                   }
@@ -948,8 +965,13 @@
           };
 
           WidgetWall.adjustLayoutForBottomLogo = function () {
-              if (WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.imageUrl) {
-                  var paddingValue = WidgetWall.bottomLogo.displayMode === 'banner' ? '150px' : '100px';
+              var sponsorLogo = WidgetWall.bottomLogo.sponsorLogo || WidgetWall.bottomLogo.imageUrl;
+              if (WidgetWall.bottomLogo.enabled && sponsorLogo) {
+                  var bannerHeight = WidgetWall.bottomLogo.displayMode === 'banner'
+                      ? (WidgetWall.bottomLogo.bannerHeight || 90)
+                      : 70;
+
+                  var paddingValue = (bannerHeight + 60) + 'px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
@@ -957,28 +979,24 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      // Increased FAB bottom offset to prevent overlap with banner, including safe area
-                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner'
-                          ? 'calc(180px + env(safe-area-inset-bottom))'
-                          : 'calc(110px + env(safe-area-inset-bottom))';
+                      var fabBottomOffset = 'calc(' + (bannerHeight + 20) + 'px + env(safe-area-inset-bottom))';
                       fabButton.style.bottom = fabBottomOffset;
                   }
 
-                  // Adjust bottom-post holder if present
                   var bottomPost = document.querySelector('.holder.bottom-post');
                   if (bottomPost) {
-                      var bottomPostOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '90px' : '70px';
+                      var bottomPostOffset = bannerHeight + 'px';
                       bottomPost.style.bottom = bottomPostOffset;
                   }
               } else {
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
-                      scrollContainer.style.paddingBottom = '0px';
+                      scrollContainer.style.paddingBottom = '120px';
                   }
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      fabButton.style.bottom = 'calc(20px + env(safe-area-inset-bottom))';
+                      fabButton.style.bottom = 'calc(80px + env(safe-area-inset-bottom))';
                   }
 
                   var bottomPost = document.querySelector('.holder.bottom-post');

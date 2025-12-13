@@ -24,3 +24,9 @@
     </div>
   </div>
 </div>
+
+<div class="bottom-logo-container" ng-if="Blocked.bottomLogo && Blocked.bottomLogo.enabled && Blocked.bottomLogo.sponsorLogo" ng-click="Blocked.handleLogoClick()">
+    <div ng-class="{'bottom-banner-mode': Blocked.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': Blocked.bottomLogo.displayMode !== 'banner'}" ng-style="Blocked.getBannerStyle()">
+        <img ng-src="{{Blocked.bottomLogo.sponsorLogo}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+    </div>
+</div>

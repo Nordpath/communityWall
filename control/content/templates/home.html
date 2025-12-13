@@ -130,4 +130,79 @@
             </div>
         </div>
     </div>
+
+    <hr class="margin-top-twenty margin-bottom-twenty">
+
+    <div class="item">
+        <h4>Sponsor Banner Settings</h4>
+        <p class="margin-bottom-fifteen">Configure a sponsor banner or logo that appears at the bottom of all screens in your community wall.</p>
+
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" ng-model="ContentHome.bannerSettings.enabled" ng-change="ContentHome.saveBannerSettings()">
+                <span>Enable Sponsor Banner</span>
+            </label>
+        </div>
+
+        <div ng-show="ContentHome.bannerSettings.enabled">
+            <div class="form-group">
+                <label>Sponsor URL</label>
+                <input type="text" class="form-control" ng-model="ContentHome.bannerSettings.sponsorUrl" placeholder="https://example.com" ng-change="ContentHome.saveBannerSettings()">
+                <p class="help-block">URL to open when the banner is clicked</p>
+            </div>
+
+            <div class="form-group">
+                <label>Display Mode</label>
+                <div class="radio-group">
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="ContentHome.bannerSettings.displayMode" value="banner" ng-change="ContentHome.saveBannerSettings()">
+                        Banner Mode (Full Width)
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="ContentHome.bannerSettings.displayMode" value="logo" ng-change="ContentHome.saveBannerSettings()">
+                        Logo Mode (Centered)
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" ng-show="ContentHome.bannerSettings.displayMode === 'banner'">
+                <label>Banner Height (pixels)</label>
+                <div class="input-group">
+                    <input type="range" min="40" max="200" ng-model="ContentHome.bannerSettings.bannerHeight" ng-change="ContentHome.saveBannerSettings()" style="width: 70%; vertical-align: middle;">
+                    <input type="number" class="form-control" min="40" max="200" ng-model="ContentHome.bannerSettings.bannerHeight" ng-change="ContentHome.saveBannerSettings()" style="width: 80px; display: inline-block; margin-left: 10px;">
+                </div>
+                <p class="help-block">Height of the banner in pixels (40-200)</p>
+            </div>
+
+            <div class="form-group" ng-show="ContentHome.bannerSettings.displayMode === 'banner'">
+                <label>Banner Background Color</label>
+                <input type="color" class="form-control" ng-model="ContentHome.bannerSettings.bannerBgColor" ng-change="ContentHome.saveBannerSettings()" style="width: 100px; height: 40px;">
+                <p class="help-block">Background color for the banner</p>
+            </div>
+
+            <div class="form-group">
+                <label>Sponsor Logo</label>
+                <div ng-if="!ContentHome.bannerSettings.sponsorLogo">
+                    <button class="btn btn-primary" ng-click="ContentHome.uploadBannerImage()">Upload Logo</button>
+                </div>
+                <div ng-if="ContentHome.bannerSettings.sponsorLogo" class="banner-preview">
+                    <img ng-src="{{ContentHome.bannerSettings.sponsorLogo}}" alt="Sponsor Logo" style="max-width: 300px; max-height: 150px; display: block; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
+                    <button class="btn btn-danger btn-sm" ng-click="ContentHome.removeBannerImage()">Remove Logo</button>
+                </div>
+            </div>
+
+            <div class="form-group" ng-if="ContentHome.bannerSettings.sponsorLogo">
+                <label>Preview</label>
+                <div class="banner-preview-container" style="border: 1px solid #ddd; padding: 20px; background: #f5f5f5;">
+                    <p class="help-block">Preview of how the banner will appear in the widget:</p>
+                    <div ng-if="ContentHome.bannerSettings.displayMode === 'banner'" style="position: relative; margin: 0 auto; max-width: 400px; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);" ng-style="{'height': ContentHome.bannerSettings.bannerHeight + 'px', 'background': ContentHome.bannerSettings.bannerBgColor}">
+                        <img ng-src="{{ContentHome.bannerSettings.sponsorLogo}}" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div ng-if="ContentHome.bannerSettings.displayMode !== 'banner'" style="display: flex; justify-content: center; align-items: center; background: rgba(255, 255, 255, 0.95); padding: 12px; border-top: 1px solid rgba(0, 0, 0, 0.08); box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08); margin: 0 auto; max-width: 400px;">
+                        <img ng-src="{{ContentHome.bannerSettings.sponsorLogo}}" alt="Logo Preview" style="max-width: 200px; max-height: 80px; object-fit: contain;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

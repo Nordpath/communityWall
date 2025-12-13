@@ -40,6 +40,77 @@
             var appId;
             var instanceId;
             var pluginTitle;
+
+            ContentHome.bannerSettings = {
+                enabled: false,
+                sponsorUrl: '',
+                sponsorLogo: '',
+                bannerHeight: 90,
+                bannerBgColor: '#000000',
+                displayMode: 'banner'
+            };
+
+            ContentHome.loadBannerSettings = function () {
+                Buildfire.datastore.get('Social', function (err, result) {
+                    if (err) {
+                        console.error('Error loading banner settings:', err);
+                        return;
+                    }
+                    if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
+                        ContentHome.bannerSettings = Object.assign({}, ContentHome.bannerSettings, result.data.appSettings.bottomLogo);
+                        if (!$scope.$$phase) {
+                            $scope.$digest();
+                        }
+                    }
+                });
+            };
+
+            ContentHome.saveBannerSettings = function () {
+                Buildfire.datastore.get('Social', function (err, result) {
+                    if (err) {
+                        console.error('Error saving banner settings:', err);
+                        return;
+                    }
+                    if (!result.data) {
+                        result.data = {};
+                    }
+                    if (!result.data.appSettings) {
+                        result.data.appSettings = {};
+                    }
+
+                    result.data.appSettings.bottomLogo = ContentHome.bannerSettings;
+
+                    Buildfire.datastore.save(result.data, 'Social', function (err, savedData) {
+                        if (err) {
+                            console.error('Error saving banner settings:', err);
+                            return;
+                        }
+                        console.log('Banner settings saved successfully');
+                    });
+                });
+            };
+
+            ContentHome.uploadBannerImage = function () {
+                buildfire.imageLib.showDialog({}, function (err, result) {
+                    if (err) {
+                        console.error('Error uploading banner image:', err);
+                        return;
+                    }
+                    if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                        ContentHome.bannerSettings.sponsorLogo = result.selectedFiles[0];
+                        ContentHome.saveBannerSettings();
+                        if (!$scope.$$phase) {
+                            $scope.$digest();
+                        }
+                    }
+                });
+            };
+
+            ContentHome.removeBannerImage = function () {
+                ContentHome.bannerSettings.sponsorLogo = '';
+                ContentHome.saveBannerSettings();
+            };
+
             var init = function () {
                 buildfire.datastore.get("languages", (err, result) => {
                     if (result.data && result.data.screenOne) {
@@ -117,6 +188,7 @@
 						}
 
 						ContentHome.getPosts();
+                        ContentHome.loadBannerSettings();
                     });
                 });
 

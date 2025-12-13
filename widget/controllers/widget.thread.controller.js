@@ -160,9 +160,31 @@
               });
           };
 
+          Thread.getBannerStyle = function () {
+              if (!Thread.bottomLogo) return {};
+
+              var style = {};
+
+              if (Thread.bottomLogo.displayMode === 'banner') {
+                  var height = Thread.bottomLogo.bannerHeight || 90;
+                  style.height = height + 'px';
+
+                  if (Thread.bottomLogo.bannerBgColor) {
+                      style.background = Thread.bottomLogo.bannerBgColor;
+                  }
+              }
+
+              return style;
+          };
+
           Thread.adjustLayoutForBottomLogo = function () {
-              if (Thread.bottomLogo && Thread.bottomLogo.enabled && Thread.bottomLogo.imageUrl) {
-                  var paddingValue = Thread.bottomLogo.displayMode === 'banner' ? '150px' : '80px';
+              var sponsorLogo = Thread.bottomLogo.sponsorLogo || Thread.bottomLogo.imageUrl;
+              if (Thread.bottomLogo && Thread.bottomLogo.enabled && sponsorLogo) {
+                  var bannerHeight = Thread.bottomLogo.displayMode === 'banner'
+                      ? (Thread.bottomLogo.bannerHeight || 90)
+                      : 70;
+
+                  var paddingValue = (bannerHeight + 60) + 'px';
                   var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
@@ -176,16 +198,18 @@
           };
 
           Thread.handleLogoClick = function () {
-              if (Thread.bottomLogo && Thread.bottomLogo.linkUrl) {
-                  var url = Thread.bottomLogo.linkUrl;
-                  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                      url = 'https://' + url;
+              if (Thread.bottomLogo) {
+                  var url = Thread.bottomLogo.sponsorUrl || Thread.bottomLogo.linkUrl;
+                  if (url) {
+                      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                          url = 'https://' + url;
+                      }
+                      buildfire.analytics.trackAction('bottom_logo_clicked', {
+                          mode: Thread.bottomLogo.displayMode,
+                          url: url
+                      });
+                      buildfire.navigation.openWindow(url, '_blank');
                   }
-                  buildfire.analytics.trackAction('bottom_logo_clicked', {
-                      mode: Thread.bottomLogo.displayMode,
-                      url: url
-                  });
-                  buildfire.navigation.openWindow(url, '_blank');
               }
           };
 

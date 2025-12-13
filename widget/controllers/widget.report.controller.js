@@ -95,8 +95,59 @@
             }
         });
 
+        Report.bottomLogo = {};
+
+        Report.loadBottomLogoConfig = function () {
+            buildfire.datastore.get('Social', function (err, result) {
+                if (err) {
+                    console.error('Error loading bottom logo config:', err);
+                    return;
+                }
+                if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
+                    Report.bottomLogo = result.data.appSettings.bottomLogo;
+                    if (!$scope.$$phase) {
+                        $scope.$apply();
+                    }
+                }
+            });
+        };
+
+        Report.getBannerStyle = function () {
+            if (!Report.bottomLogo) return {};
+
+            var style = {};
+
+            if (Report.bottomLogo.displayMode === 'banner') {
+                var height = Report.bottomLogo.bannerHeight || 90;
+                style.height = height + 'px';
+
+                if (Report.bottomLogo.bannerBgColor) {
+                    style.background = Report.bottomLogo.bannerBgColor;
+                }
+            }
+
+            return style;
+        };
+
+        Report.handleLogoClick = function () {
+            if (Report.bottomLogo) {
+                var url = Report.bottomLogo.sponsorUrl || Report.bottomLogo.linkUrl;
+                if (url) {
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                    }
+                    buildfire.analytics.trackAction('bottom_logo_clicked', {
+                        mode: Report.bottomLogo.displayMode,
+                        url: url
+                    });
+                    buildfire.navigation.openWindow(url, '_blank');
+                }
+            }
+        };
+
         Report.init = function () {
             Report.skeletonPost.start();
+            Report.loadBottomLogoConfig();
             Buildfire.services.reportAbuse.triggerWidgetReadyForAdminResponse();
             getReportPost(Report.SocialItems.reportData.postId);
 

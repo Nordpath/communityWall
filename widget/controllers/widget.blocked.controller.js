@@ -90,8 +90,59 @@
             }
           };
 
+          Blocked.bottomLogo = {};
+
+          Blocked.loadBottomLogoConfig = function () {
+            buildfire.datastore.get('Social', function (err, result) {
+              if (err) {
+                console.error('Error loading bottom logo config:', err);
+                return;
+              }
+              if (result && result.data && result.data.appSettings && result.data.appSettings.bottomLogo) {
+                Blocked.bottomLogo = result.data.appSettings.bottomLogo;
+                if (!$scope.$$phase) {
+                  $scope.$apply();
+                }
+              }
+            });
+          };
+
+          Blocked.getBannerStyle = function () {
+            if (!Blocked.bottomLogo) return {};
+
+            var style = {};
+
+            if (Blocked.bottomLogo.displayMode === 'banner') {
+              var height = Blocked.bottomLogo.bannerHeight || 90;
+              style.height = height + 'px';
+
+              if (Blocked.bottomLogo.bannerBgColor) {
+                style.background = Blocked.bottomLogo.bannerBgColor;
+              }
+            }
+
+            return style;
+          };
+
+          Blocked.handleLogoClick = function () {
+            if (Blocked.bottomLogo) {
+              var url = Blocked.bottomLogo.sponsorUrl || Blocked.bottomLogo.linkUrl;
+              if (url) {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                  url = 'https://' + url;
+                }
+                buildfire.analytics.trackAction('bottom_logo_clicked', {
+                  mode: Blocked.bottomLogo.displayMode,
+                  url: url
+                });
+                buildfire.navigation.openWindow(url, '_blank');
+              }
+            }
+          };
+
           Blocked.init = function () {
             $rootScope.showThread = false;
+            Blocked.loadBottomLogoConfig();
             Blocked.skeleton = SkeletonHandler.start(Blocked.blockedSkeletonContainer);
             scrollContainer = document.querySelector('.blocked-users');
             if (scrollContainer) {
