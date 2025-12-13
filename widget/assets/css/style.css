@@ -1917,6 +1917,16 @@ a.comments .iconsTheme.iconsFont {
     padding-bottom: 120px !important;
 }
 
+.social-thread .post-section,
+.social-Report {
+    padding-bottom: 120px !important;
+}
+
+.wallMembers,
+.blocked-users {
+    padding-bottom: 120px !important;
+}
+
 /* Custom Post Dialog Styles */
 .custom-post-dialog {
     position: fixed;
