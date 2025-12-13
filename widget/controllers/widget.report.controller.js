@@ -124,8 +124,21 @@
                 if (Report.bottomLogo.bannerBgColor) {
                     style.background = Report.bottomLogo.bannerBgColor;
                 }
+            } else if (Report.bottomLogo.displayMode === 'logo') {
+                if (Report.bottomLogo.bannerBgColor) {
+                    style.background = Report.bottomLogo.bannerBgColor;
+                }
             }
 
+            return style;
+        };
+
+        Report.getLogoImageStyle = function () {
+            if (!Report.bottomLogo || Report.bottomLogo.displayMode !== 'logo') return {};
+
+            var style = {};
+            style.maxWidth = (Report.bottomLogo.logoMaxWidth || 200) + 'px';
+            style.maxHeight = (Report.bottomLogo.logoMaxHeight || 80) + 'px';
             return style;
         };
 

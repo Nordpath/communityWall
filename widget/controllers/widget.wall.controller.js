@@ -943,8 +943,21 @@
                   if (WidgetWall.bottomLogo.bannerBgColor) {
                       style.background = WidgetWall.bottomLogo.bannerBgColor;
                   }
+              } else if (WidgetWall.bottomLogo.displayMode === 'logo') {
+                  if (WidgetWall.bottomLogo.bannerBgColor) {
+                      style.background = WidgetWall.bottomLogo.bannerBgColor;
+                  }
               }
 
+              return style;
+          };
+
+          WidgetWall.getLogoImageStyle = function () {
+              if (!WidgetWall.bottomLogo || WidgetWall.bottomLogo.displayMode !== 'logo') return {};
+
+              var style = {};
+              style.maxWidth = (WidgetWall.bottomLogo.logoMaxWidth || 200) + 'px';
+              style.maxHeight = (WidgetWall.bottomLogo.logoMaxHeight || 80) + 'px';
               return style;
           };
 
@@ -969,7 +982,7 @@
               if (WidgetWall.bottomLogo.enabled && sponsorLogo) {
                   var bannerHeight = WidgetWall.bottomLogo.displayMode === 'banner'
                       ? (WidgetWall.bottomLogo.bannerHeight || 90)
-                      : 70;
+                      : (WidgetWall.bottomLogo.logoMaxHeight || 80) + 24;
 
                   var fabSize = 56;
                   var fabMargin = 20;

@@ -51,8 +51,21 @@
                     if (Members.bottomLogo.bannerBgColor) {
                         style.background = Members.bottomLogo.bannerBgColor;
                     }
+                } else if (Members.bottomLogo.displayMode === 'logo') {
+                    if (Members.bottomLogo.bannerBgColor) {
+                        style.background = Members.bottomLogo.bannerBgColor;
+                    }
                 }
 
+                return style;
+            };
+
+            Members.getLogoImageStyle = function () {
+                if (!Members.bottomLogo || Members.bottomLogo.displayMode !== 'logo') return {};
+
+                var style = {};
+                style.maxWidth = (Members.bottomLogo.logoMaxWidth || 200) + 'px';
+                style.maxHeight = (Members.bottomLogo.logoMaxHeight || 80) + 'px';
                 return style;
             };
 

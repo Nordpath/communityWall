@@ -1838,7 +1838,7 @@ a.comments .iconsTheme.iconsFont {
     display: block;
 }
 
-/* Logo Mode - Centered with increased max dimensions */
+/* Logo Mode - Centered with dynamic dimensions from settings */
 .bottom-logo-mode {
     display: flex;
     justify-content: center;
@@ -1853,8 +1853,6 @@ a.comments .iconsTheme.iconsFont {
 }
 
 .bottom-logo-mode img {
-    max-width: 200px;
-    max-height: 80px;
     height: auto;
     width: auto;
     display: block;
@@ -1872,11 +1870,6 @@ a.comments .iconsTheme.iconsFont {
 
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {
-    .bottom-logo-mode img {
-        max-width: 160px;
-        max-height: 65px;
-    }
-
     .btn.btn--fab {
         bottom: calc(90px + constant(safe-area-inset-bottom));
         bottom: calc(90px + env(safe-area-inset-bottom));

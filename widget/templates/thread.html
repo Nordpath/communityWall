@@ -182,9 +182,9 @@
     </div>
 </div>
 
-<div class="bottom-logo-container" ng-if="Thread.bottomLogo && Thread.bottomLogo.enabled && Thread.bottomLogo.sponsorLogo" ng-click="Thread.handleLogoClick()">
+<div class="bottom-logo-container" ng-if="Thread.bottomLogo && Thread.bottomLogo.enabled && (Thread.bottomLogo.sponsorLogo || Thread.bottomLogo.imageUrl)" ng-click="Thread.handleLogoClick()">
     <div ng-class="{'bottom-banner-mode': Thread.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': Thread.bottomLogo.displayMode !== 'banner'}" ng-style="Thread.getBannerStyle()">
-        <img ng-src="{{Thread.bottomLogo.sponsorLogo}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+        <img ng-src="{{Thread.bottomLogo.sponsorLogo || Thread.bottomLogo.imageUrl}}" alt="Banner" ng-style="Thread.getLogoImageStyle()" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
     </div>
 </div>
 

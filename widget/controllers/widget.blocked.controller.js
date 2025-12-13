@@ -119,8 +119,21 @@
               if (Blocked.bottomLogo.bannerBgColor) {
                 style.background = Blocked.bottomLogo.bannerBgColor;
               }
+            } else if (Blocked.bottomLogo.displayMode === 'logo') {
+              if (Blocked.bottomLogo.bannerBgColor) {
+                style.background = Blocked.bottomLogo.bannerBgColor;
+              }
             }
 
+            return style;
+          };
+
+          Blocked.getLogoImageStyle = function () {
+            if (!Blocked.bottomLogo || Blocked.bottomLogo.displayMode !== 'logo') return {};
+
+            var style = {};
+            style.maxWidth = (Blocked.bottomLogo.logoMaxWidth || 200) + 'px';
+            style.maxHeight = (Blocked.bottomLogo.logoMaxHeight || 80) + 'px';
             return style;
           };
 

@@ -172,8 +172,21 @@
                   if (Thread.bottomLogo.bannerBgColor) {
                       style.background = Thread.bottomLogo.bannerBgColor;
                   }
+              } else if (Thread.bottomLogo.displayMode === 'logo') {
+                  if (Thread.bottomLogo.bannerBgColor) {
+                      style.background = Thread.bottomLogo.bannerBgColor;
+                  }
               }
 
+              return style;
+          };
+
+          Thread.getLogoImageStyle = function () {
+              if (!Thread.bottomLogo || Thread.bottomLogo.displayMode !== 'logo') return {};
+
+              var style = {};
+              style.maxWidth = (Thread.bottomLogo.logoMaxWidth || 200) + 'px';
+              style.maxHeight = (Thread.bottomLogo.logoMaxHeight || 80) + 'px';
               return style;
           };
 
@@ -182,7 +195,7 @@
               if (Thread.bottomLogo && Thread.bottomLogo.enabled && sponsorLogo) {
                   var bannerHeight = Thread.bottomLogo.displayMode === 'banner'
                       ? (Thread.bottomLogo.bannerHeight || 90)
-                      : 70;
+                      : (Thread.bottomLogo.logoMaxHeight || 80) + 24;
 
                   var paddingValue = (bannerHeight + 80) + 'px';
                   var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');

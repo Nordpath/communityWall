@@ -511,7 +511,144 @@
             </div>
         </div>
 
-        <div class="row" style="margin-bottom: 1.25rem;">
+        <div ng-show="data.bottomLogo.displayMode === 'banner'" style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+            <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem; color: #333;">Banner Size</h4>
+            <div class="row" style="margin-bottom: 1.25rem;">
+                <div class="col-md-4">
+                    <label style="font-size: 14px !important;">Banner Height</label>
+                </div>
+                <div class="col-md-8">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="range" min="50" max="300" step="5"
+                               ng-model="data.bottomLogo.bannerHeight"
+                               ng-change="save()"
+                               style="flex: 1; cursor: pointer;">
+                        <input type="number" min="50" max="300"
+                               ng-model="data.bottomLogo.bannerHeight"
+                               ng-blur="validateBannerHeight()"
+                               style="width: 70px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 13px; color: #666;">px</span>
+                    </div>
+                    <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                        Set banner height (50px - 300px)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div ng-show="data.bottomLogo.displayMode === 'logo'" style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+            <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem; color: #333;">Logo Size</h4>
+            <div class="row" style="margin-bottom: 1.25rem;">
+                <div class="col-md-4">
+                    <label style="font-size: 14px !important;">Max Width</label>
+                </div>
+                <div class="col-md-8">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="range" min="100" max="400" step="10"
+                               ng-model="data.bottomLogo.logoMaxWidth"
+                               ng-change="save()"
+                               style="flex: 1; cursor: pointer;">
+                        <input type="number" min="100" max="400"
+                               ng-model="data.bottomLogo.logoMaxWidth"
+                               ng-blur="validateLogoMaxWidth()"
+                               style="width: 70px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 13px; color: #666;">px</span>
+                    </div>
+                    <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                        Maximum logo width (100px - 400px)
+                    </p>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom: 1.25rem;">
+                <div class="col-md-4">
+                    <label style="font-size: 14px !important;">Max Height</label>
+                </div>
+                <div class="col-md-8">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="range" min="50" max="200" step="5"
+                               ng-model="data.bottomLogo.logoMaxHeight"
+                               ng-change="save()"
+                               style="flex: 1; cursor: pointer;">
+                        <input type="number" min="50" max="200"
+                               ng-model="data.bottomLogo.logoMaxHeight"
+                               ng-blur="validateLogoMaxHeight()"
+                               style="width: 70px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 13px; color: #666;">px</span>
+                    </div>
+                    <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                        Maximum logo height (50px - 200px)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+            <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem; color: #333;">Background Color</h4>
+            <div class="row" style="margin-bottom: 1.25rem;">
+                <div class="col-md-4">
+                    <label style="font-size: 14px !important;">
+                        <div class="tooltip-container">
+                            <span class="nowrap">Background Color</span>
+                            <span class="btn-info-icon btn-primary">
+                                <span class="cp-tooltip">Add a background color for images with transparency or for branding purposes.</span>
+                            </span>
+                        </div>
+                    </label>
+                </div>
+                <div class="col-md-8">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="color" class="form-control"
+                               ng-model="data.bottomLogo.bannerBgColor"
+                               ng-change="save()"
+                               style="height: 40px; width: 80px; padding: 4px; cursor: pointer;">
+                        <span style="font-size: 13px; color: #666;" ng-if="data.bottomLogo.bannerBgColor">{{data.bottomLogo.bannerBgColor}}</span>
+                        <span style="font-size: 13px; color: #888;" ng-if="!data.bottomLogo.bannerBgColor">Transparent</span>
+                        <button type="button" class="btn btn-sm"
+                                ng-click="clearBgColor()"
+                                ng-if="data.bottomLogo.bannerBgColor"
+                                style="padding: 4px 12px; font-size: 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                            Clear
+                        </button>
+                    </div>
+                    <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                        Useful for sponsor images with transparency to ensure proper branding
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="data.bottomLogo.imageUrl" style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1.5rem;">
+            <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem; color: #333;">Preview</h4>
+            <div style="border: 2px dashed #ddd; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <p class="label2" style="font-size: 12px; color: #666; margin-bottom: 12px; text-align: center;">
+                    This is how the {{data.bottomLogo.displayMode === 'banner' ? 'banner' : 'logo'}} will appear at the bottom of the widget
+                </p>
+                <div ng-if="data.bottomLogo.displayMode === 'banner'"
+                     style="display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                     ng-style="getPreviewContainerStyle()">
+                    <img ng-src="{{data.bottomLogo.imageUrl}}"
+                         style="width: 100%; object-fit: cover;"
+                         ng-style="{height: (data.bottomLogo.bannerHeight || 90) + 'px'}">
+                </div>
+                <div ng-if="data.bottomLogo.displayMode === 'logo'"
+                     style="display: flex; justify-content: center; align-items: center; padding: 12px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                     ng-style="getPreviewContainerStyle()">
+                    <img ng-src="{{data.bottomLogo.imageUrl}}"
+                         style="display: block; object-fit: contain;"
+                         ng-style="{maxWidth: (data.bottomLogo.logoMaxWidth || 200) + 'px', maxHeight: (data.bottomLogo.logoMaxHeight || 80) + 'px'}">
+                </div>
+                <div style="margin-top: 12px; text-align: center;">
+                    <span ng-if="data.bottomLogo.displayMode === 'banner'" style="font-size: 12px; color: #888;">
+                        Banner size: 100% width x {{data.bottomLogo.bannerHeight || 90}}px height
+                    </span>
+                    <span ng-if="data.bottomLogo.displayMode === 'logo'" style="font-size: 12px; color: #888;">
+                        Logo max size: {{data.bottomLogo.logoMaxWidth || 200}}px x {{data.bottomLogo.logoMaxHeight || 80}}px
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 1.25rem; margin-top: 1.5rem;">
             <div class="col-md-12">
                 <button class="btn btn-danger" ng-click="removeBottomLogo()" ng-if="data.bottomLogo.imageUrl">
                     <span class="icon icon-cross margin-right-ten"></span>Remove Bottom Logo

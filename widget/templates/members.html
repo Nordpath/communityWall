@@ -49,8 +49,8 @@
   </div>
 </div>
 
-<div class="bottom-logo-container" ng-if="Members.bottomLogo && Members.bottomLogo.enabled && Members.bottomLogo.sponsorLogo" ng-click="Members.handleLogoClick()">
+<div class="bottom-logo-container" ng-if="Members.bottomLogo && Members.bottomLogo.enabled && (Members.bottomLogo.sponsorLogo || Members.bottomLogo.imageUrl)" ng-click="Members.handleLogoClick()">
     <div ng-class="{'bottom-banner-mode': Members.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': Members.bottomLogo.displayMode !== 'banner'}" ng-style="Members.getBannerStyle()">
-        <img ng-src="{{Members.bottomLogo.sponsorLogo}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+        <img ng-src="{{Members.bottomLogo.sponsorLogo || Members.bottomLogo.imageUrl}}" alt="Banner" ng-style="Members.getLogoImageStyle()" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
     </div>
 </div>

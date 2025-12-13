@@ -69,8 +69,24 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                                 displayMode: 'logo',
                                 imageUrl: '',
                                 linkUrl: '',
-                                enabled: false
+                                enabled: false,
+                                bannerHeight: 90,
+                                logoMaxWidth: 200,
+                                logoMaxHeight: 80,
+                                bannerBgColor: ''
                             };
+                        }
+                        if (typeof result.data.appSettings.bottomLogo.bannerHeight === 'undefined') {
+                            result.data.appSettings.bottomLogo.bannerHeight = 90;
+                        }
+                        if (typeof result.data.appSettings.bottomLogo.logoMaxWidth === 'undefined') {
+                            result.data.appSettings.bottomLogo.logoMaxWidth = 200;
+                        }
+                        if (typeof result.data.appSettings.bottomLogo.logoMaxHeight === 'undefined') {
+                            result.data.appSettings.bottomLogo.logoMaxHeight = 80;
+                        }
+                        if (typeof result.data.appSettings.bottomLogo.bannerBgColor === 'undefined') {
+                            result.data.appSettings.bottomLogo.bannerBgColor = '';
                         }
                         if (!result.data.appSettings.themeColors) {
                             result.data.appSettings.themeColors = {
@@ -116,7 +132,11 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             displayMode: 'logo',
                             imageUrl: '',
                             linkUrl: '',
-                            enabled: false
+                            enabled: false,
+                            bannerHeight: 90,
+                            logoMaxWidth: 200,
+                            logoMaxHeight: 80,
+                            bannerBgColor: ''
                         };
                         result.data.appSettings.themeColors = {
                             fabButton: '#FF6B35',
@@ -445,7 +465,11 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                     displayMode: 'logo',
                     imageUrl: '',
                     linkUrl: '',
-                    enabled: false
+                    enabled: false,
+                    bannerHeight: 90,
+                    logoMaxWidth: 200,
+                    logoMaxHeight: 80,
+                    bannerBgColor: ''
                 };
                 $scope.save();
                 buildfire.dialog.toast({
@@ -494,5 +518,77 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
             $scope.data.usernameFont.family = 'inherit';
         }
         $scope.save();
+    };
+
+    $scope.validateBannerHeight = function () {
+        var value = parseInt($scope.data.bottomLogo.bannerHeight, 10);
+        if (isNaN(value) || value < 50) {
+            $scope.data.bottomLogo.bannerHeight = 50;
+        } else if (value > 300) {
+            $scope.data.bottomLogo.bannerHeight = 300;
+        } else {
+            $scope.data.bottomLogo.bannerHeight = value;
+        }
+        $scope.save();
+    };
+
+    $scope.validateLogoMaxWidth = function () {
+        var value = parseInt($scope.data.bottomLogo.logoMaxWidth, 10);
+        if (isNaN(value) || value < 100) {
+            $scope.data.bottomLogo.logoMaxWidth = 100;
+        } else if (value > 400) {
+            $scope.data.bottomLogo.logoMaxWidth = 400;
+        } else {
+            $scope.data.bottomLogo.logoMaxWidth = value;
+        }
+        $scope.save();
+    };
+
+    $scope.validateLogoMaxHeight = function () {
+        var value = parseInt($scope.data.bottomLogo.logoMaxHeight, 10);
+        if (isNaN(value) || value < 50) {
+            $scope.data.bottomLogo.logoMaxHeight = 50;
+        } else if (value > 200) {
+            $scope.data.bottomLogo.logoMaxHeight = 200;
+        } else {
+            $scope.data.bottomLogo.logoMaxHeight = value;
+        }
+        $scope.save();
+    };
+
+    $scope.clearBgColor = function () {
+        $scope.data.bottomLogo.bannerBgColor = '';
+        $scope.save();
+    };
+
+    $scope.getPreviewStyle = function () {
+        if (!$scope.data.bottomLogo) return {};
+        var style = {};
+        if ($scope.data.bottomLogo.displayMode === 'banner') {
+            style.height = ($scope.data.bottomLogo.bannerHeight || 90) + 'px';
+            style.width = '100%';
+            if ($scope.data.bottomLogo.bannerBgColor) {
+                style.background = $scope.data.bottomLogo.bannerBgColor;
+            }
+        } else {
+            style.maxWidth = ($scope.data.bottomLogo.logoMaxWidth || 200) + 'px';
+            style.maxHeight = ($scope.data.bottomLogo.logoMaxHeight || 80) + 'px';
+            if ($scope.data.bottomLogo.bannerBgColor) {
+                style.background = $scope.data.bottomLogo.bannerBgColor;
+            }
+        }
+        return style;
+    };
+
+    $scope.getPreviewContainerStyle = function () {
+        if (!$scope.data.bottomLogo) return {};
+        var style = {};
+        if ($scope.data.bottomLogo.bannerBgColor) {
+            style.background = $scope.data.bottomLogo.bannerBgColor;
+        }
+        if ($scope.data.bottomLogo.displayMode === 'banner') {
+            style.height = ($scope.data.bottomLogo.bannerHeight || 90) + 'px';
+        }
+        return style;
     };
 }]);

@@ -213,9 +213,9 @@
                 </div>
             </div>
 
-            <div class="bottom-logo-container" ng-if="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && WidgetWall.bottomLogo.sponsorLogo" ng-click="WidgetWall.handleLogoClick()">
+            <div class="bottom-logo-container" ng-if="WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && (WidgetWall.bottomLogo.sponsorLogo || WidgetWall.bottomLogo.imageUrl)" ng-click="WidgetWall.handleLogoClick()">
                 <div ng-class="{'bottom-banner-mode': WidgetWall.bottomLogo.displayMode === 'banner', 'bottom-logo-mode': WidgetWall.bottomLogo.displayMode !== 'banner'}" ng-style="WidgetWall.getBannerStyle()">
-                    <img ng-src="{{WidgetWall.bottomLogo.sponsorLogo}}" alt="Banner" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
+                    <img ng-src="{{WidgetWall.bottomLogo.sponsorLogo || WidgetWall.bottomLogo.imageUrl}}" alt="Banner" ng-style="WidgetWall.getLogoImageStyle()" onerror="console.error('[BannerError] Failed to load banner:', this.src);">
                 </div>
             </div>
         </div>
