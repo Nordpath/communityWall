@@ -1972,12 +1972,20 @@
                           );
                       } else {
                           console.error('[ImageUpload] publicFiles.uploadFiles not available - this requires the BuildFire app environment and user must be logged in');
-                          buildfire.dialog.toast({
-                              message: 'Video upload requires the BuildFire app. Please test in the actual app.',
-                              type: 'warning',
-                              duration: 5000
+                          buildfire.auth.getCurrentUser(function(authErr, user) {
+                              var errorMessage;
+                              if (authErr || !user || !user._id) {
+                                  errorMessage = 'Please log in to upload videos.';
+                              } else {
+                                  errorMessage = 'Video upload is only available in the BuildFire mobile app. Please open this in the app to upload videos.';
+                              }
+                              buildfire.dialog.toast({
+                                  message: errorMessage,
+                                  type: 'warning',
+                                  duration: 5000
+                              });
+                              resolve(null);
                           });
-                          resolve(null);
                       }
                   });
               });
@@ -2134,67 +2142,102 @@
           }
 
           WidgetWall.selectVideos = function () {
-              if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.showDialog) {
-                  console.log('[VideoSelect] Using publicFiles.showDialog');
-                  WidgetWall.isUploadingMedia = true;
-                  if (!$scope.$$phase) $scope.$apply();
+              console.log('[VideoSelect] Checking video upload capabilities');
 
-                  buildfire.services.publicFiles.showDialog(
-                      {
-                          allowMultipleFilesUpload: true,
-                          filter: ['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg', 'video/avi', 'video/*']
-                      },
-                      function(onProgress) {
-                          console.log('[VideoSelect] Upload progress:', onProgress);
-                      },
-                      function(onComplete) {
-                          console.log('[VideoSelect] File complete:', onComplete);
-                      },
-                      function(err, files) {
-                          console.log('[VideoSelect] showDialog callback:', err, files);
-                          if (err) {
-                              console.error('[VideoSelect] showDialog error:', err);
-                              WidgetWall.isUploadingMedia = false;
-                              if (!$scope.$$phase) $scope.$apply();
-                              return;
-                          }
+              // First check if upload API is available
+              var hasUploadAPI = buildfire && buildfire.services && buildfire.services.publicFiles &&
+                               (buildfire.services.publicFiles.showDialog || buildfire.services.publicFiles.uploadFiles);
 
-                          if (files && files.length > 0) {
-                              files.forEach(function(file) {
-                                  if (file.status === 'success' && file.url) {
-                                      WidgetWall.selectedVideos.push(file.url);
-                                  }
-                              });
-                              WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
-                          }
+              if (!hasUploadAPI) {
+                  console.error('[VideoSelect] BuildFire upload API not available');
+                  buildfire.dialog.toast({
+                      message: 'Video upload is only available in the BuildFire mobile app. Please open this in the app to upload videos.',
+                      type: 'warning',
+                      duration: 5000
+                  });
+                  return;
+              }
 
-                          WidgetWall.isUploadingMedia = false;
-                          if (!$scope.$$phase) $scope.$apply();
-                      }
-                  );
-              } else {
-                  console.log('[VideoSelect] showDialog not available, using file input fallback');
-                  var input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'video/*';
-                  input.multiple = true;
-                  input.style.display = 'none';
-                  document.body.appendChild(input);
+              // Check if user is logged in before allowing video upload
+              buildfire.auth.getCurrentUser(function(err, currentUser) {
+                  if (err || !currentUser || !currentUser._id) {
+                      console.error('[VideoSelect] User not logged in:', err);
+                      buildfire.dialog.toast({
+                          message: 'Please log in to upload videos.',
+                          type: 'warning',
+                          duration: 4000
+                      });
+                      return;
+                  }
 
-                  input.onchange = function(e) {
-                      var files = e.target.files;
-                      document.body.removeChild(input);
+                  console.log('[VideoSelect] User authenticated, proceeding with video selection');
 
-                      if (!files || files.length === 0) return;
-
+                  if (buildfire.services.publicFiles.showDialog) {
+                      console.log('[VideoSelect] Using publicFiles.showDialog');
                       WidgetWall.isUploadingMedia = true;
                       if (!$scope.$$phase) $scope.$apply();
 
-                      WidgetWall.processSelectedFiles(files);
-                  };
+                      buildfire.services.publicFiles.showDialog(
+                          {
+                              allowMultipleFilesUpload: true,
+                              filter: ['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg', 'video/avi', 'video/*']
+                          },
+                          function(onProgress) {
+                              console.log('[VideoSelect] Upload progress:', onProgress);
+                          },
+                          function(onComplete) {
+                              console.log('[VideoSelect] File complete:', onComplete);
+                          },
+                          function(err, files) {
+                              console.log('[VideoSelect] showDialog callback:', err, files);
+                              if (err) {
+                                  console.error('[VideoSelect] showDialog error:', err);
+                                  buildfire.dialog.toast({
+                                      message: err.message || 'Video upload failed. Please try again.',
+                                      type: 'danger'
+                                  });
+                                  WidgetWall.isUploadingMedia = false;
+                                  if (!$scope.$$phase) $scope.$apply();
+                                  return;
+                              }
 
-                  input.click();
-              }
+                              if (files && files.length > 0) {
+                                  files.forEach(function(file) {
+                                      if (file.status === 'success' && file.url) {
+                                          WidgetWall.selectedVideos.push(file.url);
+                                      }
+                                  });
+                                  WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
+                              }
+
+                              WidgetWall.isUploadingMedia = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                          }
+                      );
+                  } else if (buildfire.services.publicFiles.uploadFiles) {
+                      console.log('[VideoSelect] showDialog not available, using file input with uploadFiles fallback');
+                      var input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'video/*';
+                      input.multiple = true;
+                      input.style.display = 'none';
+                      document.body.appendChild(input);
+
+                      input.onchange = function(e) {
+                          var files = e.target.files;
+                          document.body.removeChild(input);
+
+                          if (!files || files.length === 0) return;
+
+                          WidgetWall.isUploadingMedia = true;
+                          if (!$scope.$$phase) $scope.$apply();
+
+                          WidgetWall.processSelectedFiles(files);
+                      };
+
+                      input.click();
+                  }
+              });
           }
 
           WidgetWall.handlePostKeyPress = function (event) {

@@ -1471,57 +1471,167 @@
           }
 
           Thread.selectVideos = function () {
-              var input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'video/*';
-              input.multiple = true;
-              input.style.display = 'none';
-              document.body.appendChild(input);
+              console.log('[ThreadVideoSelect] Checking video upload capabilities');
 
-              input.onchange = function(e) {
-                  var files = e.target.files;
-                  document.body.removeChild(input);
+              // First check if upload API is available
+              var hasUploadAPI = buildfire && buildfire.services && buildfire.services.publicFiles &&
+                               (buildfire.services.publicFiles.showDialog || buildfire.services.publicFiles.uploadFile || buildfire.services.publicFiles.uploadFiles);
 
-                  if (!files || files.length === 0) return;
+              if (!hasUploadAPI) {
+                  console.error('[ThreadVideoSelect] BuildFire upload API not available');
+                  buildfire.dialog.toast({
+                      message: 'Video upload is only available in the BuildFire mobile app. Please open this in the app to upload videos.',
+                      type: 'warning',
+                      duration: 5000
+                  });
+                  return;
+              }
 
-                  Thread.isUploadingMedia = true;
-                  if (!$scope.$$phase) $scope.$apply();
-
-                  var videoPromises = Array.from(files).map(function(file) {
-                      return new Promise(function(resolve) {
-                          if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFile) {
-                              buildfire.services.publicFiles.uploadFile(
-                                  file,
-                                  { allowMultipleFilesUpload: false },
-                                  function(err, result) {
-                                      if (err) {
-                                          var reader = new FileReader();
-                                          reader.onload = function(event) { resolve(event.target.result); };
-                                          reader.onerror = function() { resolve(null); };
-                                          reader.readAsDataURL(file);
-                                      } else {
-                                          resolve(result.url);
-                                      }
-                                  }
-                              );
-                          } else {
-                              var reader = new FileReader();
-                              reader.onload = function(event) { resolve(event.target.result); };
-                              reader.onerror = function() { resolve(null); };
-                              reader.readAsDataURL(file);
-                          }
+              // Check if user is logged in before allowing video upload
+              buildfire.auth.getCurrentUser(function(err, currentUser) {
+                  if (err || !currentUser || !currentUser._id) {
+                      console.error('[ThreadVideoSelect] User not logged in:', err);
+                      buildfire.dialog.toast({
+                          message: 'Please log in to upload videos.',
+                          type: 'warning',
+                          duration: 4000
                       });
-                  });
+                      return;
+                  }
 
-                  Promise.all(videoPromises).then(function(urls) {
-                      Thread.selectedVideos = urls.filter(function(url) { return url !== null; });
-                      Thread.selectedVideosText = Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos';
-                      Thread.isUploadingMedia = false;
+                  console.log('[ThreadVideoSelect] User authenticated, proceeding with video selection');
+
+                  if (buildfire.services.publicFiles.showDialog) {
+                      console.log('[ThreadVideoSelect] Using publicFiles.showDialog');
+                      Thread.isUploadingMedia = true;
                       if (!$scope.$$phase) $scope.$apply();
-                  });
-              };
 
-              input.click();
+                      buildfire.services.publicFiles.showDialog(
+                          {
+                              allowMultipleFilesUpload: true,
+                              filter: ['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg', 'video/avi', 'video/*']
+                          },
+                          function(onProgress) {
+                              console.log('[ThreadVideoSelect] Upload progress:', onProgress);
+                          },
+                          function(onComplete) {
+                              console.log('[ThreadVideoSelect] File complete:', onComplete);
+                          },
+                          function(err, files) {
+                              console.log('[ThreadVideoSelect] showDialog callback:', err, files);
+                              if (err) {
+                                  console.error('[ThreadVideoSelect] showDialog error:', err);
+                                  buildfire.dialog.toast({
+                                      message: err.message || 'Video upload failed. Please try again.',
+                                      type: 'danger'
+                                  });
+                                  Thread.isUploadingMedia = false;
+                                  if (!$scope.$$phase) $scope.$apply();
+                                  return;
+                              }
+
+                              if (files && files.length > 0) {
+                                  files.forEach(function(file) {
+                                      if (file.status === 'success' && file.url) {
+                                          Thread.selectedVideos.push(file.url);
+                                      }
+                                  });
+                                  Thread.selectedVideosText = Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos';
+                              }
+
+                              Thread.isUploadingMedia = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                          }
+                      );
+                  } else {
+                      console.log('[ThreadVideoSelect] Using file input fallback');
+                      var input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'video/*';
+                      input.multiple = true;
+                      input.style.display = 'none';
+                      document.body.appendChild(input);
+
+                      input.onchange = function(e) {
+                          var files = e.target.files;
+                          document.body.removeChild(input);
+
+                          if (!files || files.length === 0) return;
+
+                          Thread.isUploadingMedia = true;
+                          if (!$scope.$$phase) $scope.$apply();
+
+                          var videoPromises = Array.from(files).map(function(file) {
+                              return new Promise(function(resolve) {
+                                  if (buildfire.services.publicFiles.uploadFile) {
+                                      buildfire.services.publicFiles.uploadFile(
+                                          file,
+                                          { allowMultipleFilesUpload: false },
+                                          function(err, result) {
+                                              if (err) {
+                                                  console.error('[ThreadVideoSelect] uploadFile error:', err);
+                                                  buildfire.dialog.toast({
+                                                      message: err.message || 'Video upload failed. Please try again.',
+                                                      type: 'danger'
+                                                  });
+                                                  resolve(null);
+                                              } else {
+                                                  resolve(result.url);
+                                              }
+                                          }
+                                      );
+                                  } else if (buildfire.services.publicFiles.uploadFiles) {
+                                      buildfire.services.publicFiles.uploadFiles(
+                                          [file],
+                                          { allowMultipleFilesUpload: false },
+                                          function(progress) {
+                                              console.log('[ThreadVideoSelect] Upload progress:', progress);
+                                          },
+                                          function(completed) {
+                                              console.log('[ThreadVideoSelect] Upload completed:', completed);
+                                          },
+                                          function(err, uploadedFiles) {
+                                              if (err) {
+                                                  console.error('[ThreadVideoSelect] uploadFiles error:', err);
+                                                  buildfire.dialog.toast({
+                                                      message: err.message || 'Video upload failed. Please try again.',
+                                                      type: 'danger'
+                                                  });
+                                                  resolve(null);
+                                              } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
+                                                  resolve(uploadedFiles[0].url);
+                                              } else {
+                                                  console.error('[ThreadVideoSelect] Upload completed but status is not success');
+                                                  buildfire.dialog.toast({
+                                                      message: 'Video upload failed.',
+                                                      type: 'danger'
+                                                  });
+                                                  resolve(null);
+                                              }
+                                          }
+                                      );
+                                  } else {
+                                      console.error('[ThreadVideoSelect] No upload API available');
+                                      buildfire.dialog.toast({
+                                          message: 'Video upload is only available in the BuildFire mobile app.',
+                                          type: 'warning'
+                                      });
+                                      resolve(null);
+                                  }
+                              });
+                          });
+
+                          Promise.all(videoPromises).then(function(urls) {
+                              Thread.selectedVideos = urls.filter(function(url) { return url !== null; });
+                              Thread.selectedVideosText = Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos';
+                              Thread.isUploadingMedia = false;
+                              if (!$scope.$$phase) $scope.$apply();
+                          });
+                      };
+
+                      input.click();
+                  }
+              });
           }
 
           Thread.editPost = function (post) {
