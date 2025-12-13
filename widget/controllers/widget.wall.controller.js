@@ -957,8 +957,10 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      // Increased FAB bottom offset to prevent overlap with banner
-                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner' ? '180px' : '110px';
+                      // Increased FAB bottom offset to prevent overlap with banner, including safe area
+                      var fabBottomOffset = WidgetWall.bottomLogo.displayMode === 'banner'
+                          ? 'calc(180px + env(safe-area-inset-bottom))'
+                          : 'calc(110px + env(safe-area-inset-bottom))';
                       fabButton.style.bottom = fabBottomOffset;
                   }
 
@@ -976,7 +978,7 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      fabButton.style.bottom = '20px';
+                      fabButton.style.bottom = 'calc(20px + env(safe-area-inset-bottom))';
                   }
 
                   var bottomPost = document.querySelector('.holder.bottom-post');

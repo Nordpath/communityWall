@@ -1879,7 +1879,8 @@ a.comments .iconsTheme.iconsFont {
     }
 
     .btn.btn--fab {
-        bottom: 90px;
+        bottom: calc(90px + constant(safe-area-inset-bottom));
+        bottom: calc(90px + env(safe-area-inset-bottom));
     }
 }
 
@@ -1890,7 +1891,8 @@ a.comments .iconsTheme.iconsFont {
 
 #addBtn, #addCommentBtn {
     position: fixed;
-    bottom: 80px;
+    bottom: calc(80px + constant(safe-area-inset-bottom));
+    bottom: calc(80px + env(safe-area-inset-bottom));
     right: 1.5rem;
     z-index: 150;
     transition: transform 0.3s ease, opacity 0.3s ease;
