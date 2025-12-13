@@ -924,6 +924,9 @@
                     let commentToDelete = Thread.post.comments.find(element => element.comment === comment.comment)
                     let index = Thread.post.comments.indexOf(commentToDelete);
                     Thread.post.comments.splice(index, 1);
+                    if (Thread.post.commentsCount > 0) {
+                        Thread.post.commentsCount--;
+                    }
                     if (!$scope.$$phase)
                         $scope.$digest();
                     console.log('Comment deleted=============================success----------data', data);
@@ -1305,6 +1308,7 @@
                         'comment': commentData
                     });
                     Thread.post.comments.push(commentData);
+                    Thread.post.commentsCount = (Thread.post.commentsCount || 0) + 1;
                     Thread.organizeThreadedComments();
                     Thread.scheduleNotification(commentData, 'comment');
                 });
