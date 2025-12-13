@@ -184,7 +184,7 @@
                       ? (Thread.bottomLogo.bannerHeight || 90)
                       : 70;
 
-                  var paddingValue = (bannerHeight + 60) + 'px';
+                  var paddingValue = (bannerHeight + 80) + 'px';
                   var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;

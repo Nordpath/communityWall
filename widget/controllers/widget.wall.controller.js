@@ -971,7 +971,9 @@
                       ? (WidgetWall.bottomLogo.bannerHeight || 90)
                       : 70;
 
-                  var paddingValue = (bannerHeight + 60) + 'px';
+                  var fabSize = 56;
+                  var fabMargin = 20;
+                  var paddingValue = (bannerHeight + fabSize + fabMargin + 30) + 'px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.paddingBottom = paddingValue;
@@ -979,7 +981,7 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      var fabBottomOffset = 'calc(' + (bannerHeight + 20) + 'px + env(safe-area-inset-bottom))';
+                      var fabBottomOffset = 'calc(' + (bannerHeight + fabMargin) + 'px + env(safe-area-inset-bottom))';
                       fabButton.style.bottom = fabBottomOffset;
                   }
 
@@ -1638,8 +1640,8 @@
               let postData = {};
               postData.userDetails = WidgetWall.SocialItems.userDetails;
               postData.imageUrl = imageUrl || null;
-              postData.images = WidgetWall.images ? $scope.WidgetWall.images : [];
-              postData.videos = WidgetWall.videos ? $scope.WidgetWall.videos : [];
+              postData.images = $scope.WidgetWall.images && $scope.WidgetWall.images.length > 0 ? $scope.WidgetWall.images : [];
+              postData.videos = $scope.WidgetWall.videos && $scope.WidgetWall.videos.length > 0 ? $scope.WidgetWall.videos : [];
               postData.wid = WidgetWall.SocialItems.wid;
               postData.text = WidgetWall.postText ? WidgetWall.postText.replace(/[#&%+!@^*()-]/g, function (match) {
                   return encodeURIComponent(match)
@@ -1956,56 +1958,67 @@
                           return;
                       }
 
-                      // Use BuildFire's publicFiles.uploadFiles API (correct method name)
-                      if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFiles) {
-                          console.log('[ImageUpload] Using publicFiles.uploadFiles for video ' + index);
+                      function attemptVideoUpload() {
+                          if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFiles) {
+                              console.log('[ImageUpload] Using publicFiles.uploadFiles for video ' + index);
 
-                          buildfire.services.publicFiles.uploadFiles(
-                              [file], // Array of files
-                              { allowMultipleFilesUpload: false }, // Options
-                              function(progress) {
-                                  console.log('[ImageUpload] Upload progress for video ' + index + ':', progress);
-                              }, // onProgress
-                              function(completed) {
-                                  console.log('[ImageUpload] Upload completed for video ' + index + ':', completed);
-                              }, // onComplete
-                              function(err, uploadedFiles) {
-                                  if (err) {
-                                      console.error('[ImageUpload] publicFiles.uploadFiles ERROR for video ' + index + ':', err);
-                                      buildfire.dialog.toast({
-                                          message: err.message || 'Video upload failed. Please try again.',
-                                          type: 'danger'
-                                      });
-                                      resolve(null);
-                                  } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
-                                      console.log('[ImageUpload] publicFiles.uploadFiles SUCCESS for video ' + index + ':', uploadedFiles[0]);
-                                      resolve(uploadedFiles[0].url);
-                                  } else {
-                                      console.error('[ImageUpload] Upload completed but file status is not success');
-                                      buildfire.dialog.toast({
-                                          message: 'Video upload failed.',
-                                          type: 'danger'
-                                      });
-                                      resolve(null);
+                              buildfire.services.publicFiles.uploadFiles(
+                                  [file],
+                                  { allowMultipleFilesUpload: false },
+                                  function(progress) {
+                                      console.log('[ImageUpload] Upload progress for video ' + index + ':', progress);
+                                  },
+                                  function(completed) {
+                                      console.log('[ImageUpload] Upload completed for video ' + index + ':', completed);
+                                  },
+                                  function(err, uploadedFiles) {
+                                      if (err) {
+                                          console.error('[ImageUpload] publicFiles.uploadFiles ERROR for video ' + index + ':', err);
+                                          buildfire.dialog.toast({
+                                              message: err.message || 'Video upload failed. Please try again.',
+                                              type: 'danger'
+                                          });
+                                          resolve(null);
+                                      } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
+                                          console.log('[ImageUpload] publicFiles.uploadFiles SUCCESS for video ' + index + ':', uploadedFiles[0]);
+                                          resolve(uploadedFiles[0].url);
+                                      } else {
+                                          console.error('[ImageUpload] Upload completed but file status is not success');
+                                          buildfire.dialog.toast({
+                                              message: 'Video upload failed.',
+                                              type: 'danger'
+                                          });
+                                          resolve(null);
+                                      }
                                   }
-                              } // callback
-                          );
-                      } else {
-                          console.error('[ImageUpload] publicFiles.uploadFiles not available - this requires the BuildFire app environment and user must be logged in');
-                          buildfire.auth.getCurrentUser(function(authErr, user) {
-                              var errorMessage;
-                              if (authErr || !user || !user._id) {
-                                  errorMessage = 'Please log in to upload videos.';
-                              } else {
-                                  errorMessage = 'Video upload is only available in the BuildFire mobile app. Please open this in the app to upload videos.';
+                              );
+                              return true;
+                          }
+                          return false;
+                      }
+
+                      if (!attemptVideoUpload()) {
+                          setTimeout(function() {
+                              if (!attemptVideoUpload()) {
+                                  console.error('[ImageUpload] publicFiles.uploadFiles not available after retry');
+                                  buildfire.auth.getCurrentUser(function(authErr, user) {
+                                      if (authErr || !user || !user._id) {
+                                          buildfire.dialog.toast({
+                                              message: 'Please log in to upload videos.',
+                                              type: 'warning',
+                                              duration: 5000
+                                          });
+                                      } else {
+                                          buildfire.dialog.toast({
+                                              message: 'Video upload is currently unavailable. Please try again or use a different video format.',
+                                              type: 'warning',
+                                              duration: 5000
+                                          });
+                                      }
+                                      resolve(null);
+                                  });
                               }
-                              buildfire.dialog.toast({
-                                  message: errorMessage,
-                                  type: 'warning',
-                                  duration: 5000
-                              });
-                              resolve(null);
-                          });
+                          }, 500);
                       }
                   });
               });
