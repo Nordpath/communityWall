@@ -2761,10 +2761,6 @@
                       if (canUseWebShare) {
                           const shareData = { title: title, text: description, url: url };
                           navigator.share(shareData).then(() => {
-                              Buildfire.dialog.toast({
-                                  message: WidgetWall.SocialItems.languages.sharePostSuccess || "Post shared successfully!",
-                                  type: 'success'
-                              });
                               if (typeof Analytics !== 'undefined') {
                                   Analytics.trackAction("post-shared");
                               }
@@ -2788,11 +2784,6 @@
                               WidgetWall.fallbackShare(url, post);
                               return;
                           }
-
-                          Buildfire.dialog.toast({
-                              message: WidgetWall.SocialItems.languages.sharePostSuccess || "Post shared successfully!",
-                              type: 'success'
-                          });
 
                           if (typeof Analytics !== 'undefined') {
                               Analytics.trackAction("post-shared");
@@ -2818,10 +2809,6 @@
 
           WidgetWall.copyToClipboard = function(url) {
               var copySuccess = function() {
-                  Buildfire.dialog.toast({
-                      message: WidgetWall.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
-                      type: 'success'
-                  });
                   if (typeof Analytics !== 'undefined') {
                       Analytics.trackAction("post-shared");
                   }
@@ -2882,10 +2869,6 @@
 
               try {
                   document.execCommand('copy');
-                  Buildfire.dialog.toast({
-                      message: WidgetWall.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
-                      type: 'success'
-                  });
 
                   if (typeof Analytics !== 'undefined') {
                       Analytics.trackAction("post-shared");
@@ -2949,11 +2932,6 @@
                   }
 
                   navigator.share(shareData).then(() => {
-                      Buildfire.dialog.toast({
-                          message: WidgetWall.SocialItems.languages.sharePostSuccess || "Post shared successfully!",
-                          type: 'success'
-                      });
-
                       if (typeof Analytics !== 'undefined') {
                           Analytics.trackAction("post-shared");
                       }
@@ -2975,20 +2953,12 @@
 
                   try {
                       document.execCommand('copy');
-                      Buildfire.dialog.toast({
-                          message: WidgetWall.SocialItems.languages.sharePostSuccess || "Link copied to clipboard!",
-                          type: 'success'
-                      });
 
                       if (typeof Analytics !== 'undefined') {
                           Analytics.trackAction("post-shared");
                       }
                   } catch (err) {
                       console.error('Fallback copy failed:', err);
-                      Buildfire.dialog.toast({
-                          message: WidgetWall.SocialItems.languages.sharePostFail || "Unable to share post. Please try again.",
-                          type: 'danger'
-                      });
                   } finally {
                       document.body.removeChild(tempInput);
                   }
