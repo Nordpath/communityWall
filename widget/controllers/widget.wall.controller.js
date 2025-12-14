@@ -1748,7 +1748,7 @@
                               return;
                           }
 
-                          var videoExts = ['.mp4', '.mov', '.webm', '.ogg', '.avi', '.mkv', '.m4v', '.3gp'];
+                          var videoExts = ['.mp4', '.mov', '.webm', '.ogg', '.avi', '.mkv', '.m4v', '.3gp', '.qt'];
                           files.forEach(function(file) {
                               if (file.status === 'success' && file.url) {
                                   var isVideo = (file.type && file.type.startsWith('video/'));
@@ -1784,7 +1784,7 @@
                   console.log('[MediaPicker] showDialog not available, using file input fallback');
                   var input = document.createElement('input');
                   input.type = 'file';
-                  input.accept = 'image/*,video/*,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.avi,.mkv,.m4v,.3gp,.jpg,.jpeg,.png,.gif,.webp';
+                  input.accept = 'image/*,video/*,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.avi,.mkv,.m4v,.3gp,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif';
                   input.multiple = true;
                   input.style.display = 'none';
                   document.body.appendChild(input);
@@ -1823,8 +1823,8 @@
               var imageFiles = [];
               var videoFiles = [];
 
-              var imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
-              var videoExtensions = ['.mp4', '.mov', '.webm', '.ogg', '.avi', '.mkv', '.m4v', '.3gp'];
+              var imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.heic', '.heif'];
+              var videoExtensions = ['.mp4', '.mov', '.webm', '.ogg', '.avi', '.mkv', '.m4v', '.3gp', '.qt'];
 
               function getFileExtension(filename) {
                   if (!filename) return '';
