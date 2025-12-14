@@ -1588,7 +1588,7 @@
                       console.log('[ThreadVideoSelect] Using file input fallback');
                       var input = document.createElement('input');
                       input.type = 'file';
-                      input.accept = 'video/*';
+                      input.accept = 'video/*,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.avi,.mkv,.m4v,.3gp';
                       input.multiple = true;
                       input.style.display = 'none';
                       document.body.appendChild(input);

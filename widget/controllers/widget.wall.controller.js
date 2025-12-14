@@ -1748,9 +1748,15 @@
                               return;
                           }
 
+                          var videoExts = ['.mp4', '.mov', '.webm', '.ogg', '.avi', '.mkv', '.m4v', '.3gp'];
                           files.forEach(function(file) {
                               if (file.status === 'success' && file.url) {
-                                  if (file.type && file.type.startsWith('video/')) {
+                                  var isVideo = (file.type && file.type.startsWith('video/'));
+                                  if (!isVideo && file.url) {
+                                      var urlLower = file.url.toLowerCase();
+                                      isVideo = videoExts.some(function(ext) { return urlLower.indexOf(ext) !== -1; });
+                                  }
+                                  if (isVideo) {
                                       WidgetWall.selectedVideos.push(file.url);
                                   } else {
                                       WidgetWall.selectedImages.push(file.url);
@@ -1778,7 +1784,7 @@
                   console.log('[MediaPicker] showDialog not available, using file input fallback');
                   var input = document.createElement('input');
                   input.type = 'file';
-                  input.accept = 'image/*,video/*';
+                  input.accept = 'image/*,video/*,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.avi,.mkv,.m4v,.3gp,.jpg,.jpeg,.png,.gif,.webp';
                   input.multiple = true;
                   input.style.display = 'none';
                   document.body.appendChild(input);
@@ -1817,17 +1823,34 @@
               var imageFiles = [];
               var videoFiles = [];
 
+              var imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+              var videoExtensions = ['.mp4', '.mov', '.webm', '.ogg', '.avi', '.mkv', '.m4v', '.3gp'];
+
+              function getFileExtension(filename) {
+                  if (!filename) return '';
+                  var lastDot = filename.lastIndexOf('.');
+                  return lastDot !== -1 ? filename.substring(lastDot).toLowerCase() : '';
+              }
+
               for (var i = 0; i < files.length; i++) {
                   var file = files[i];
+                  var ext = getFileExtension(file.name);
                   console.log('[ImageUpload] File ' + i + ':', {
                       name: file.name,
                       type: file.type,
+                      extension: ext,
                       size: file.size,
                       lastModified: file.lastModified
                   });
-                  if (file.type.startsWith('image/')) {
+                  if (file.type && file.type.startsWith('image/')) {
                       imageFiles.push(file);
-                  } else if (file.type.startsWith('video/')) {
+                  } else if (file.type && file.type.startsWith('video/')) {
+                      videoFiles.push(file);
+                  } else if (imageExtensions.indexOf(ext) !== -1) {
+                      console.log('[ImageUpload] Detected image by extension:', ext);
+                      imageFiles.push(file);
+                  } else if (videoExtensions.indexOf(ext) !== -1) {
+                      console.log('[ImageUpload] Detected video by extension:', ext);
                       videoFiles.push(file);
                   }
               }
@@ -2231,7 +2254,7 @@
                       console.log('[VideoSelect] showDialog not available, using file input with uploadFiles fallback');
                       var input = document.createElement('input');
                       input.type = 'file';
-                      input.accept = 'video/*';
+                      input.accept = 'video/*,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.avi,.mkv,.m4v,.3gp';
                       input.multiple = true;
                       input.style.display = 'none';
                       document.body.appendChild(input);
