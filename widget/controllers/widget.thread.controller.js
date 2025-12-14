@@ -174,7 +174,7 @@
                   if (result && result.data && result.data.appSettings) {
                       if (result.data.appSettings.bottomLogo) {
                           Thread.bottomLogo = result.data.appSettings.bottomLogo;
-                          Thread.adjustLayoutForBottomLogo();
+                          Thread.initFabPositioning();
                       }
                   }
               });
@@ -210,24 +210,96 @@
               return style;
           };
 
-          Thread.adjustLayoutForBottomLogo = function () {
-              var sponsorLogo = Thread.bottomLogo.sponsorLogo || Thread.bottomLogo.imageUrl;
-              if (Thread.bottomLogo && Thread.bottomLogo.enabled && sponsorLogo) {
-                  var bannerHeight = Thread.bottomLogo.displayMode === 'banner'
+          Thread.getActualBannerHeight = function () {
+              var bannerContainer = document.querySelector('.bottom-logo-container');
+              if (bannerContainer && bannerContainer.offsetHeight > 0) {
+                  return bannerContainer.getBoundingClientRect().height;
+              }
+              if (Thread.bottomLogo && Thread.bottomLogo.enabled) {
+                  var configuredHeight = Thread.bottomLogo.displayMode === 'banner'
                       ? (Thread.bottomLogo.bannerHeight || 90)
                       : (Thread.bottomLogo.logoMaxHeight || 80) + 24;
+                  return configuredHeight + 40;
+              }
+              return 0;
+          };
 
-                  var paddingValue = (bannerHeight + 80) + 'px';
+          Thread.setFabPosition = function (bottomValue) {
+              var MIN_FAB_BOTTOM = 100;
+              var finalBottom = Math.max(bottomValue, MIN_FAB_BOTTOM);
+
+              var fabButton = document.querySelector('#addCommentBtn');
+              if (fabButton) {
+                  fabButton.style.setProperty('bottom', finalBottom + 'px', 'important');
+                  fabButton.style.setProperty('position', 'fixed', 'important');
+                  fabButton.style.setProperty('z-index', '9999', 'important');
+              }
+
+              var root = document.documentElement;
+              root.style.setProperty('--fab-bottom-offset', finalBottom + 'px');
+          };
+
+          Thread.adjustLayoutForBottomLogo = function () {
+              var sponsorLogo = Thread.bottomLogo && (Thread.bottomLogo.sponsorLogo || Thread.bottomLogo.imageUrl);
+              var isEnabled = Thread.bottomLogo && Thread.bottomLogo.enabled && sponsorLogo;
+
+              if (isEnabled) {
+                  var actualHeight = Thread.getActualBannerHeight();
+                  var configuredHeight = Thread.bottomLogo.displayMode === 'banner'
+                      ? (Thread.bottomLogo.bannerHeight || 90)
+                      : (Thread.bottomLogo.logoMaxHeight || 80) + 24;
+                  var bannerHeight = Math.max(actualHeight, configuredHeight);
+
+                  var fabMargin = 30;
+                  var safetyBuffer = 20;
+                  var fabBottomOffset = bannerHeight + fabMargin + safetyBuffer;
+
+                  Thread.setFabPosition(fabBottomOffset);
+
+                  var fabSize = 56;
+                  var paddingValue = (bannerHeight + fabSize + fabMargin + safetyBuffer + 30) + 'px';
                   var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
                   if (scrollContainer) {
-                      scrollContainer.style.paddingBottom = paddingValue;
+                      scrollContainer.style.setProperty('padding-bottom', paddingValue, 'important');
                   }
               } else {
+                  Thread.setFabPosition(140);
+
                   var scrollContainer = document.querySelector('.social-plugin.social-thread .post-section');
                   if (scrollContainer) {
-                      scrollContainer.style.paddingBottom = '7rem';
+                      scrollContainer.style.setProperty('padding-bottom', '160px', 'important');
                   }
               }
+          };
+
+          Thread.setupBannerImageLoadListener = function () {
+              var bannerImg = document.querySelector('.bottom-logo-container img');
+              if (bannerImg) {
+                  if (bannerImg.complete) {
+                      Thread.adjustLayoutForBottomLogo();
+                  } else {
+                      bannerImg.addEventListener('load', function () {
+                          Thread.adjustLayoutForBottomLogo();
+                      });
+                  }
+              }
+          };
+
+          Thread.initFabPositioning = function () {
+              Thread.adjustLayoutForBottomLogo();
+
+              setTimeout(function () {
+                  Thread.adjustLayoutForBottomLogo();
+                  Thread.setupBannerImageLoadListener();
+              }, 300);
+
+              setTimeout(function () {
+                  Thread.adjustLayoutForBottomLogo();
+              }, 800);
+
+              setTimeout(function () {
+                  Thread.adjustLayoutForBottomLogo();
+              }, 1500);
           };
 
           Thread.handleLogoClick = function () {

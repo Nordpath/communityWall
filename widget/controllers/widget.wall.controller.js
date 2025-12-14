@@ -142,7 +142,7 @@
               }
 
               setTimeout(function() {
-                  WidgetWall.adjustLayoutForBottomLogo();
+                  WidgetWall.initFabPositioning();
               }, 100);
           }
 
@@ -962,50 +962,116 @@
               }
           };
 
-          WidgetWall.adjustLayoutForBottomLogo = function () {
-              var sponsorLogo = WidgetWall.bottomLogo.sponsorLogo || WidgetWall.bottomLogo.imageUrl;
-              if (WidgetWall.bottomLogo.enabled && sponsorLogo) {
-                  var bannerHeight = WidgetWall.bottomLogo.displayMode === 'banner'
+          WidgetWall.getActualBannerHeight = function () {
+              var bannerContainer = document.querySelector('.bottom-logo-container');
+              if (bannerContainer && bannerContainer.offsetHeight > 0) {
+                  return bannerContainer.getBoundingClientRect().height;
+              }
+              if (WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled) {
+                  var configuredHeight = WidgetWall.bottomLogo.displayMode === 'banner'
                       ? (WidgetWall.bottomLogo.bannerHeight || 90)
                       : (WidgetWall.bottomLogo.logoMaxHeight || 80) + 24;
+                  return configuredHeight + 40;
+              }
+              return 0;
+          };
+
+          WidgetWall.setFabPosition = function (bottomValue) {
+              var MIN_FAB_BOTTOM = 100;
+              var finalBottom = Math.max(bottomValue, MIN_FAB_BOTTOM);
+
+              var fabButton = document.querySelector('#addBtn');
+              if (fabButton) {
+                  fabButton.style.setProperty('bottom', finalBottom + 'px', 'important');
+                  fabButton.style.setProperty('position', 'fixed', 'important');
+                  fabButton.style.setProperty('z-index', '9999', 'important');
+              }
+
+              var root = document.documentElement;
+              root.style.setProperty('--fab-bottom-offset', finalBottom + 'px');
+          };
+
+          WidgetWall.adjustLayoutForBottomLogo = function () {
+              var sponsorLogo = WidgetWall.bottomLogo && (WidgetWall.bottomLogo.sponsorLogo || WidgetWall.bottomLogo.imageUrl);
+              var isEnabled = WidgetWall.bottomLogo && WidgetWall.bottomLogo.enabled && sponsorLogo;
+
+              if (isEnabled) {
+                  var actualHeight = WidgetWall.getActualBannerHeight();
+                  var configuredHeight = WidgetWall.bottomLogo.displayMode === 'banner'
+                      ? (WidgetWall.bottomLogo.bannerHeight || 90)
+                      : (WidgetWall.bottomLogo.logoMaxHeight || 80) + 24;
+                  var bannerHeight = Math.max(actualHeight, configuredHeight);
+
+                  var fabMargin = 30;
+                  var safetyBuffer = 20;
+                  var fabBottomOffset = bannerHeight + fabMargin + safetyBuffer;
+
+                  WidgetWall.setFabPosition(fabBottomOffset);
 
                   var fabSize = 56;
-                  var fabMargin = 20;
-                  var paddingValue = (bannerHeight + fabSize + fabMargin + 30) + 'px';
+                  var paddingValue = (bannerHeight + fabSize + fabMargin + safetyBuffer + 30) + 'px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
-                      scrollContainer.style.paddingBottom = paddingValue;
-                  }
-
-                  var fabButton = document.querySelector('#addBtn');
-                  if (fabButton) {
-                      var baseOffset = bannerHeight + fabMargin;
-                      fabButton.style.bottom = baseOffset + 'px';
-                      fabButton.style.bottom = 'calc(' + baseOffset + 'px + env(safe-area-inset-bottom))';
+                      scrollContainer.style.setProperty('padding-bottom', paddingValue, 'important');
                   }
 
                   var bottomPost = document.querySelector('.holder.bottom-post');
                   if (bottomPost) {
-                      var bottomPostOffset = bannerHeight + 'px';
-                      bottomPost.style.bottom = bottomPostOffset;
+                      bottomPost.style.setProperty('bottom', bannerHeight + 'px', 'important');
                   }
               } else {
+                  WidgetWall.setFabPosition(140);
+
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
-                      scrollContainer.style.paddingBottom = '120px';
-                  }
-
-                  var fabButton = document.querySelector('#addBtn');
-                  if (fabButton) {
-                      fabButton.style.bottom = '80px';
-                      fabButton.style.bottom = 'calc(80px + env(safe-area-inset-bottom))';
+                      scrollContainer.style.setProperty('padding-bottom', '160px', 'important');
                   }
 
                   var bottomPost = document.querySelector('.holder.bottom-post');
                   if (bottomPost) {
-                      bottomPost.style.bottom = '0px';
+                      bottomPost.style.setProperty('bottom', '0px', 'important');
                   }
               }
+          };
+
+          WidgetWall.setupBannerImageLoadListener = function () {
+              var bannerImg = document.querySelector('.bottom-logo-container img');
+              if (bannerImg) {
+                  if (bannerImg.complete) {
+                      WidgetWall.adjustLayoutForBottomLogo();
+                  } else {
+                      bannerImg.addEventListener('load', function () {
+                          WidgetWall.adjustLayoutForBottomLogo();
+                      });
+                  }
+              }
+          };
+
+          WidgetWall.initFabPositioning = function () {
+              WidgetWall.adjustLayoutForBottomLogo();
+
+              setTimeout(function () {
+                  WidgetWall.adjustLayoutForBottomLogo();
+                  WidgetWall.setupBannerImageLoadListener();
+              }, 300);
+
+              setTimeout(function () {
+                  WidgetWall.adjustLayoutForBottomLogo();
+              }, 800);
+
+              setTimeout(function () {
+                  WidgetWall.adjustLayoutForBottomLogo();
+              }, 1500);
+
+              window.addEventListener('resize', function () {
+                  WidgetWall.adjustLayoutForBottomLogo();
+              });
+
+              window.addEventListener('orientationchange', function () {
+                  setTimeout(function () {
+                      WidgetWall.adjustLayoutForBottomLogo();
+                  }, 100);
+              });
           };
 
           WidgetWall.init = function () {

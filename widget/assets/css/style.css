@@ -279,10 +279,12 @@ button.btn--lg,
     width: 3.5rem;
     height: 3.5rem;
     border-radius: 50%;
-    position: fixed;
-    bottom: 110px;
-    right: 1.5rem;
+    position: fixed !important;
+    bottom: 140px !important;
+    bottom: calc(140px + env(safe-area-inset-bottom)) !important;
+    right: 1.5rem !important;
     box-shadow: 0 .125rem .5rem rgba(50, 50, 50, 0.3);
+    z-index: 9999 !important;
 }
 .btn--fab.btn--add span{
     display: block;
@@ -1890,27 +1892,37 @@ a.comments .iconsTheme.iconsFont {
     opacity: 0.95;
 }
 
+:root {
+    --fab-bottom-offset: 140px;
+}
+
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {
     .btn.btn--fab {
-        bottom: 90px;
-        bottom: calc(90px + constant(safe-area-inset-bottom));
-        bottom: calc(90px + env(safe-area-inset-bottom));
+        bottom: 140px !important;
+        bottom: calc(140px + constant(safe-area-inset-bottom)) !important;
+        bottom: calc(140px + env(safe-area-inset-bottom)) !important;
     }
 }
 
 /* Ensure FAB button appears above bottom banner/logo */
 #addBtn {
-    z-index: 150 !important;
+    z-index: 9999 !important;
+}
+
+#addCommentBtn {
+    z-index: 9999 !important;
 }
 
 #addBtn, #addCommentBtn {
-    position: fixed;
-    bottom: 80px;
-    bottom: calc(80px + constant(safe-area-inset-bottom));
-    bottom: calc(80px + env(safe-area-inset-bottom));
-    right: 1.5rem;
-    z-index: 150;
+    position: fixed !important;
+    bottom: 140px !important;
+    bottom: calc(140px + constant(safe-area-inset-bottom)) !important;
+    bottom: calc(140px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(var(--fab-bottom-offset, 140px) + constant(safe-area-inset-bottom)) !important;
+    bottom: calc(var(--fab-bottom-offset, 140px) + env(safe-area-inset-bottom)) !important;
+    right: 1.5rem !important;
+    z-index: 9999 !important;
     transition: transform 0.3s ease, opacity 0.3s ease;
     transform: translateY(0);
     opacity: 1;
