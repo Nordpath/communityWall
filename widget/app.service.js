@@ -760,29 +760,47 @@
                             }
                         }
 
+                        console.log('[createPost] Inserting post with data:', JSON.stringify(postData, null, 2));
                         buildfire.publicData.insert(postData, 'posts', (error, insertResult) => {
-                            if (error) return deferred.reject(error);
-                            if (insertResult && insertResult.id && insertResult.data) {
-                                insertResult.data.id = insertResult.id;
-                                insertResult.data.uniqueLink = insertResult.id + "-" + insertResult.data.wid;
-                                buildfire.publicData.update(insertResult.id, insertResult.data, 'posts', (err, posts) => {
-                                    if (err) return deferred.reject(err);
-
-                                    if (moderationEnabled && notifyAdmins) {
-                                        buildfire.notifications.pushNotification.schedule({
-                                            title: "New Post Pending Review",
-                                            text: "A new post has been submitted and requires approval.",
-                                            queryString: "postId=" + insertResult.id,
-                                            sendToSelf: false,
-                                            sendToAdmin: true
-                                        }, function(err, result) {
-                                            if (err) console.error('Error sending notification:', err);
-                                        });
-                                    }
-
-                                    return deferred.resolve(posts);
-                                });
+                            console.log('[createPost] Insert callback - error:', error, 'result:', insertResult);
+                            if (error) {
+                                console.error('[createPost] Insert failed:', error);
+                                return deferred.reject(error);
                             }
+                            if (!insertResult) {
+                                console.error('[createPost] Insert returned no result');
+                                return deferred.reject(new Error('Insert returned no result'));
+                            }
+                            if (!insertResult.id) {
+                                console.error('[createPost] Insert result missing id:', insertResult);
+                                return deferred.reject(new Error('Insert result missing id'));
+                            }
+
+                            var resultData = insertResult.data || postData;
+                            resultData.id = insertResult.id;
+                            resultData.uniqueLink = insertResult.id + "-" + (resultData.wid || postData.wid);
+
+                            buildfire.publicData.update(insertResult.id, resultData, 'posts', (err, posts) => {
+                                if (err) {
+                                    console.error('[createPost] Update failed:', err);
+                                    return deferred.reject(err);
+                                }
+
+                                if (moderationEnabled && notifyAdmins) {
+                                    buildfire.notifications.pushNotification.schedule({
+                                        title: "New Post Pending Review",
+                                        text: "A new post has been submitted and requires approval.",
+                                        queryString: "postId=" + insertResult.id,
+                                        sendToSelf: false,
+                                        sendToAdmin: true
+                                    }, function(err, result) {
+                                        if (err) console.error('Error sending notification:', err);
+                                    });
+                                }
+
+                                console.log('[createPost] Post created successfully:', posts);
+                                return deferred.resolve(posts);
+                            });
                         });
                     });
 

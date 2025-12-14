@@ -1647,10 +1647,20 @@
                   return encodeURIComponent(match)
               }) : '';
 
+              console.log('[finalPostCreation] Starting post creation with:', {
+                  hasUserDetails: !!postData.userDetails,
+                  userId: postData.userDetails && postData.userDetails.userId,
+                  wid: postData.wid,
+                  imagesCount: postData.images.length,
+                  videosCount: postData.videos.length,
+                  text: postData.text
+              });
+
               WidgetWall.onSendMessage({
                     _id: postData.userDetails && postData.userDetails.userId ? postData.userDetails.userId : null
-                }, postData.text, () =>
-                  SocialDataStore.createPost(postData).then((response) => {
+                }, postData.text, (msgErr) => {
+                    console.log('[finalPostCreation] onSendMessage callback, error:', msgErr);
+                    SocialDataStore.createPost(postData).then((response) => {
                       const isPending = response.data && response.data.status === 'pending';
 
                       if (!isPending) {
@@ -1684,11 +1694,16 @@
                       // $anchorScroll();
                       callback(null, response.data);
                   }, (err) => {
-                      console.error("Something went wrong.", err)
+                      console.error("[finalPostCreation] Post creation failed:", err);
                       WidgetWall.postText = '';
+                      Buildfire.dialog.toast({
+                          message: WidgetWall.SocialItems.languages.postCreationFailed || "Failed to create post. Please try again.",
+                          type: 'danger',
+                          duration: 4000
+                      });
                       callback(err);
-                  })
-              );
+                  });
+              });
           }
 
           WidgetWall.getPostContent = function (data) {
