@@ -2216,16 +2216,23 @@
           WidgetWall.selectVideos = function () {
               console.log('[VideoSelect] Checking video upload capabilities');
 
-              // First check if upload API is available
-              var hasUploadAPI = buildfire && buildfire.services && buildfire.services.publicFiles &&
+              // Check for available upload APIs
+              var hasPublicFiles = buildfire && buildfire.services && buildfire.services.publicFiles &&
                                (buildfire.services.publicFiles.showDialog || buildfire.services.publicFiles.uploadFiles);
 
-              if (!hasUploadAPI) {
-                  console.error('[VideoSelect] BuildFire upload API not available');
+              var hasImageLibFallback = buildfire && buildfire.imageLib && buildfire.imageLib.showDialog;
+
+              console.log('[VideoSelect] API availability:', {
+                  hasPublicFiles: hasPublicFiles,
+                  hasImageLibFallback: hasImageLibFallback
+              });
+
+              if (!hasPublicFiles && !hasImageLibFallback) {
+                  console.error('[VideoSelect] No upload API available');
                   buildfire.dialog.toast({
-                      message: 'Video upload is only available in the BuildFire mobile app. Please open this in the app to upload videos.',
+                      message: 'Video upload requires an updated BuildFire SDK. Please update your BuildFire CLI: npm install -g buildfire@latest',
                       type: 'warning',
-                      duration: 5000
+                      duration: 8000
                   });
                   return;
               }
@@ -2244,7 +2251,7 @@
 
                   console.log('[VideoSelect] User authenticated, proceeding with video selection');
 
-                  if (buildfire.services.publicFiles.showDialog) {
+                  if (hasPublicFiles && buildfire.services.publicFiles.showDialog) {
                       console.log('[VideoSelect] Using publicFiles.showDialog');
                       WidgetWall.isUploadingMedia = true;
                       if (!$scope.$$phase) $scope.$apply();
@@ -2286,7 +2293,7 @@
                               if (!$scope.$$phase) $scope.$apply();
                           }
                       );
-                  } else if (buildfire.services.publicFiles.uploadFiles) {
+                  } else if (hasPublicFiles && buildfire.services.publicFiles.uploadFiles) {
                       console.log('[VideoSelect] showDialog not available, using file input with uploadFiles fallback');
                       var input = document.createElement('input');
                       input.type = 'file';
@@ -2308,6 +2315,48 @@
                       };
 
                       input.click();
+                  } else if (hasImageLibFallback) {
+                      // Fallback to imageLib.showDialog with showFiles option
+                      console.log('[VideoSelect] Using imageLib.showDialog fallback (older SDK)');
+                      console.warn('[VideoSelect] Note: Video uploads work best with updated BuildFire SDK');
+
+                      WidgetWall.isUploadingMedia = true;
+                      if (!$scope.$$phase) $scope.$apply();
+
+                      buildfire.imageLib.showDialog(
+                          {
+                              showFiles: true,
+                              showIcons: false,
+                              multiSelection: true
+                          },
+                          function(err, result) {
+                              console.log('[VideoSelect] imageLib callback:', err, result);
+                              WidgetWall.isUploadingMedia = false;
+
+                              if (err) {
+                                  console.error('[VideoSelect] imageLib error:', err);
+                                  buildfire.dialog.toast({
+                                      message: err.message || 'Upload failed. For better video support, please update BuildFire SDK.',
+                                      type: 'warning',
+                                      duration: 5000
+                                  });
+                                  if (!$scope.$$phase) $scope.$apply();
+                                  return;
+                              }
+
+                              if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                                  result.selectedFiles.forEach(function(file) {
+                                      if (file && typeof file === 'string') {
+                                          WidgetWall.selectedVideos.push(file);
+                                      }
+                                  });
+                                  WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
+                                  console.log('[VideoSelect] Files selected via imageLib:', WidgetWall.selectedVideos.length);
+                              }
+
+                              if (!$scope.$$phase) $scope.$apply();
+                          }
+                      );
                   }
               });
           }

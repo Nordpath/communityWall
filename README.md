@@ -3,9 +3,23 @@ Social wall
 
 ## Testing Video Uploads
 
+### Important: SDK Version Requirements
+
+Video uploads require the BuildFire `services.publicFiles` API. If you see errors like "publicFiles.uploadFiles not available", update your SDK:
+
+```bash
+# Update BuildFire CLI to latest version
+npm install -g buildfire@latest
+
+# Or update local SDK
+npm update buildfire
+```
+
+**Fallback Support:** The plugin now includes automatic fallback to `imageLib.showDialog` for older SDK versions, but for best results, update to the latest BuildFire SDK.
+
 ### Method 1: BuildFire Emulator (Recommended)
 ```bash
-# Install BuildFire CLI globally
+# Install BuildFire CLI globally (if not already installed)
 npm install -g buildfire
 
 # Navigate to plugin directory
@@ -31,6 +45,43 @@ The mock APIs are available in `test/assets/buildfire.js`:
 - `buildfire.services.publicFiles.uploadFiles()` - Multiple file upload
 
 Open `test-video-upload.html` in your browser to see the testing dashboard.
+
+## Troubleshooting Video Uploads
+
+### Error: "publicFiles.uploadFiles not available after 3 retries"
+
+**Cause:** Your BuildFire SDK doesn't include the `services.publicFiles` API.
+
+**Solutions:**
+1. **Update BuildFire CLI** (recommended):
+   ```bash
+   npm install -g buildfire@latest
+   ```
+
+2. **Restart emulator** after updating:
+   ```bash
+   buildfire run
+   ```
+
+3. **Use fallback**: The plugin automatically falls back to `imageLib.showDialog` for older SDKs
+
+### Checking API Availability
+
+Open browser console and check:
+```javascript
+// Should return true for modern SDK
+console.log(!!buildfire.services.publicFiles);
+
+// Should return true for fallback support
+console.log(!!buildfire.imageLib);
+```
+
+### Console Logs to Watch For
+
+- `[VideoSelect] API availability` - Shows which APIs are detected
+- `[VideoSelect] Using publicFiles.showDialog` - Modern API in use
+- `[VideoSelect] Using imageLib.showDialog fallback` - Older SDK fallback
+- `[ImageUpload] Environment` - Shows detailed API detection
 
 ## Navigation
 
