@@ -959,8 +959,9 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
-                      var fabBottomOffset = 'calc(' + (bannerHeight + fabMargin) + 'px + env(safe-area-inset-bottom))';
-                      fabButton.style.bottom = fabBottomOffset;
+                      var baseOffset = bannerHeight + fabMargin;
+                      fabButton.style.bottom = baseOffset + 'px';
+                      fabButton.style.bottom = 'calc(' + baseOffset + 'px + env(safe-area-inset-bottom))';
                   }
 
                   var bottomPost = document.querySelector('.holder.bottom-post');
@@ -976,6 +977,7 @@
 
                   var fabButton = document.querySelector('#addBtn');
                   if (fabButton) {
+                      fabButton.style.bottom = '80px';
                       fabButton.style.bottom = 'calc(80px + env(safe-area-inset-bottom))';
                   }
 
