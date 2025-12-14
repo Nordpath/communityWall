@@ -45,7 +45,13 @@
                             <img ng-src="{{Thread.util.resizeImage(image)}}" data-alt="Post image" ng-click="Thread.SocialItems.previewImage($event, $index, Thread.post.imageUrl)">
                         </div>
                         <div ng-repeat="video in Thread.post.videos track by $index" class="post-videos-container">
-                            <video controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
+                            <div class="video-thumbnail-wrapper" ng-if="Thread.post.videoThumbnails[$index] && !Thread.post.showVideo[$index]" ng-click="Thread.playVideo(Thread.post, $index)">
+                                <img ng-src="{{Thread.post.videoThumbnails[$index]}}" alt="Video thumbnail" class="video-thumbnail-img">
+                                <div class="video-play-overlay">
+                                    <span class="material-icons play-icon">play_circle_filled</span>
+                                </div>
+                            </div>
+                            <video ng-if="!Thread.post.videoThumbnails[$index] || Thread.post.showVideo[$index]" controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
                             </video>
                         </div>
                     </div>

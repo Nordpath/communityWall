@@ -115,6 +115,16 @@
               }
           };
 
+          Thread.playVideo = function(item, index) {
+              if (!item.showVideo) {
+                  item.showVideo = {};
+              }
+              item.showVideo[index] = true;
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
           $scope.$on('openImageGallery', function(event, data) {
               if (data && data.images && data.images.length) {
                   Thread.imageGallery.images = data.images;
@@ -1530,6 +1540,13 @@
               }
           }
 
+          Thread.checkContentModeration = function(imageUrls) {
+              if (!imageUrls || !imageUrls.length || typeof MediaUtils === 'undefined') {
+                  return Promise.resolve({ safe: true });
+              }
+              return MediaUtils.checkImagesNSFW(imageUrls);
+          };
+
           Thread.submitCustomPost = function () {
               if (!Thread.customPostText || Thread.customPostText.trim() === '') {
                   buildfire.dialog.toast({
@@ -1542,12 +1559,32 @@
               if (Thread.editingPost) {
                   Thread.updatePost();
               } else {
-                  Thread.comment = Thread.customPostText;
-                  Thread.images = Thread.selectedImages || [];
-                  Thread.videos = Thread.selectedVideos || [];
-                  const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
-                  Thread.closeCustomPostDialog();
-                  Thread.addComment(parentCommentId);
+                  var imagesToCheck = Thread.selectedImages || [];
+
+                  Thread.checkContentModeration(imagesToCheck).then(function(moderationResult) {
+                      if (!moderationResult.safe) {
+                          buildfire.dialog.toast({
+                              message: Thread.SocialItems.languages.contentBlocked || "This content cannot be posted as it violates community guidelines.",
+                              type: 'danger'
+                          });
+                          return;
+                      }
+
+                      Thread.comment = Thread.customPostText;
+                      Thread.images = imagesToCheck;
+                      Thread.videos = Thread.selectedVideos || [];
+                      const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
+                      Thread.closeCustomPostDialog();
+                      Thread.addComment(parentCommentId);
+                  }).catch(function(err) {
+                      console.error('[Thread.submitCustomPost] Moderation error:', err);
+                      Thread.comment = Thread.customPostText;
+                      Thread.images = imagesToCheck;
+                      Thread.videos = Thread.selectedVideos || [];
+                      const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
+                      Thread.closeCustomPostDialog();
+                      Thread.addComment(parentCommentId);
+                  });
               }
           }
 

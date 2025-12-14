@@ -1749,6 +1749,54 @@ a.comments .iconsTheme.iconsFont {
     background-color: #000;
 }
 
+.video-thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.video-thumbnail-img {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+    border-radius: 8px;
+}
+
+.video-play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease;
+}
+
+.video-thumbnail-wrapper:hover .video-play-overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.video-play-overlay .play-icon {
+    font-size: 64px;
+    color: #fff;
+    opacity: 0.9;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.video-thumbnail-wrapper:hover .play-icon {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
 .feed-tabs-container {
     position: sticky;
     top: 0;

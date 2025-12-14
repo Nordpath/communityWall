@@ -1708,6 +1708,8 @@
               postData.imageUrl = imageUrl || null;
               postData.images = $scope.WidgetWall.images && $scope.WidgetWall.images.length > 0 ? $scope.WidgetWall.images : [];
               postData.videos = $scope.WidgetWall.videos && $scope.WidgetWall.videos.length > 0 ? $scope.WidgetWall.videos : [];
+              postData.videoThumbnails = $scope.WidgetWall.videoThumbnails && $scope.WidgetWall.videoThumbnails.length > 0 ? $scope.WidgetWall.videoThumbnails : [];
+              postData.showVideo = {};
               postData.wid = WidgetWall.SocialItems.wid;
               postData.text = WidgetWall.postText ? WidgetWall.postText.replace(/[#&%+!@^*()-]/g, function (match) {
                   return encodeURIComponent(match)
@@ -2474,44 +2476,73 @@
 
               WidgetWall.isSubmittingPost = true;
 
-              $scope.WidgetWall.images = WidgetWall.selectedImages || [];
-              $scope.WidgetWall.videos = WidgetWall.selectedVideos || [];
-              WidgetWall.postText = WidgetWall.customPostText;
+              var imagesToCheck = WidgetWall.selectedImages || [];
+              var videosToProcess = WidgetWall.selectedVideos || [];
 
-              console.log('[DEBUG] Submitting post with:', {
-                  images: $scope.WidgetWall.images.length,
-                  videos: $scope.WidgetWall.videos.length,
-                  text: WidgetWall.postText
-              });
-
-              WidgetWall.closeCustomPostDialog();
-
-              finalPostCreation($scope.WidgetWall.images, (err) => {
-                  WidgetWall.isSubmittingPost = false;
-                  if (err) {
+              WidgetWall.checkContentModeration(imagesToCheck).then(function(moderationResult) {
+                  if (!moderationResult.safe) {
+                      WidgetWall.isSubmittingPost = false;
+                      buildfire.dialog.toast({
+                          message: WidgetWall.SocialItems.languages.contentBlocked || "This content cannot be posted as it violates community guidelines.",
+                          type: 'danger'
+                      });
                       return;
                   }
-                  if (!WidgetWall.SocialItems.isPrivateChat) {
-                      buildfire.auth.getCurrentUser((err, currentUser) => {
-                          if (err || !currentUser) {
-                              console.error('Error getting current user: ', err);
+
+                  return WidgetWall.generateVideoThumbnails(videosToProcess).then(function(thumbnails) {
+                      $scope.WidgetWall.images = imagesToCheck;
+                      $scope.WidgetWall.videos = videosToProcess;
+                      $scope.WidgetWall.videoThumbnails = thumbnails.filter(function(t) { return t !== null; });
+                      WidgetWall.postText = WidgetWall.customPostText;
+
+                      console.log('[DEBUG] Submitting post with:', {
+                          images: $scope.WidgetWall.images.length,
+                          videos: $scope.WidgetWall.videos.length,
+                          thumbnails: $scope.WidgetWall.videoThumbnails.length,
+                          text: WidgetWall.postText
+                      });
+
+                      WidgetWall.closeCustomPostDialog();
+
+                      finalPostCreation($scope.WidgetWall.images, (err) => {
+                          WidgetWall.isSubmittingPost = false;
+                          if (err) {
                               return;
-                          } else {
-                              SocialDataStore.addFeedPost({
-                                  postText: WidgetWall.postText ? WidgetWall.postText : "",
-                                  postImages: $scope.WidgetWall.images || []
-                              }, (err, r) => {
-                                  if (err) {
-                                      console.error('Error adding feed post: ', err);
-                                      return;
-                                  }
-                                  if (r && r.id) {
-                                      followThread(r.id);
-                                  }
-                              });
                           }
-                      })
-                  }
+                          if (!WidgetWall.SocialItems.isPrivateChat) {
+                              buildfire.auth.getCurrentUser((err, currentUser) => {
+                                  if (err || !currentUser) {
+                                      console.error('Error getting current user: ', err);
+                                      return;
+                                  } else {
+                                      SocialDataStore.addFeedPost({
+                                          postText: WidgetWall.postText ? WidgetWall.postText : "",
+                                          postImages: $scope.WidgetWall.images || []
+                                      }, (err, r) => {
+                                          if (err) {
+                                              console.error('Error adding feed post: ', err);
+                                              return;
+                                          }
+                                          if (r && r.id) {
+                                              followThread(r.id);
+                                          }
+                                      });
+                                  }
+                              })
+                          }
+                      });
+                  });
+              }).catch(function(err) {
+                  console.error('[submitCustomPost] Moderation/thumbnail error:', err);
+                  WidgetWall.isSubmittingPost = false;
+                  $scope.WidgetWall.images = imagesToCheck;
+                  $scope.WidgetWall.videos = videosToProcess;
+                  $scope.WidgetWall.videoThumbnails = [];
+                  WidgetWall.postText = WidgetWall.customPostText;
+                  WidgetWall.closeCustomPostDialog();
+                  finalPostCreation($scope.WidgetWall.images, function() {
+                      WidgetWall.isSubmittingPost = false;
+                  });
               });
           }
 
@@ -3234,6 +3265,36 @@
                   }
               }
           });
+
+          WidgetWall.playVideo = function(post, index) {
+              if (!post.showVideo) {
+                  post.showVideo = {};
+              }
+              post.showVideo[index] = true;
+              if (!$scope.$$phase) {
+                  $scope.$apply();
+              }
+          };
+
+          WidgetWall.generateVideoThumbnails = function(videoUrls) {
+              if (!videoUrls || !videoUrls.length || typeof MediaUtils === 'undefined') {
+                  return Promise.resolve([]);
+              }
+              return MediaUtils.generateThumbnailsForVideos(videoUrls);
+          };
+
+          WidgetWall.checkContentModeration = function(imageUrls) {
+              if (!imageUrls || !imageUrls.length || typeof MediaUtils === 'undefined') {
+                  return Promise.resolve({ safe: true });
+              }
+              return MediaUtils.checkImagesNSFW(imageUrls);
+          };
+
+          if (typeof MediaUtils !== 'undefined' && MediaUtils.preloadModel) {
+              setTimeout(function() {
+                  MediaUtils.preloadModel();
+              }, 3000);
+          }
 
           document.addEventListener('keydown', function(e) {
               if (WidgetWall.imageGallery.show) {

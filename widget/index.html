@@ -26,6 +26,9 @@
     <link rel="stylesheet" href="../../../styles/components/skeleton.css" />
     <link rel="stylesheet" href="../../../styles/components/fabSpeedDial/fabSpeedDial.css" />
 
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nsfwjs@2.4.2/dist/nsfwjs.min.js"></script>
+
     <!-- build:bundleCFFiles  -->
     <script src="./CommunityFeedAPI/data/analyticKeys.js"></script>
     <script src="./CommunityFeedAPI/data/Errors.js"></script>
@@ -36,6 +39,7 @@
     <!-- build:bundleJSFiles  -->
     <script src="assets/js/moment.js"></script>
     <script src="utils/data-utils.js"></script>
+    <script src="utils/media-utils.js"></script>
     <script src="app.js"></script>
     <script src="app.service.js"></script>
     <script src="enums.js"></script>
@@ -159,7 +163,13 @@
                                                     <img ng-src="{{WidgetWall.util.resizeImage(image)}}" data-alt="Post image" ng-click="WidgetWall.SocialItems.previewImage($event, $index, post.images)" onerror="console.error('[ImageError] Failed to load:', this.src); this.style.display='none';">
                                                 </div>
                                                 <div ng-repeat="video in post.videos track by $index" class="post-videos-container" ng-if="video && video !== ''">
-                                                    <video controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
+                                                    <div class="video-thumbnail-wrapper" ng-if="post.videoThumbnails[$index] && !post.showVideo[$index]" ng-click="WidgetWall.playVideo(post, $index)">
+                                                        <img ng-src="{{post.videoThumbnails[$index]}}" alt="Video thumbnail" class="video-thumbnail-img">
+                                                        <div class="video-play-overlay">
+                                                            <span class="material-icons play-icon">play_circle_filled</span>
+                                                        </div>
+                                                    </div>
+                                                    <video ng-if="!post.videoThumbnails[$index] || post.showVideo[$index]" controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
                                                     </video>
                                                 </div>
                                             </div>
