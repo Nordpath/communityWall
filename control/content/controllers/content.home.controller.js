@@ -235,6 +235,8 @@
             ContentHome.approvedCount = 0;
             ContentHome.rejectedCount = 0;
             ContentHome.allPosts = [];
+            ContentHome.newPendingPost = false;
+            ContentHome.pollInterval = null;
 
             ContentHome.getPosts = function () {
                 ContentHome.loading = true;
@@ -322,6 +324,10 @@
 
                             ContentHome.updateCounts();
                             ContentHome.applyFilter();
+
+                            if (ContentHome.moderationEnabled) {
+                                ContentHome.startPolling();
+                            }
                         } else {
                             ContentHome.posts = [];
                             ContentHome.loading = false;
@@ -357,6 +363,71 @@
                     });
                 }
             };
+
+            ContentHome.checkForNewPosts = function() {
+                const searchOptions = {
+                    filter: { "_buildfire.index.string2": "pending" },
+                    sort: { "_buildfire.index.date1": -1 },
+                    recordCount: true
+                };
+
+                buildfire.publicData.search(searchOptions, 'posts', (err, data) => {
+                    if (err) {
+                        console.error('[ContentHome] Error checking for new posts:', err);
+                        return;
+                    }
+                    if (data && data.result) {
+                        const serverPendingIds = data.result.map(item => item.id);
+                        const localPendingIds = ContentHome.allPosts.filter(p => p.status === 'pending').map(p => p.id);
+
+                        const newPosts = data.result.filter(item => !localPendingIds.includes(item.id));
+                        if (newPosts.length > 0) {
+                            console.log('[ContentHome] Found', newPosts.length, 'new pending posts');
+                            newPosts.forEach(item => {
+                                const mappedItem = { ...item.data, id: item.id };
+                                if (!mappedItem.images && mappedItem.postImages) {
+                                    mappedItem.images = mappedItem.postImages;
+                                }
+                                if (!mappedItem.images) mappedItem.images = [];
+                                if (!mappedItem.videos && mappedItem.postVideos) {
+                                    mappedItem.videos = mappedItem.postVideos;
+                                }
+                                if (!mappedItem.videos) mappedItem.videos = [];
+                                ContentHome.allPosts.unshift(mappedItem);
+                            });
+                            ContentHome.updateCounts();
+                            ContentHome.newPendingPost = true;
+                            if (ContentHome.moderationEnabled) {
+                                ContentHome.filterStatus = 'pending';
+                            }
+                            ContentHome.applyFilter();
+                            if (!$scope.$$phase) $scope.$digest();
+                        }
+                    }
+                });
+            };
+
+            ContentHome.startPolling = function() {
+                if (ContentHome.pollInterval) {
+                    clearInterval(ContentHome.pollInterval);
+                }
+                ContentHome.pollInterval = setInterval(function() {
+                    if (ContentHome.moderationEnabled) {
+                        ContentHome.checkForNewPosts();
+                    }
+                }, 5000);
+            };
+
+            ContentHome.stopPolling = function() {
+                if (ContentHome.pollInterval) {
+                    clearInterval(ContentHome.pollInterval);
+                    ContentHome.pollInterval = null;
+                }
+            };
+
+            $scope.$on('$destroy', function() {
+                ContentHome.stopPolling();
+            });
 
             ContentHome.showComments = function (post) {
                 post.viewComments = true;
@@ -818,9 +889,11 @@
             }
 
             Buildfire.messaging.onReceivedMessage = function (event) {
+                console.log('[ContentHome] Received message from widget:', event);
                 if (event) {
                     switch (event.name) {
                         case EVENTS.POST_CREATED:
+                            console.log('[ContentHome] POST_CREATED event received:', event.post);
                             if (event.post) {
                                 // Map postImages to images for template compatibility
                                 if (!event.post.images && event.post.postImages) {
@@ -838,7 +911,16 @@
                                 }
                                 ContentHome.allPosts.unshift(event.post);
                                 ContentHome.updateCounts();
+
+                                // Auto-switch to pending tab if moderation is enabled and post is pending
+                                if (ContentHome.moderationEnabled && event.post.status === 'pending') {
+                                    ContentHome.filterStatus = 'pending';
+                                    ContentHome.newPendingPost = true;
+                                }
+
                                 ContentHome.applyFilter();
+                                console.log('[ContentHome] Post added, pending count:', ContentHome.pendingCount);
+                                if (!$scope.$$phase) $scope.$digest();
                             }
                             break;
                         case EVENTS.POST_LIKED:
