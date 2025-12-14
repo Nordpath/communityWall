@@ -1735,6 +1735,7 @@
           WidgetWall.selectedImagesText = 'Change selected';
           WidgetWall.selectedVideosText = 'Change selected';
           WidgetWall.editingPost = null;
+          WidgetWall.isSubmittingPost = false;
           WidgetWall.isUploadingMedia = false;
 
           WidgetWall.openPostSection = function () {
@@ -2388,6 +2389,11 @@
                   return;
               }
 
+              if (WidgetWall.isSubmittingPost) {
+                  console.log('[submitCustomPost] Already submitting, ignoring duplicate request');
+                  return;
+              }
+
               const hasImages = WidgetWall.selectedImages && WidgetWall.selectedImages.length > 0;
               const hasVideos = WidgetWall.selectedVideos && WidgetWall.selectedVideos.length > 0;
               const hasMedia = hasImages || hasVideos;
@@ -2399,6 +2405,8 @@
                   });
                   return;
               }
+
+              WidgetWall.isSubmittingPost = true;
 
               $scope.WidgetWall.images = WidgetWall.selectedImages || [];
               $scope.WidgetWall.videos = WidgetWall.selectedVideos || [];
@@ -2413,6 +2421,7 @@
               WidgetWall.closeCustomPostDialog();
 
               finalPostCreation($scope.WidgetWall.images, (err) => {
+                  WidgetWall.isSubmittingPost = false;
                   if (err) {
                       return;
                   }
