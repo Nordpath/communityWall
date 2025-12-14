@@ -1961,9 +1961,13 @@
                           return;
                       }
 
+                      var uploadAttempted = false;
+
                       function attemptVideoUpload() {
-                          if (buildfire && buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFiles) {
+                          if (buildfire && buildfire.services && buildfire.services.publicFiles &&
+                              typeof buildfire.services.publicFiles.uploadFiles === 'function') {
                               console.log('[ImageUpload] Using publicFiles.uploadFiles for video ' + index);
+                              uploadAttempted = true;
 
                               buildfire.services.publicFiles.uploadFiles(
                                   [file],
@@ -2000,28 +2004,40 @@
                           return false;
                       }
 
-                      if (!attemptVideoUpload()) {
+                      function retryUpload(attempt, maxAttempts) {
+                          if (attempt >= maxAttempts) {
+                              console.error('[ImageUpload] publicFiles.uploadFiles not available after ' + maxAttempts + ' retries');
+                              buildfire.auth.getCurrentUser(function(authErr, user) {
+                                  if (authErr || !user || !user._id) {
+                                      buildfire.dialog.toast({
+                                          message: 'Please log in to upload videos.',
+                                          type: 'warning',
+                                          duration: 5000
+                                      });
+                                  } else {
+                                      buildfire.dialog.toast({
+                                          message: 'Video upload is currently unavailable. Please try again or use a different video format.',
+                                          type: 'warning',
+                                          duration: 5000
+                                      });
+                                  }
+                                  resolve(null);
+                              });
+                              return;
+                          }
+
+                          var delay = attempt === 0 ? 500 : (attempt === 1 ? 1000 : 2000);
+                          console.log('[ImageUpload] Retry attempt ' + (attempt + 1) + ' in ' + delay + 'ms');
+
                           setTimeout(function() {
-                              if (!attemptVideoUpload()) {
-                                  console.error('[ImageUpload] publicFiles.uploadFiles not available after retry');
-                                  buildfire.auth.getCurrentUser(function(authErr, user) {
-                                      if (authErr || !user || !user._id) {
-                                          buildfire.dialog.toast({
-                                              message: 'Please log in to upload videos.',
-                                              type: 'warning',
-                                              duration: 5000
-                                          });
-                                      } else {
-                                          buildfire.dialog.toast({
-                                              message: 'Video upload is currently unavailable. Please try again or use a different video format.',
-                                              type: 'warning',
-                                              duration: 5000
-                                          });
-                                      }
-                                      resolve(null);
-                                  });
+                              if (!uploadAttempted && !attemptVideoUpload()) {
+                                  retryUpload(attempt + 1, maxAttempts);
                               }
-                          }, 500);
+                          }, delay);
+                      }
+
+                      if (!attemptVideoUpload()) {
+                          retryUpload(0, 3);
                       }
                   });
               });

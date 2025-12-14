@@ -1604,60 +1604,90 @@
 
                           var videoPromises = Array.from(files).map(function(file) {
                               return new Promise(function(resolve) {
-                                  if (buildfire.services.publicFiles.uploadFile) {
-                                      buildfire.services.publicFiles.uploadFile(
-                                          file,
-                                          { allowMultipleFilesUpload: false },
-                                          function(err, result) {
-                                              if (err) {
-                                                  console.error('[ThreadVideoSelect] uploadFile error:', err);
-                                                  buildfire.dialog.toast({
-                                                      message: err.message || 'Video upload failed. Please try again.',
-                                                      type: 'danger'
-                                                  });
-                                                  resolve(null);
-                                              } else {
-                                                  resolve(result.url);
-                                              }
+                                  var uploadAttempted = false;
+
+                                  function attemptUpload() {
+                                      if (buildfire && buildfire.services && buildfire.services.publicFiles) {
+                                          if (typeof buildfire.services.publicFiles.uploadFile === 'function') {
+                                              uploadAttempted = true;
+                                              buildfire.services.publicFiles.uploadFile(
+                                                  file,
+                                                  { allowMultipleFilesUpload: false },
+                                                  function(err, result) {
+                                                      if (err) {
+                                                          console.error('[ThreadVideoSelect] uploadFile error:', err);
+                                                          buildfire.dialog.toast({
+                                                              message: err.message || 'Video upload failed. Please try again.',
+                                                              type: 'danger'
+                                                          });
+                                                          resolve(null);
+                                                      } else {
+                                                          resolve(result.url);
+                                                      }
+                                                  }
+                                              );
+                                              return true;
+                                          } else if (typeof buildfire.services.publicFiles.uploadFiles === 'function') {
+                                              uploadAttempted = true;
+                                              buildfire.services.publicFiles.uploadFiles(
+                                                  [file],
+                                                  { allowMultipleFilesUpload: false },
+                                                  function(progress) {
+                                                      console.log('[ThreadVideoSelect] Upload progress:', progress);
+                                                  },
+                                                  function(completed) {
+                                                      console.log('[ThreadVideoSelect] Upload completed:', completed);
+                                                  },
+                                                  function(err, uploadedFiles) {
+                                                      if (err) {
+                                                          console.error('[ThreadVideoSelect] uploadFiles error:', err);
+                                                          buildfire.dialog.toast({
+                                                              message: err.message || 'Video upload failed. Please try again.',
+                                                              type: 'danger'
+                                                          });
+                                                          resolve(null);
+                                                      } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
+                                                          resolve(uploadedFiles[0].url);
+                                                      } else {
+                                                          console.error('[ThreadVideoSelect] Upload completed but status is not success');
+                                                          buildfire.dialog.toast({
+                                                              message: 'Video upload failed.',
+                                                              type: 'danger'
+                                                          });
+                                                          resolve(null);
+                                                      }
+                                                  }
+                                              );
+                                              return true;
                                           }
-                                      );
-                                  } else if (buildfire.services.publicFiles.uploadFiles) {
-                                      buildfire.services.publicFiles.uploadFiles(
-                                          [file],
-                                          { allowMultipleFilesUpload: false },
-                                          function(progress) {
-                                              console.log('[ThreadVideoSelect] Upload progress:', progress);
-                                          },
-                                          function(completed) {
-                                              console.log('[ThreadVideoSelect] Upload completed:', completed);
-                                          },
-                                          function(err, uploadedFiles) {
-                                              if (err) {
-                                                  console.error('[ThreadVideoSelect] uploadFiles error:', err);
-                                                  buildfire.dialog.toast({
-                                                      message: err.message || 'Video upload failed. Please try again.',
-                                                      type: 'danger'
-                                                  });
-                                                  resolve(null);
-                                              } else if (uploadedFiles && uploadedFiles.length > 0 && uploadedFiles[0].status === 'success') {
-                                                  resolve(uploadedFiles[0].url);
-                                              } else {
-                                                  console.error('[ThreadVideoSelect] Upload completed but status is not success');
-                                                  buildfire.dialog.toast({
-                                                      message: 'Video upload failed.',
-                                                      type: 'danger'
-                                                  });
-                                                  resolve(null);
-                                              }
+                                      }
+                                      return false;
+                                  }
+
+                                  function retryUpload(attempt, maxAttempts) {
+                                      if (attempt >= maxAttempts) {
+                                          console.error('[ThreadVideoSelect] No upload API available after ' + maxAttempts + ' retries');
+                                          buildfire.dialog.toast({
+                                              message: 'Video upload is currently unavailable. Please try again.',
+                                              type: 'warning',
+                                              duration: 5000
+                                          });
+                                          resolve(null);
+                                          return;
+                                      }
+
+                                      var delay = attempt === 0 ? 500 : (attempt === 1 ? 1000 : 2000);
+                                      console.log('[ThreadVideoSelect] Retry attempt ' + (attempt + 1) + ' in ' + delay + 'ms');
+
+                                      setTimeout(function() {
+                                          if (!uploadAttempted && !attemptUpload()) {
+                                              retryUpload(attempt + 1, maxAttempts);
                                           }
-                                      );
-                                  } else {
-                                      console.error('[ThreadVideoSelect] No upload API available');
-                                      buildfire.dialog.toast({
-                                          message: 'Video upload is only available in the BuildFire mobile app.',
-                                          type: 'warning'
-                                      });
-                                      resolve(null);
+                                      }, delay);
+                                  }
+
+                                  if (!attemptUpload()) {
+                                      retryUpload(0, 3);
                                   }
                               });
                           });
