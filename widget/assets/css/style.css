@@ -1786,10 +1786,14 @@ a.comments .iconsTheme.iconsFont {
 
 .video-play-overlay .play-icon {
     font-size: 64px;
-    color: #fff;
+    color: #fff !important;
     opacity: 0.9;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.video-play-overlay .play-icon.material-icons {
+    color: #fff !important;
 }
 
 .video-thumbnail-wrapper:hover .play-icon {
