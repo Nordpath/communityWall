@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload Testing - Social Plugin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #ff9800;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px 10px 10px 0;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: #1976d2;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .console-output div {
+            margin: 5px 0;
+        }
+        .test-mode {
+            background: #f3e5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #9c27b0;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Video Upload Testing</h1>
+        <p>Test the video upload functionality with mock BuildFire APIs</p>
+
+        <div class="info">
+            <strong>✓ Mock API Enabled</strong><br>
+            This page loads the test buildfire.js with mock <code>services.publicFiles</code> APIs that simulate video uploads.
+        </div>
+
+        <div class="warning">
+            <strong>⚠ Test Environment Only</strong><br>
+            This page uses mock APIs for testing. In production, the actual BuildFire APIs will be used.
+        </div>
+
+        <h2>Setup Instructions</h2>
+        <ol>
+            <li>You need to test this plugin in the BuildFire emulator or on a device</li>
+            <li>The mock APIs in <code>test/assets/buildfire.js</code> can be used for unit testing</li>
+            <li>For integration testing with video uploads, use one of these methods:</li>
+        </ol>
+
+        <h3>Method 1: BuildFire Emulator (Recommended)</h3>
+        <div class="info">
+            <strong>Using BuildFire SDK</strong><br>
+            1. Install BuildFire CLI: <code>npm install -g buildfire</code><br>
+            2. Navigate to your plugin folder<br>
+            3. Run: <code>buildfire run</code><br>
+            4. Open the emulator in your browser<br>
+            5. Test video uploads with the mock dialog
+        </div>
+
+        <h3>Method 2: Test with URL Parameter</h3>
+        <div class="info">
+            <strong>Simulate Delayed API</strong><br>
+            Add <code>?testVideoRetry=true</code> to your URL to test the retry logic:<br>
+            • The video API will be hidden for 2.5 seconds<br>
+            • Retry logic will attempt at 500ms, 1s, 2s intervals<br>
+            • API restores after 2.5s and upload succeeds<br>
+            • Check console for <code>[TEST MODE]</code> logs
+        </div>
+
+        <h2>Test Options</h2>
+
+        <button class="btn" onclick="openTestWidget(false)">
+            Test in New Window
+        </button>
+
+        <button class="btn" onclick="openTestWidget(true)">
+            Test with Retry Mode
+        </button>
+
+        <div class="test-mode">
+            <strong>Retry Test Mode</strong> simulates delayed API initialization:<br>
+            • APIs become unavailable for 2.5 seconds<br>
+            • Retry logic attempts uploads at 500ms, 1s, and 2s<br>
+            • APIs restore after 2.5s and upload succeeds<br>
+            • Check browser console for detailed logs
+        </div>
+
+        <h2>How to Test</h2>
+        <ol>
+            <li>Click one of the buttons above to open the widget</li>
+            <li>Open browser DevTools (F12) to see console logs</li>
+            <li>Click the video upload button in the widget</li>
+            <li>Select a video file from your computer</li>
+            <li>Watch the console for mock upload logs</li>
+        </ol>
+
+        <h2>What to Look For</h2>
+        <ul>
+            <li><strong>[TEST MOCK]</strong> - Mock API calls</li>
+            <li><strong>[ImageUpload]</strong> - Upload process logs</li>
+            <li><strong>[TEST MODE]</strong> - Retry test mode logs</li>
+        </ul>
+
+        <h2>Console Output</h2>
+        <div class="console-output" id="consoleOutput">
+            <div style="color: #888;">Console logs will appear here when you test...</div>
+        </div>
+    </div>
+
+    <script src="test/assets/buildfire.js"></script>
+    <script>
+        // Intercept console.log to display in the page
+        var consoleDiv = document.getElementById('consoleOutput');
+        var originalLog = console.log;
+
+        console.log = function() {
+            // Call original console.log
+            originalLog.apply(console, arguments);
+
+            // Display in page
+            var message = Array.from(arguments).map(function(arg) {
+                if (typeof arg === 'object') {
+                    return JSON.stringify(arg, null, 2);
+                }
+                return String(arg);
+            }).join(' ');
+
+            var div = document.createElement('div');
+
+            // Color code different log types
+            if (message.includes('[TEST MOCK]')) {
+                div.style.color = '#4fc3f7';
+            } else if (message.includes('[ImageUpload]')) {
+                div.style.color = '#81c784';
+            } else if (message.includes('[TEST MODE]')) {
+                div.style.color = '#ba68c8';
+            } else if (message.includes('ERROR')) {
+                div.style.color = '#e57373';
+            }
+
+            div.textContent = message;
+            consoleDiv.insertBefore(div, consoleDiv.firstChild);
+
+            // Keep only last 50 logs
+            while (consoleDiv.children.length > 50) {
+                consoleDiv.removeChild(consoleDiv.lastChild);
+            }
+        };
+
+        function openTestWidget(retryMode) {
+            var url = 'widget/index.html';
+            if (retryMode) {
+                url += '?testVideoRetry=true';
+            }
+
+            alert(
+                'Testing Instructions:\n\n' +
+                '1. The widget needs to run in BuildFire emulator\n' +
+                '2. Use "buildfire run" command in your terminal\n' +
+                '3. Or test on a real device\n\n' +
+                'This page demonstrates the mock APIs only.\n' +
+                'Video uploads require the full BuildFire environment.'
+            );
+
+            console.log('[TEST PAGE] To test video uploads, use BuildFire CLI: buildfire run');
+        }
+
+        console.log('[TEST PAGE] Video upload testing page loaded');
+        console.log('[TEST PAGE] buildfire.services.publicFiles available:', !!buildfire.services.publicFiles);
+
+        // Test the mock API
+        console.log('[TEST PAGE] Testing mock uploadFiles API...');
+        if (buildfire.services && buildfire.services.publicFiles && buildfire.services.publicFiles.uploadFiles) {
+            console.log('[TEST PAGE] ✓ Mock API is ready');
+        }
+    </script>
+</body>
+</html>

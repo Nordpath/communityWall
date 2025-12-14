@@ -1014,6 +1014,74 @@ var buildfire = {
             buildfire._sendPacket(new Packet(null,"geo.clearWatch",watchId),callback);
         }
     }
+    /// Mock for Public Files Service - for testing video/file uploads
+    , services: {
+        publicFiles: {
+            showDialog: function(options, callback) {
+                console.log('[TEST MOCK] publicFiles.showDialog called with options:', options);
+
+                // Create a file input element for testing
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.multiple = options && options.multiSelection;
+
+                // Set accept attribute based on content type
+                if (options && options.contentType) {
+                    if (options.contentType === 'images') {
+                        input.accept = 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
+                    } else if (options.contentType === 'videos') {
+                        input.accept = 'video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-m4v,video/x-matroska';
+                    }
+                }
+
+                input.onchange = function(e) {
+                    var files = Array.from(e.target.files);
+                    console.log('[TEST MOCK] Files selected:', files.length);
+
+                    // Simulate file upload and return URLs
+                    var fileUrls = files.map(function(file, index) {
+                        var mockUrl = 'https://test-cdn.buildfire.com/mock-uploads/' + Date.now() + '-' + index + '-' + file.name;
+                        console.log('[TEST MOCK] Generated URL:', mockUrl, 'for file:', file.name);
+                        return mockUrl;
+                    });
+
+                    if (callback) {
+                        callback(null, fileUrls);
+                    }
+                };
+
+                input.click();
+            },
+            uploadFile: function(file, callback) {
+                console.log('[TEST MOCK] publicFiles.uploadFile called with file:', file.name);
+
+                // Simulate upload progress
+                setTimeout(function() {
+                    var mockUrl = 'https://test-cdn.buildfire.com/mock-uploads/' + Date.now() + '-' + file.name;
+                    console.log('[TEST MOCK] Upload complete, URL:', mockUrl);
+
+                    if (callback) {
+                        callback(null, mockUrl);
+                    }
+                }, 500);
+            },
+            uploadFiles: function(files, callback) {
+                console.log('[TEST MOCK] publicFiles.uploadFiles called with', files.length, 'files');
+
+                // Simulate upload progress for multiple files
+                setTimeout(function() {
+                    var fileUrls = files.map(function(file, index) {
+                        return 'https://test-cdn.buildfire.com/mock-uploads/' + Date.now() + '-' + index + '-' + file.name;
+                    });
+                    console.log('[TEST MOCK] Uploads complete, URLs:', fileUrls);
+
+                    if (callback) {
+                        callback(null, fileUrls);
+                    }
+                }, 800);
+            }
+        }
+    }
 
 };
 buildfire.init();
