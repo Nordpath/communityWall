@@ -754,6 +754,7 @@
                                 string1: postData.wid,
                                 string2: postData.status,
                                 number1: 0,
+                                number2: 0,
                                 date1: new Date().getTime(),
                                 array1: [{string1: "createdBy_" + postData.userDetails.userId}]
                             }
@@ -806,6 +807,9 @@
                                 requestData,
                                 1000
                             );
+                            if (!post.data._buildfire) post.data._buildfire = {};
+                            if (!post.data._buildfire.index) post.data._buildfire.index = {};
+                            post.data._buildfire.index.number2 = post.data.comments.length;
                             return DataUtils.publicData.updateWithRetry(post.id, post.data, 'posts');
                         })
                         .then(function(status) {
@@ -848,6 +852,9 @@
                             })
                             let index = result.data.comments.indexOf(commentToDelete);
                             result.data.comments.splice(index, 1);
+                            if (!result.data._buildfire) result.data._buildfire = {};
+                            if (!result.data._buildfire.index) result.data._buildfire.index = {};
+                            result.data._buildfire.index.number2 = result.data.comments.length;
                             buildfire.publicData.update(result.id, result.data, 'posts', function (error, result) {
                                 return deferred.resolve(result.data.comments);
                             })
@@ -1211,15 +1218,22 @@
                             return mappedItem;
                         });
 
+                        _this.items = DataUtils.array.limit(_this.items.concat(newItems), 1000);
+
                         if (activeTab === 'popular') {
-                            newItems.sort((a, b) => {
+                            _this.items.sort((a, b) => {
                                 const aLikes = (a.likes && a.likes.length) || 0;
                                 const bLikes = (b.likes && b.likes.length) || 0;
-                                return bLikes - aLikes;
+                                const aComments = (a.comments && a.comments.length) || 0;
+                                const bComments = (b.comments && b.comments.length) || 0;
+                                const aScore = aLikes + aComments;
+                                const bScore = bLikes + bComments;
+                                if (bScore !== aScore) return bScore - aScore;
+                                const aDate = new Date(a.createdOn).getTime();
+                                const bDate = new Date(b.createdOn).getTime();
+                                return bDate - aDate;
                             });
                         }
-
-                        _this.items = DataUtils.array.limit(_this.items.concat(newItems), 1000);
                         if (data.totalRecord > _this.items.length) {
                             _this.showMorePosts = true;
                             _this.page++;
@@ -1287,7 +1301,7 @@
             function getSort(activeTab) {
                 if (activeTab === 'popular') {
                     if (_this.indexingUpdateDone) {
-                        return { "_buildfire.index.number1": -1, "_buildfire.index.date1": -1 };
+                        return { "_buildfire.index.number1": -1, "_buildfire.index.number2": -1, "_buildfire.index.date1": -1 };
                     }
                     return { "likesCount": -1, "createdOn": -1 };
                 }

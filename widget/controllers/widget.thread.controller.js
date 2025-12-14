@@ -848,12 +848,12 @@
                   if (userData) {
                       var liked = post.likes.find(function(element) { return element === Thread.SocialItems.userDetails.userId; });
                       var index = post.likes.indexOf(Thread.SocialItems.userDetails.userId);
+                      if (!post._buildfire) post._buildfire = {};
+                      if (!post._buildfire.index) post._buildfire.index = {};
                       if (liked !== undefined) {
                           post.likes.splice(index, 1);
                           post.likesCount = post.likes.length;
-                          if (post._buildfire && post._buildfire.index) {
-                              post._buildfire.index.number1 = post.likes.length;
-                          }
+                          post._buildfire.index.number1 = post.likes.length;
                           Buildfire.messaging.sendMessageToControl({
                               'name': EVENTS.POST_UNLIKED,
                               'id': post.id,
@@ -862,9 +862,7 @@
                       } else {
                           post.likes = DataUtils.array.addToLimited(post.likes || [], Thread.SocialItems.userDetails.userId, 10000);
                           post.likesCount = post.likes.length;
-                          if (post._buildfire && post._buildfire.index) {
-                              post._buildfire.index.number1 = post.likes.length;
-                          }
+                          post._buildfire.index.number1 = post.likes.length;
                           Buildfire.messaging.sendMessageToControl({
                               'name': EVENTS.POST_LIKED,
                               'id': post.id,
