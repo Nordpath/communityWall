@@ -29,6 +29,26 @@
           WidgetWall.isFromDeepLink= false;
           WidgetWall.skeleton = null;
 
+          // Testing mode: Add ?testVideoRetry=true to URL to simulate delayed API initialization
+          var urlParams = new URLSearchParams(window.location.search);
+          var testVideoRetry = urlParams.get('testVideoRetry') === 'true';
+          if (testVideoRetry && buildfire && buildfire.services && buildfire.services.publicFiles) {
+              console.log('[TEST MODE] Simulating delayed video upload API initialization');
+              var originalUploadFiles = buildfire.services.publicFiles.uploadFiles;
+              var originalUploadFile = buildfire.services.publicFiles.uploadFile;
+
+              // Temporarily hide the upload APIs
+              buildfire.services.publicFiles.uploadFiles = undefined;
+              buildfire.services.publicFiles.uploadFile = undefined;
+
+              // Restore them after 2.5 seconds to test retry logic
+              setTimeout(function() {
+                  console.log('[TEST MODE] Restoring video upload API');
+                  buildfire.services.publicFiles.uploadFiles = originalUploadFiles;
+                  buildfire.services.publicFiles.uploadFile = originalUploadFile;
+              }, 2500);
+          }
+
           WidgetWall.activeTab = 'newest';
 
           WidgetWall.initSkeleton = function () {
