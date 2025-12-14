@@ -75,9 +75,10 @@
                     <div class="hes-gallery post-images" data-wrap="true" data-img-count="{{post.images.length}}" ng-init="initHesGallery()">
                         <img ng-repeat="image in post.images" ng-src="{{image}}" data-alt="Post image" style="max-width: 100%; height: auto;" onerror="console.error('[ImageError] Failed to load:', this.src);">
                     </div>
-                    <div ng-if="post.videos && post.videos.length > 0" class="post-videos">
-                        <video ng-repeat="video in post.videos" controls style="max-width: 100%; max-height: 300px;">
-                            <source ng-src="{{video}}" type="video/mp4">
+                    <div ng-if="post.videos && post.videos.length > 0" class="post-videos" style="margin-top: 10px;">
+                        <video ng-repeat="video in post.videos" controls preload="metadata" style="max-width: 100%; max-height: 400px; display: block; margin-bottom: 10px; background: #000; border-radius: 4px;">
+                            <source ng-src="{{video | trustAsResourceUrl}}" type="video/mp4">
+                            Your browser does not support the video tag.
                         </video>
                     </div>
                 </div>
@@ -121,6 +122,12 @@
                         </div>
                         <div class="hes-gallery post-images" data-wrap="true" ng-show="comment.imageUrl.length" data-img-count="{{comment.imageUrl.length}}" ng-init="initHesGallery()">
                             <img ng-repeat="imageUrl in comment.imageUrl" ng-src="{{ContentHome.util.resizeImage(imageUrl)}}" data-alt="Post image">
+                        </div>
+                        <div ng-if="comment.videos && comment.videos.length > 0" class="comment-videos" style="margin-top: 10px;">
+                            <video ng-repeat="video in comment.videos" controls preload="metadata" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px; background: #000; border-radius: 4px;">
+                                <source ng-src="{{video | trustAsResourceUrl}}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
                         <div class="social-footer flex">
                             <a class="text-danger padded-sm caption padding-left-zero" ng-click="ContentHome.deleteComment(post, comment)">Delete Comment</a>

@@ -68,5 +68,10 @@
                     elem.attr("src", attrs.finalSrc);
                 }
             };
+        }])
+        .filter('trustAsResourceUrl', ['$sce', function($sce) {
+            return function(url) {
+                return $sce.trustAsResourceUrl(url);
+            };
         }]);
 })(window.angular);
