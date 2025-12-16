@@ -879,12 +879,17 @@
            * @param post
            * @param type
            */
-          Thread.scheduleNotification = function (post, text) {
+          Thread.scheduleNotification = function (post, text, parentComment) {
               let options = {
                   title: 'Notification',
                   text: '',
                   sendToSelf: false
               };
+
+              const currentUserId = Thread.SocialItems.userDetails.userId;
+
+              if (text === 'likedComment' && post.userId === currentUserId) return;
+              if (text === 'commentReply' && parentComment && parentComment.userId === currentUserId) return;
 
               Util.setExpression({title: Thread.SocialItems.context.title});
 
@@ -900,10 +905,16 @@
                   messageKey = Thread.SocialItems.languages.postLikeNotificationMessageBody;
                   inAppMessageKey = Thread.SocialItems.languages.postLikeInAppMessageBody;
               } else if (text === 'comment') {
+                  if (Thread.post.userId === currentUserId) return;
                   options.users = [Thread.post.userId];
                   titleKey = Thread.SocialItems.languages.commentNotificationMessageTitle;
                   messageKey = Thread.SocialItems.languages.commentNotificationMessageBody;
                   inAppMessageKey = Thread.SocialItems.languages.commentInAppMessageBody;
+              } else if (text === 'commentReply' && parentComment) {
+                  options.users = [parentComment.userId];
+                  titleKey = Thread.SocialItems.languages.commentReplyNotificationTitle || 'New Reply';
+                  messageKey = Thread.SocialItems.languages.commentReplyNotificationMessageBody || "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment.";
+                  inAppMessageKey = Thread.SocialItems.languages.commentReplyInAppMessageBody || "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment.";
               }
 
               if (Thread.SocialItems.wid) {
@@ -1392,6 +1403,11 @@
           }
 
           Thread.addComment = function (parentCommentId = null) {
+              let parentComment = null;
+              if (parentCommentId) {
+                  parentComment = Thread.post.comments.find(c => c.commentId === parentCommentId);
+              }
+
               let commentData = {
                   threadId: Thread.post.id,
                   comment: Thread.comment ? Thread.comment.replace(/[#&%+!@^*()-]/g, function (match) {
@@ -1423,7 +1439,11 @@
                     Thread.post.comments.push(commentData);
                     Thread.post.commentsCount = (Thread.post.commentsCount || 0) + 1;
                     Thread.organizeThreadedComments();
-                    Thread.scheduleNotification(commentData, 'comment');
+                    if (parentComment) {
+                        Thread.scheduleNotification(commentData, 'commentReply', parentComment);
+                    } else {
+                        Thread.scheduleNotification(commentData, 'comment');
+                    }
                 });
           }
 

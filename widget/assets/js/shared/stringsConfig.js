@@ -400,6 +400,26 @@ const stringsConfig = {
 				, maxLength: 150
 				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} liked your comment."
 			},
+
+			commentReplyNotificationTitle: {
+				title: "Title"
+				, subtitle: "Comment Reply Notification"
+				, placeholder: "New Reply"
+				, maxLength: 25
+				, defaultValue: "New Reply"
+			},
+			commentReplyNotificationMessageBody: {
+				title: "Body"
+				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+				, maxLength: 150
+				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+			},
+			commentReplyInAppMessageBody: {
+				title: "In App Message"
+				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+				, maxLength: 150
+				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+			},
 		}
 	},
 	general: {
