@@ -237,6 +237,76 @@
             ContentHome.allPosts = [];
             ContentHome.newPendingPost = false;
             ContentHome.pollInterval = null;
+            ContentHome.originalTitle = document.title || 'Content';
+            ContentHome.titleFlashInterval = null;
+
+            ContentHome.requestNotificationPermission = function() {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+            };
+
+            ContentHome.sendBrowserNotification = function(count) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    var notification = new Notification('New Posts Pending Review', {
+                        body: count + ' post' + (count > 1 ? 's' : '') + ' waiting for your approval',
+                        icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827379.png',
+                        requireInteraction: true,
+                        tag: 'pending-posts'
+                    });
+                    notification.onclick = function() {
+                        window.focus();
+                        ContentHome.filterByStatus('pending');
+                        if (!$scope.$$phase) $scope.$digest();
+                        notification.close();
+                    };
+                }
+            };
+
+            ContentHome.playAlertSound = function() {
+                try {
+                    var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    var oscillator = audioContext.createOscillator();
+                    var gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Could not play alert sound');
+                }
+            };
+
+            ContentHome.startTitleFlash = function() {
+                if (ContentHome.titleFlashInterval) return;
+                var isOriginal = true;
+                ContentHome.titleFlashInterval = setInterval(function() {
+                    if (ContentHome.pendingCount > 0) {
+                        document.title = isOriginal ? '(' + ContentHome.pendingCount + ') PENDING POSTS!' : ContentHome.originalTitle;
+                        isOriginal = !isOriginal;
+                    } else {
+                        ContentHome.stopTitleFlash();
+                    }
+                }, 1000);
+            };
+
+            ContentHome.stopTitleFlash = function() {
+                if (ContentHome.titleFlashInterval) {
+                    clearInterval(ContentHome.titleFlashInterval);
+                    ContentHome.titleFlashInterval = null;
+                    document.title = ContentHome.originalTitle;
+                }
+            };
+
+            ContentHome.notifyAdmin = function(newCount) {
+                ContentHome.sendBrowserNotification(newCount);
+                ContentHome.playAlertSound();
+                ContentHome.startTitleFlash();
+            };
 
             ContentHome.getPosts = function () {
                 ContentHome.loading = true;
@@ -327,6 +397,10 @@
 
                             if (ContentHome.moderationEnabled) {
                                 ContentHome.startPolling();
+                                ContentHome.requestNotificationPermission();
+                                if (ContentHome.pendingCount > 0) {
+                                    ContentHome.startTitleFlash();
+                                }
                             }
                         } else {
                             ContentHome.posts = [];
@@ -343,6 +417,9 @@
                 ContentHome.pendingCount = ContentHome.allPosts.filter(p => p.status === 'pending').length;
                 ContentHome.approvedCount = ContentHome.allPosts.filter(p => p.status === 'approved' || !p.status).length;
                 ContentHome.rejectedCount = ContentHome.allPosts.filter(p => p.status === 'rejected').length;
+                if (ContentHome.pendingCount === 0) {
+                    ContentHome.stopTitleFlash();
+                }
             };
 
             ContentHome.filterByStatus = function(status) {
@@ -401,6 +478,7 @@
                                 ContentHome.filterStatus = 'pending';
                             }
                             ContentHome.applyFilter();
+                            ContentHome.notifyAdmin(newPosts.length);
                             if (!$scope.$$phase) $scope.$digest();
                         }
                     }
@@ -427,6 +505,7 @@
 
             $scope.$on('$destroy', function() {
                 ContentHome.stopPolling();
+                ContentHome.stopTitleFlash();
             });
 
             ContentHome.showComments = function (post) {
@@ -916,6 +995,7 @@
                                 if (ContentHome.moderationEnabled && event.post.status === 'pending') {
                                     ContentHome.filterStatus = 'pending';
                                     ContentHome.newPendingPost = true;
+                                    ContentHome.notifyAdmin(1);
                                 }
 
                                 ContentHome.applyFilter();

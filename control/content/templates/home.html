@@ -1,4 +1,14 @@
 <div class="padded">
+    <div class="pending-alert-banner" ng-if="ContentHome.moderationEnabled && ContentHome.pendingCount > 0" ng-click="ContentHome.filterByStatus('pending')">
+        <div class="pending-alert-content">
+            <span class="pending-alert-icon">!</span>
+            <span class="pending-alert-text">
+                <strong>{{ContentHome.pendingCount}}</strong> post{{ContentHome.pendingCount > 1 ? 's' : ''}} pending review
+            </span>
+            <span class="pending-alert-action">Click to review</span>
+        </div>
+    </div>
+
     <div class="item row" ng-if="ContentHome.moderationEnabled">
         <div class="col-xs-12">
             <div class="btn-group margin-bottom-fifteen" role="group">
