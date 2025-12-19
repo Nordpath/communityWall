@@ -505,4 +505,22 @@ const stringsConfig = {
 			}
 		}
         },
+	fileSizeLimits: {
+		title: "File Size Limits",
+		subtitle: "Change values to update file size error messages",
+		labels: {
+			imageTooLarge: {
+				title: "Image Too Large Error"
+				, placeholder: "Image is too large. Maximum size is 1GB."
+				, maxLength: 100
+				, defaultValue: "Image is too large. Maximum size is 1GB."
+			},
+			videoTooLarge: {
+				title: "Video Too Large Error"
+				, placeholder: "Video is too large. Maximum size is 1GB."
+				, maxLength: 100
+				, defaultValue: "Video is too large. Maximum size is 1GB."
+			}
+		}
+	},
 };

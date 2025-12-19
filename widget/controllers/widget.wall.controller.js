@@ -2032,12 +2032,12 @@
                   return new Promise(function(resolve, reject) {
                       console.log('[ImageUpload] Processing image ' + index + ':', file.name, 'Size:', file.size);
 
-                      // Check if image is too large (max 1GB, but recommend smaller)
                       var maxFileSize = 1024 * 1024 * 1024; // 1GB
                       if (file.size > maxFileSize) {
                           console.error('[ImageUpload] Image exceeds 1GB limit');
+                          var imageTooLargeMsg = (WidgetWall.SocialItems.languages && WidgetWall.SocialItems.languages.imageTooLarge) || 'Image is too large. Maximum size is 1GB.';
                           buildfire.dialog.toast({
-                              message: 'Image is too large. Maximum size is 1GB.',
+                              message: imageTooLargeMsg,
                               type: 'danger'
                           });
                           resolve(null);
@@ -2120,12 +2120,12 @@
                   return new Promise(function(resolve, reject) {
                       console.log('[ImageUpload] Processing video ' + index + ':', file.name, 'Size:', file.size);
 
-                      // Check if file is too large (BuildFire supports up to 1GB)
                       var maxFileSize = 1024 * 1024 * 1024; // 1GB
                       if (file.size > maxFileSize) {
                           console.error('[ImageUpload] Video exceeds 1GB limit');
+                          var videoTooLargeMsg = (WidgetWall.SocialItems.languages && WidgetWall.SocialItems.languages.videoTooLarge) || 'Video is too large. Maximum size is 1GB.';
                           buildfire.dialog.toast({
-                              message: 'Video is too large. Maximum size is 1GB.',
+                              message: videoTooLargeMsg,
                               type: 'danger'
                           });
                           resolve(null);
