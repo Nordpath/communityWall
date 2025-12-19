@@ -86,7 +86,10 @@
                         <img ng-repeat="image in post.images" ng-src="{{image}}" data-alt="Post image" style="max-width: 100%; height: auto;" onerror="console.error('[ImageError] Failed to load:', this.src);">
                     </div>
                     <div ng-if="post.videos && post.videos.length > 0" class="post-videos" style="margin-top: 10px;">
-                        <video ng-repeat="video in post.videos" controls preload="metadata" style="max-width: 100%; max-height: 400px; display: block; margin-bottom: 10px; background: #000; border-radius: 4px;">
+                        <div class="video-moderation-notice" style="background: #fff3cd; border: 1px solid #ffc107; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; font-size: 13px; color: #856404;">
+                            <strong>Video Content:</strong> Please review {{post.videos.length}} video(s) before approving this post.
+                        </div>
+                        <video ng-repeat="video in post.videos" controls preload="auto" style="max-width: 100%; max-height: 400px; display: block; margin-bottom: 10px; background: #000; border-radius: 4px;">
                             <source ng-src="{{video | trustAsResourceUrl}}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
@@ -134,7 +137,10 @@
                             <img ng-repeat="imageUrl in comment.imageUrl" ng-src="{{ContentHome.util.resizeImage(imageUrl)}}" data-alt="Post image">
                         </div>
                         <div ng-if="comment.videos && comment.videos.length > 0" class="comment-videos" style="margin-top: 10px;">
-                            <video ng-repeat="video in comment.videos" controls preload="metadata" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px; background: #000; border-radius: 4px;">
+                            <div class="video-moderation-notice" style="background: #fff3cd; border: 1px solid #ffc107; padding: 6px 10px; border-radius: 4px; margin-bottom: 8px; font-size: 12px; color: #856404;">
+                                <strong>Video in comment</strong> - Review before approving
+                            </div>
+                            <video ng-repeat="video in comment.videos" controls preload="auto" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px; background: #000; border-radius: 4px;">
                                 <source ng-src="{{video | trustAsResourceUrl}}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
