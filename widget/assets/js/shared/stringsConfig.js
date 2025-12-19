@@ -422,6 +422,54 @@ const stringsConfig = {
 			},
 		}
 	},
+	postingLimitations: {
+		title: "Posting Limitations",
+		subtitle: "Change values to update posting limitation messages",
+		labels: {
+			limitationsTitle: {
+				title: "Limitations Dialog Title"
+				, placeholder: "Posting Guidelines"
+				, maxLength: 50
+				, defaultValue: "Posting Guidelines"
+			},
+			limitationsMessage: {
+				title: "Limitations Message"
+				, placeholder: "Please note the following when creating posts:"
+				, maxLength: 200
+				, defaultValue: "Please note the following when creating posts:"
+			},
+			moderationEnabled: {
+				title: "Moderation Enabled Notice"
+				, placeholder: "Posts require admin approval before appearing in the feed."
+				, maxLength: 150
+				, defaultValue: "Posts require admin approval before appearing in the feed."
+			},
+			tagRestriction: {
+				title: "Tag Restriction Notice"
+				, placeholder: "Posting is restricted to users with specific permissions."
+				, maxLength: 150
+				, defaultValue: "Posting is restricted to users with specific permissions."
+			},
+			noRestrictions: {
+				title: "No Restrictions Message"
+				, placeholder: "Your posts will be published immediately."
+				, maxLength: 150
+				, defaultValue: "Your posts will be published immediately."
+			},
+			continueButton: {
+				title: "Continue Button Text"
+				, placeholder: "Continue"
+				, maxLength: 20
+				, defaultValue: "Continue"
+			},
+			cancelButton: {
+				title: "Cancel Button Text"
+				, placeholder: "Cancel"
+				, maxLength: 20
+				, defaultValue: "Cancel"
+			}
+		}
+	},
 	general: {
 		title: "General",
 		labels: {

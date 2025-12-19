@@ -854,11 +854,21 @@
                       if (result.data.appSettings.usernameFont) {
                           WidgetWall.applyUsernameFont(result.data.appSettings.usernameFont);
                       }
+                      if (typeof result.data.appSettings.mediaPadding !== 'undefined') {
+                          WidgetWall.applyMediaPadding(result.data.appSettings.mediaPadding);
+                      }
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
                   }
               });
+          };
+
+          WidgetWall.applyMediaPadding = function (padding) {
+              var root = document.documentElement;
+              var paddingValue = parseInt(padding, 10) || 0;
+              var marginValue = paddingValue > 0 ? paddingValue + 'px' : '-1rem';
+              root.style.setProperty('--media-padding', marginValue);
           };
 
           WidgetWall.applyThemeColors = function (colors) {
@@ -1811,8 +1821,67 @@
                   if (err) return console.error("Getting user failed.", err);
                   if (user) {
                       WidgetWall.checkFollowingStatus();
-                      WidgetWall.openMediaPickerFirst();
+                      WidgetWall.showPostingLimitationsDialog(function(confirmed) {
+                          if (confirmed) {
+                              WidgetWall.openMediaPickerFirst();
+                          }
+                      });
                   }
+              });
+          }
+
+          WidgetWall.showPostingLimitationsDialog = function(callback) {
+              var languages = WidgetWall.SocialItems.languages || {};
+              var appSettings = WidgetWall.SocialItems.appSettings || {};
+
+              var title = languages.limitationsTitle || 'Posting Guidelines';
+              var message = languages.limitationsMessage || 'Please note the following when creating posts:';
+              var continueText = languages.continueButton || 'Continue';
+              var cancelText = languages.cancelButton || 'Cancel';
+
+              var limitations = [];
+
+              if (appSettings.enableModeration) {
+                  var moderationMsg = languages.moderationEnabled || 'Posts require admin approval before appearing in the feed.';
+                  limitations.push(moderationMsg);
+              }
+
+              if (appSettings.allowMainThreadTags && appSettings.mainThreadUserTags && appSettings.mainThreadUserTags.length > 0) {
+                  var tagMsg = languages.tagRestriction || 'Posting is restricted to users with specific permissions.';
+                  limitations.push(tagMsg);
+              }
+
+              if (limitations.length === 0) {
+                  var noRestrictionsMsg = languages.noRestrictions || 'Your posts will be published immediately.';
+                  limitations.push(noRestrictionsMsg);
+              }
+
+              var bodyHtml = '<div style="text-align: left; padding: 8px 0;">' +
+                  '<p style="margin: 0 0 12px 0; color: #666;">' + message + '</p>' +
+                  '<ul style="margin: 0; padding-left: 20px; color: #333;">';
+
+              limitations.forEach(function(item) {
+                  bodyHtml += '<li style="margin-bottom: 8px;">' + item + '</li>';
+              });
+
+              bodyHtml += '</ul></div>';
+
+              buildfire.dialog.confirm({
+                  title: title,
+                  message: bodyHtml,
+                  isMessageHtml: true,
+                  confirmButton: {
+                      text: continueText,
+                      type: 'primary'
+                  },
+                  cancelButtonText: cancelText
+              }, function(err, isConfirmed) {
+                  if (err) {
+                      console.error('Dialog error:', err);
+                      callback(false);
+                      return;
+                  }
+                  callback(isConfirmed);
               });
           }
 
