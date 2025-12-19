@@ -1852,7 +1852,10 @@
                   limitations.push(tagMsg);
               }
 
-              if (limitations.length === 0) {
+              var fileSizeMsg = languages.fileSizeLimit || 'Images and videos must be under 1GB.';
+              limitations.push(fileSizeMsg);
+
+              if (limitations.length === 1) {
                   var noRestrictionsMsg = languages.noRestrictions || 'Your posts will be published immediately.';
                   limitations.push(noRestrictionsMsg);
               }

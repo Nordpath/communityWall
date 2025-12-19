@@ -467,6 +467,12 @@ const stringsConfig = {
 				, placeholder: "Cancel"
 				, maxLength: 20
 				, defaultValue: "Cancel"
+			},
+			fileSizeLimit: {
+				title: "File Size Limit Notice"
+				, placeholder: "Images and videos must be under 1GB."
+				, maxLength: 100
+				, defaultValue: "Images and videos must be under 1GB."
 			}
 		}
 	},
