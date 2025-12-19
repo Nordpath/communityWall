@@ -1533,7 +1533,7 @@
                     if (response.data && response.data.mainWall && response.data.sideThread && response.data.members && response.data.input && response.data.modal) {
                         strings = Object.assign({}, response.data.mainWall, response.data.sideThread, response.data.members, response.data.input, response.data.modal);
 
-                        const newProperties = ['pushNotifications'];
+                        const newProperties = ['pushNotifications', 'postingLimitations', 'general', 'fileSizeLimits'];
                         newProperties.forEach((key) => {
                             if (response.data[key]) {
                                 strings = Object.assign(strings, response.data[key]);
