@@ -868,7 +868,9 @@
               var root = document.documentElement;
               var paddingValue = parseInt(padding, 10) || 0;
               var marginValue = paddingValue > 0 ? paddingValue + 'px' : '-1rem';
+              var borderRadius = paddingValue > 0 ? '8px' : '0';
               root.style.setProperty('--media-padding', marginValue);
+              root.style.setProperty('--media-border-radius', borderRadius);
           };
 
           WidgetWall.applyThemeColors = function (colors) {
@@ -1012,14 +1014,13 @@
                       : (WidgetWall.bottomLogo.logoMaxHeight || 80) + 24;
                   var bannerHeight = Math.max(actualHeight, configuredHeight);
 
-                  var fabMargin = 30;
-                  var safetyBuffer = 20;
-                  var fabBottomOffset = bannerHeight + fabMargin + safetyBuffer;
+                  var fabMargin = 16;
+                  var fabBottomOffset = bannerHeight + fabMargin;
 
                   WidgetWall.setFabPosition(fabBottomOffset);
 
                   var fabSize = 56;
-                  var paddingValue = (bannerHeight + fabSize + fabMargin + safetyBuffer + 30) + 'px';
+                  var paddingValue = (bannerHeight + fabSize + fabMargin + 8) + 'px';
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
                       scrollContainer.style.setProperty('padding-bottom', paddingValue, 'important');
@@ -1030,11 +1031,11 @@
                       bottomPost.style.setProperty('bottom', bannerHeight + 'px', 'important');
                   }
               } else {
-                  WidgetWall.setFabPosition(140);
+                  WidgetWall.setFabPosition(100);
 
                   var scrollContainer = document.querySelector('.post-infinite-scroll');
                   if (scrollContainer) {
-                      scrollContainer.style.setProperty('padding-bottom', '160px', 'important');
+                      scrollContainer.style.setProperty('padding-bottom', '120px', 'important');
                   }
 
                   var bottomPost = document.querySelector('.holder.bottom-post');
@@ -1856,20 +1857,17 @@
                   limitations.push(noRestrictionsMsg);
               }
 
-              var bodyHtml = '<div style="text-align: left; padding: 8px 0;">' +
-                  '<p style="margin: 0 0 12px 0; color: #666;">' + message + '</p>' +
-                  '<ul style="margin: 0; padding-left: 20px; color: #333;">';
-
-              limitations.forEach(function(item) {
-                  bodyHtml += '<li style="margin-bottom: 8px;">' + item + '</li>';
+              var bodyText = message + '\n\n';
+              limitations.forEach(function(item, index) {
+                  bodyText += '• ' + item;
+                  if (index < limitations.length - 1) {
+                      bodyText += '\n';
+                  }
               });
-
-              bodyHtml += '</ul></div>';
 
               buildfire.dialog.confirm({
                   title: title,
-                  message: bodyHtml,
-                  isMessageHtml: true,
+                  message: bodyText,
                   confirmButton: {
                       text: continueText,
                       type: 'primary'
@@ -3343,6 +3341,33 @@
               if (!$scope.$$phase) {
                   $scope.$apply();
               }
+
+              setTimeout(function() {
+                  var videoContainers = document.querySelectorAll('.post-videos-container');
+                  var videoElement = null;
+                  videoContainers.forEach(function(container) {
+                      var video = container.querySelector('video');
+                      if (video && video.src && post.videos && post.videos[index] && video.src.indexOf(post.videos[index]) !== -1) {
+                          videoElement = video;
+                      }
+                  });
+                  if (!videoElement) {
+                      var allVideos = document.querySelectorAll('.post-videos-container video');
+                      if (allVideos.length > 0) {
+                          videoElement = allVideos[allVideos.length - 1];
+                      }
+                  }
+                  if (videoElement) {
+                      videoElement.play();
+                      if (videoElement.requestFullscreen) {
+                          videoElement.requestFullscreen();
+                      } else if (videoElement.webkitEnterFullscreen) {
+                          videoElement.webkitEnterFullscreen();
+                      } else if (videoElement.webkitRequestFullscreen) {
+                          videoElement.webkitRequestFullscreen();
+                      }
+                  }
+              }, 100);
           };
 
           WidgetWall.generateVideoThumbnails = function(videoUrls) {

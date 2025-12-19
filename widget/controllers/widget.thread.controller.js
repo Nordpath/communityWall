@@ -123,6 +123,33 @@
               if (!$scope.$$phase) {
                   $scope.$apply();
               }
+
+              setTimeout(function() {
+                  var videoContainers = document.querySelectorAll('.post-videos-container');
+                  var videoElement = null;
+                  videoContainers.forEach(function(container) {
+                      var video = container.querySelector('video');
+                      if (video && video.src && item.videos && item.videos[index] && video.src.indexOf(item.videos[index]) !== -1) {
+                          videoElement = video;
+                      }
+                  });
+                  if (!videoElement) {
+                      var allVideos = document.querySelectorAll('.post-videos-container video');
+                      if (allVideos.length > 0) {
+                          videoElement = allVideos[allVideos.length - 1];
+                      }
+                  }
+                  if (videoElement) {
+                      videoElement.play();
+                      if (videoElement.requestFullscreen) {
+                          videoElement.requestFullscreen();
+                      } else if (videoElement.webkitEnterFullscreen) {
+                          videoElement.webkitEnterFullscreen();
+                      } else if (videoElement.webkitRequestFullscreen) {
+                          videoElement.webkitRequestFullscreen();
+                      }
+                  }
+              }, 100);
           };
 
           $scope.$on('openImageGallery', function(event, data) {

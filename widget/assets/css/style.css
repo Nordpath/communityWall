@@ -1732,7 +1732,7 @@ a.comments .iconsTheme.iconsFont {
     max-height: none;
     object-fit: contain;
     display: block;
-    border-radius: 0;
+    border-radius: var(--media-border-radius, 0);
 }
 
 .post-videos-container {
@@ -1745,7 +1745,7 @@ a.comments .iconsTheme.iconsFont {
     max-height: 500px;
     object-fit: contain;
     display: block;
-    border-radius: 0;
+    border-radius: var(--media-border-radius, 0);
     background-color: #000;
 }
 
