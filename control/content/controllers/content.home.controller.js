@@ -599,18 +599,18 @@
             };
 
             ContentHome.rejectPost = function (postId) {
-                buildfire.dialog.prompt(
+                buildfire.dialog.confirm(
                     {
                         title: "Reject Post",
-                        message: "Please provide a reason for rejecting this post (optional):",
+                        message: "Are you sure you want to reject this post?",
                         confirmButton: {
                             text: "Reject",
                             type: "danger",
                         },
                     },
-                    (err, reason) => {
+                    (err, isConfirmed) => {
                         if (err) console.error(err);
-                        if (reason !== null) {
+                        if (isConfirmed) {
                             Buildfire.getContext(function (err, context) {
                                 const moderatorName = (context.currentUser && context.currentUser.displayName) || 'Admin';
 
@@ -623,7 +623,6 @@
                                     post.data.status = 'rejected';
                                     post.data.moderatedBy = moderatorName;
                                     post.data.moderatedOn = new Date();
-                                    post.data.moderationReason = reason || 'No reason provided';
                                     post.data._buildfire.index.string2 = 'rejected';
 
                                     buildfire.publicData.update(postId, post.data, 'posts', function (err, result) {
@@ -642,15 +641,13 @@
                                         ContentHome.applyFilter();
                                         if (!$scope.$$phase) $scope.$digest();
 
-                                        if (reason) {
-                                            buildfire.notifications.pushNotification.schedule({
-                                                title: "Post Rejected",
-                                                text: `Your post was rejected. Reason: ${reason}`,
-                                                userIds: [post.data.userId]
-                                            }, function(err, result) {
-                                                if (err) console.error('Error sending notification:', err);
-                                            });
-                                        }
+                                        buildfire.notifications.pushNotification.schedule({
+                                            title: "Post Rejected",
+                                            text: "Your post was rejected by a moderator.",
+                                            userIds: [post.data.userId]
+                                        }, function(err, result) {
+                                            if (err) console.error('Error sending notification:', err);
+                                        });
                                     });
                                 });
                             });
