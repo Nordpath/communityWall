@@ -234,6 +234,7 @@
             ContentHome.pendingCount = 0;
             ContentHome.approvedCount = 0;
             ContentHome.rejectedCount = 0;
+            ContentHome.allCount = 0;
             ContentHome.allPosts = [];
             ContentHome.newPendingPost = false;
             ContentHome.pollInterval = null;
@@ -417,6 +418,7 @@
                 ContentHome.pendingCount = ContentHome.allPosts.filter(p => p.status === 'pending').length;
                 ContentHome.approvedCount = ContentHome.allPosts.filter(p => p.status === 'approved' || !p.status).length;
                 ContentHome.rejectedCount = ContentHome.allPosts.filter(p => p.status === 'rejected').length;
+                ContentHome.allCount = ContentHome.allPosts.filter(p => p.status !== 'rejected').length;
                 if (ContentHome.pendingCount === 0) {
                     ContentHome.stopTitleFlash();
                 }
@@ -430,7 +432,7 @@
 
             ContentHome.applyFilter = function() {
                 if (ContentHome.filterStatus === 'all') {
-                    ContentHome.posts = ContentHome.allPosts;
+                    ContentHome.posts = ContentHome.allPosts.filter(post => post.status !== 'rejected');
                 } else {
                     ContentHome.posts = ContentHome.allPosts.filter(post => {
                         if (ContentHome.filterStatus === 'approved') {
