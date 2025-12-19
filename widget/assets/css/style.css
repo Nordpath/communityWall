@@ -69,15 +69,15 @@
     color: #fff !important;
  }
   #addBtn {
-    background-color: var(--fab-button-color, #FF6B35) !important;
+    background-color: var(--fab-button-color, #4547ff) !important;
     border-radius: 50% !important;
  }
   #addBtn button {
-    background-color: var(--fab-button-color, #FF6B35) !important;
+    background-color: var(--fab-button-color, #4547ff) !important;
     border-radius: 50% !important;
  }
   #addCommentBtn button {
-    background-color: var(--fab-button-color, #FF6B35) !important;
+    background-color: var(--fab-button-color, #4547ff) !important;
     border-radius: 50% !important;
  }
   .fab-button {
@@ -1613,31 +1613,31 @@ button.btn-danger-outlined:hover, button.btn-danger-outlined:focus{
 
 a.likes .material-icons-outlined,
 .social-icon.likes .material-icons-outlined {
-    color: var(--like-icon-color, #E63946) !important;
+    color: var(--like-icon-color, #4547ff) !important;
 }
 
 a.comments .material-icons-outlined,
 .social-icon.comments .material-icons-outlined {
-    color: var(--comment-icon-color, #457B9D) !important;
+    color: var(--comment-icon-color, #4547ff) !important;
 }
 
 .comment-bubble-icon {
     width: 24px;
     height: 24px;
-    color: var(--comment-icon-color, #457B9D) !important;
+    color: var(--comment-icon-color, #4547ff) !important;
     vertical-align: middle;
 }
 
 a.likes .iconsTheme.iconsFont {
-    color: var(--like-counter-color, var(--like-icon-color, #E63946)) !important;
+    color: var(--like-counter-color, var(--like-icon-color, #4547ff)) !important;
 }
 
 a.comments .iconsTheme.iconsFont {
-    color: var(--comment-counter-color, var(--comment-icon-color, #457B9D)) !important;
+    color: var(--comment-counter-color, var(--comment-icon-color, #4547ff)) !important;
 }
 
 .footer-right .social-icon:first-child .material-icons-outlined {
-    color: var(--share-icon-color, #06A77D) !important;
+    color: var(--share-icon-color, #4547ff) !important;
     transform: rotate(-45deg);
 }
 
@@ -1650,7 +1650,7 @@ a.comments .iconsTheme.iconsFont {
 }
 
 .footer-right .social-icon:last-child .material-icons-outlined {
-    color: var(--menu-icon-color, #9B59B6) !important;
+    color: var(--menu-icon-color, #4547ff) !important;
 }
 #socialHeader, .head-btn, .head-btn2 {
     transition: transform .3s ease-in-out;

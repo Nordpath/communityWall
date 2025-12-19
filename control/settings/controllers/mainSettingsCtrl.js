@@ -90,11 +90,11 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                         }
                         if (!result.data.appSettings.themeColors) {
                             result.data.appSettings.themeColors = {
-                                fabButton: '#FF6B35',
-                                likeIcon: '#E63946',
-                                commentIcon: '#457B9D',
-                                shareIcon: '#06A77D',
-                                menuIcon: '#9B59B6'
+                                fabButton: '#4547ff',
+                                likeIcon: '#4547ff',
+                                commentIcon: '#4547ff',
+                                shareIcon: '#4547ff',
+                                menuIcon: '#4547ff'
                             };
                         }
                         if (!result.data.appSettings.usernameFont) {
@@ -142,11 +142,11 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             bannerBgColor: ''
                         };
                         result.data.appSettings.themeColors = {
-                            fabButton: '#FF6B35',
-                            likeIcon: '#E63946',
-                            commentIcon: '#457B9D',
-                            shareIcon: '#06A77D',
-                            menuIcon: '#9B59B6'
+                            fabButton: '#4547ff',
+                            likeIcon: '#4547ff',
+                            commentIcon: '#4547ff',
+                            shareIcon: '#4547ff',
+                            menuIcon: '#4547ff'
                         };
                         result.data.appSettings.usernameFont = {
                             family: 'inherit',
