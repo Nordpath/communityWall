@@ -14,7 +14,7 @@
   .text-primary a,
   .text-primary p a {
     font-family: var(--username-font-family, inherit) !important;
-    font-weight: var(--username-font-weight, 400) !important;
+    font-weight: var(--username-font-weight, 600) !important;
     font-size: var(--username-font-size, 13px) !important;
   }
   /* fallback */
@@ -589,7 +589,7 @@ button.btn--lg,
 }
 .social-name {
     font-family: var(--username-font-family, inherit);
-    font-weight: var(--username-font-weight, 400);
+    font-weight: var(--username-font-weight, 600);
     font-size: var(--username-font-size, 13px);
     color: #444 !important;
 }
