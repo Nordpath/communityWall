@@ -169,7 +169,7 @@
                                                             <span class="material-icons play-icon">play_circle_filled</span>
                                                         </div>
                                                     </div>
-                                                    <video ng-if="!post.videoThumbnails[$index] || post.showVideo[$index]" controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
+                                                    <video ng-if="!post.videoThumbnails[$index] || post.showVideo[$index]" autoplay muted loop controls width="100%" playsinline ng-src="{{video | trustAsResourceUrl}}">
                                                     </video>
                                                 </div>
                                             </div>
@@ -261,7 +261,7 @@
                         <span class="preview-remove-btn" ng-click="WidgetWall.removeVideo($index)">
                             <span class="material-icons">close</span>
                         </span>
-                        <video controls playsinline ng-src="{{video | trustAsResourceUrl}}">
+                        <video autoplay muted loop controls playsinline ng-src="{{video | trustAsResourceUrl}}">
                         </video>
                     </div>
                 </div>
