@@ -3361,7 +3361,31 @@
                       }
                   }
                   if (videoElement) {
-                      videoElement.play();
+                      videoElement.controls = false;
+
+                      var onMetadataLoaded = function() {
+                          videoElement.controls = true;
+                          videoElement.removeEventListener('loadedmetadata', onMetadataLoaded);
+                      };
+
+                      var onError = function() {
+                          console.error('Video failed to load');
+                          videoElement.controls = true;
+                          videoElement.removeEventListener('error', onError);
+                      };
+
+                      if (videoElement.readyState >= 1) {
+                          videoElement.controls = true;
+                      } else {
+                          videoElement.addEventListener('loadedmetadata', onMetadataLoaded);
+                          videoElement.addEventListener('error', onError);
+                      }
+
+                      videoElement.play().catch(function(err) {
+                          console.error('Video play failed:', err);
+                          videoElement.controls = true;
+                      });
+
                       if (videoElement.requestFullscreen) {
                           videoElement.requestFullscreen();
                       } else if (videoElement.webkitEnterFullscreen) {

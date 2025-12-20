@@ -233,10 +233,55 @@
                     });
                 }
             };
+        })
+        .directive('videoPlayer', function() {
+            return {
+                restrict: 'A',
+                link: function(scope, element) {
+                    var video = element[0];
+
+                    if (!video || video.tagName.toLowerCase() !== 'video') {
+                        return;
+                    }
+
+                    var controlsEnabled = false;
+
+                    var enableControls = function() {
+                        if (!controlsEnabled) {
+                            video.controls = true;
+                            controlsEnabled = true;
+                        }
+                    };
+
+                    var onMetadataLoaded = function() {
+                        enableControls();
+                        video.removeEventListener('loadedmetadata', onMetadataLoaded);
+                    };
+
+                    var onError = function(err) {
+                        console.error('Video loading error:', err);
+                        enableControls();
+                        video.removeEventListener('error', onError);
+                    };
+
+                    if (video.readyState >= 1) {
+                        enableControls();
+                    } else {
+                        video.controls = false;
+                        video.addEventListener('loadedmetadata', onMetadataLoaded);
+                        video.addEventListener('error', onError);
+                    }
+
+                    scope.$on('$destroy', function() {
+                        video.removeEventListener('loadedmetadata', onMetadataLoaded);
+                        video.removeEventListener('error', onError);
+                    });
+                }
+            };
         });
-        
-        
-        
-        
-        
+
+
+
+
+
 })(window.angular, window.buildfire);
