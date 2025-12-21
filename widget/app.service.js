@@ -1526,6 +1526,31 @@
                 changeDetector.reset();
             }
 
+            function fixBrokenNotificationTemplates(languages) {
+                const notificationKeys = [
+                    'privateMessageNotificationMessageBody',
+                    'privateMessageInAppMessageBody',
+                    'newPostNotificationMessageBody',
+                    'newPostInAppMessageBody',
+                    'commentNotificationMessageBody',
+                    'commentInAppMessageBody',
+                    'postLikeNotificationMessageBody',
+                    'postLikeInAppMessageBody',
+                    'commentLikeNotificationMessageBody',
+                    'commentLikeInAppMessageBody',
+                    'commentReplyNotificationMessageBody',
+                    'commentReplyInAppMessageBody'
+                ];
+                const brokenPattern = /context\.appUser\?context\.appUser\.displayName/g;
+                const fixedPattern = '(context.appUser && context.appUser.displayName)?context.appUser.displayName';
+
+                notificationKeys.forEach(function(key) {
+                    if (languages[key] && typeof languages[key] === 'string' && brokenPattern.test(languages[key])) {
+                        languages[key] = languages[key].replace(brokenPattern, fixedPattern);
+                    }
+                });
+            }
+
             SocialItems.prototype.formatLanguages = function (response) {
                 const stringsCopy = JSON.parse(JSON.stringify(stringsConfig));
                 _this.languages = {};
@@ -1583,6 +1608,7 @@
                             strings[e].value ? _this.languages[e] = strings[e].value : _this.languages[e] = strings[e].defaultValue;
                     });
                 }
+                fixBrokenNotificationTemplates(_this.languages);
                 $rootScope.$digest();
             }
 

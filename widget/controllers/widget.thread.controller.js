@@ -998,8 +998,8 @@
               } else if (text === 'commentReply' && parentComment) {
                   options.users = [parentComment.userId];
                   titleKey = Thread.SocialItems.languages.commentReplyNotificationTitle || 'New Reply';
-                  messageKey = Thread.SocialItems.languages.commentReplyNotificationMessageBody || "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment.";
-                  inAppMessageKey = Thread.SocialItems.languages.commentReplyInAppMessageBody || "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment.";
+                  messageKey = Thread.SocialItems.languages.commentReplyNotificationMessageBody || "${(context.appUser && context.appUser.displayName)?context.appUser.displayName:'Someone'} replied to your comment.";
+                  inAppMessageKey = Thread.SocialItems.languages.commentReplyInAppMessageBody || "${(context.appUser && context.appUser.displayName)?context.appUser.displayName:'Someone'} replied to your comment.";
               }
 
               if (Thread.SocialItems.wid) {
