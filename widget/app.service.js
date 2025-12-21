@@ -1226,17 +1226,46 @@
                                 mappedItem.videos = [];
                             }
 
+                            if (!mappedItem.videoThumbnails) {
+                                mappedItem.videoThumbnails = [];
+                            }
+
+                            if (!mappedItem.showVideo) {
+                                mappedItem.showVideo = {};
+                            }
+
                             console.log('[PostsDebug] Processing post:', item.id, {
                                 hasImages: !!(mappedItem.images && mappedItem.images.length),
                                 imagesCount: mappedItem.images ? mappedItem.images.length : 0,
                                 hasVideos: !!(mappedItem.videos && mappedItem.videos.length),
-                                videosCount: mappedItem.videos ? mappedItem.videos.length : 0
+                                videosCount: mappedItem.videos ? mappedItem.videos.length : 0,
+                                hasThumbnails: !!(mappedItem.videoThumbnails && mappedItem.videoThumbnails.length),
+                                thumbnailsCount: mappedItem.videoThumbnails ? mappedItem.videoThumbnails.length : 0
                             });
 
                             return mappedItem;
                         });
 
                         _this.items = DataUtils.array.limit(_this.items.concat(newItems), 1000);
+
+                        if (typeof MediaUtils !== 'undefined') {
+                            newItems.forEach(item => {
+                                if (item.videos && item.videos.length > 0) {
+                                    const thumbnailsNeeded = item.videos.length - (item.videoThumbnails ? item.videoThumbnails.length : 0);
+                                    if (thumbnailsNeeded > 0) {
+                                        console.log('[VideoThumbnails] Generating thumbnails for post:', item.id);
+                                        MediaUtils.generateThumbnailsForVideos(item.videos).then(function(thumbnails) {
+                                            if (thumbnails && thumbnails.length > 0) {
+                                                item.videoThumbnails = thumbnails;
+                                                console.log('[VideoThumbnails] Generated', thumbnails.length, 'thumbnails for post:', item.id);
+                                            }
+                                        }).catch(function(err) {
+                                            console.warn('[VideoThumbnails] Failed to generate thumbnails:', err);
+                                        });
+                                    }
+                                }
+                            });
+                        }
 
                         if (activeTab === 'popular') {
                             _this.items.sort((a, b) => {

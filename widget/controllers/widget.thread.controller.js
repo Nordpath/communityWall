@@ -441,6 +441,21 @@
                   if (!comment.parentCommentId) {
                       comment.parentCommentId = null;
                   }
+                  if (!comment.videoThumbnails) {
+                      comment.videoThumbnails = [];
+                  }
+                  if (!comment.showVideo) {
+                      comment.showVideo = {};
+                  }
+                  if (comment.videos && comment.videos.length > 0 && comment.videoThumbnails.length === 0 && typeof MediaUtils !== 'undefined') {
+                      MediaUtils.generateThumbnailsForVideos(comment.videos).then(function(thumbnails) {
+                          if (thumbnails && thumbnails.length > 0) {
+                              comment.videoThumbnails = thumbnails;
+                          }
+                      }).catch(function(err) {
+                          console.warn('[VideoThumbnails] Failed to generate comment thumbnails:', err);
+                      });
+                  }
                   commentMap[comment.commentId] = comment;
               });
 
@@ -1468,6 +1483,8 @@
                   userToken: Thread.SocialItems.userDetails.userToken,
                   imageUrl: Thread.images || [],
                   videos: Thread.videos || [],
+                  videoThumbnails: Thread.videoThumbnails || [],
+                  showVideo: {},
                   userId: Thread.SocialItems.userDetails.userId,
                   likes: [],
                   userDetails: Thread.SocialItems.userDetails,
@@ -1618,6 +1635,13 @@
               return MediaUtils.checkImagesNSFW(imageUrls);
           };
 
+          Thread.generateVideoThumbnails = function(videoUrls) {
+              if (!videoUrls || !videoUrls.length || typeof MediaUtils === 'undefined') {
+                  return Promise.resolve([]);
+              }
+              return MediaUtils.generateThumbnailsForVideos(videoUrls);
+          };
+
           Thread.submitCustomPost = function () {
               if (!Thread.customPostText || Thread.customPostText.trim() === '') {
                   buildfire.dialog.toast({
@@ -1631,8 +1655,15 @@
                   Thread.updatePost();
               } else {
                   var imagesToCheck = Thread.selectedImages || [];
+                  var videosToProcess = Thread.selectedVideos || [];
 
-                  Thread.checkContentModeration(imagesToCheck).then(function(moderationResult) {
+                  var moderationPromise = Thread.checkContentModeration(imagesToCheck);
+                  var thumbnailPromise = videosToProcess.length > 0 ? Thread.generateVideoThumbnails(videosToProcess) : Promise.resolve([]);
+
+                  Promise.all([moderationPromise, thumbnailPromise]).then(function(results) {
+                      var moderationResult = results[0];
+                      var thumbnails = results[1];
+
                       if (!moderationResult.safe) {
                           buildfire.dialog.toast({
                               message: Thread.SocialItems.languages.contentBlocked || "This content cannot be posted as it violates community guidelines.",
@@ -1643,15 +1674,17 @@
 
                       Thread.comment = Thread.customPostText;
                       Thread.images = imagesToCheck;
-                      Thread.videos = Thread.selectedVideos || [];
+                      Thread.videos = videosToProcess;
+                      Thread.videoThumbnails = thumbnails.filter(function(t) { return t !== null; });
                       const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
                       Thread.closeCustomPostDialog();
                       Thread.addComment(parentCommentId);
                   }).catch(function(err) {
-                      console.error('[Thread.submitCustomPost] Moderation error:', err);
+                      console.error('[Thread.submitCustomPost] Moderation/thumbnail error:', err);
                       Thread.comment = Thread.customPostText;
                       Thread.images = imagesToCheck;
-                      Thread.videos = Thread.selectedVideos || [];
+                      Thread.videos = videosToProcess;
+                      Thread.videoThumbnails = [];
                       const parentCommentId = Thread.replyingToComment ? Thread.replyingToComment.commentId : null;
                       Thread.closeCustomPostDialog();
                       Thread.addComment(parentCommentId);
