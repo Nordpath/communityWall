@@ -857,6 +857,9 @@
                       if (typeof result.data.appSettings.mediaPadding !== 'undefined') {
                           WidgetWall.applyMediaPadding(result.data.appSettings.mediaPadding);
                       }
+                      if (typeof result.data.appSettings.mediaBorderRadius !== 'undefined') {
+                          WidgetWall.applyMediaBorderRadius(result.data.appSettings.mediaBorderRadius);
+                      }
                       if (!$scope.$$phase) {
                           $scope.$apply();
                       }
@@ -868,9 +871,13 @@
               var root = document.documentElement;
               var paddingValue = parseInt(padding, 10) || 0;
               var marginValue = paddingValue > 0 ? paddingValue + 'px' : '-1rem';
-              var borderRadius = paddingValue > 0 ? '8px' : '0';
               root.style.setProperty('--media-padding', marginValue);
-              root.style.setProperty('--media-border-radius', borderRadius);
+          };
+
+          WidgetWall.applyMediaBorderRadius = function (borderRadius) {
+              var root = document.documentElement;
+              var radiusValue = parseInt(borderRadius, 10) || 0;
+              root.style.setProperty('--media-border-radius', radiusValue + 'px');
           };
 
           WidgetWall.applyThemeColors = function (colors) {

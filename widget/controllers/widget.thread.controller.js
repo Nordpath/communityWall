@@ -575,8 +575,27 @@
                       if (result.data.appSettings.usernameFont) {
                           Thread.applyUsernameFont(result.data.appSettings.usernameFont);
                       }
+                      if (typeof result.data.appSettings.mediaPadding !== 'undefined') {
+                          Thread.applyMediaPadding(result.data.appSettings.mediaPadding);
+                      }
+                      if (typeof result.data.appSettings.mediaBorderRadius !== 'undefined') {
+                          Thread.applyMediaBorderRadius(result.data.appSettings.mediaBorderRadius);
+                      }
                   }
               });
+          };
+
+          Thread.applyMediaPadding = function (padding) {
+              var root = document.documentElement;
+              var paddingValue = parseInt(padding, 10) || 0;
+              var marginValue = paddingValue > 0 ? paddingValue + 'px' : '-1rem';
+              root.style.setProperty('--media-padding', marginValue);
+          };
+
+          Thread.applyMediaBorderRadius = function (borderRadius) {
+              var root = document.documentElement;
+              var radiusValue = parseInt(borderRadius, 10) || 0;
+              root.style.setProperty('--media-border-radius', radiusValue + 'px');
           };
 
           Thread.applyThemeColors = function (colors) {

@@ -337,18 +337,44 @@
 
         <div class="row" style="margin-bottom: 1.25rem;">
             <div class="col-md-4">
-                <label style="font-size: 14px !important;">Image/Video Padding</label>
+                <label style="font-size: 14px !important;">Horizontal Padding</label>
             </div>
             <div class="col-md-8">
-                <select class="form-control" ng-model="data.mediaPadding" ng-change="save()">
-                    <option value="0">Edge to Edge (0px)</option>
-                    <option value="4">Extra Small (4px)</option>
-                    <option value="8">Small (8px)</option>
-                    <option value="12">Medium (12px)</option>
-                    <option value="16">Large (16px)</option>
-                </select>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="range" min="0" max="24" step="1"
+                           ng-model="data.mediaPadding"
+                           ng-change="save()"
+                           style="flex: 1; cursor: pointer;">
+                    <input type="number" min="0" max="24"
+                           ng-model="data.mediaPadding"
+                           ng-change="save()"
+                           style="width: 70px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                    <span style="font-size: 13px; color: #666;">px</span>
+                </div>
                 <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
-                    Set horizontal padding around images and videos in posts
+                    Set to 0 for edge-to-edge media display (0-24 pixels)
+                </p>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 1.25rem;">
+            <div class="col-md-4">
+                <label style="font-size: 14px !important;">Border Radius</label>
+            </div>
+            <div class="col-md-8">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="range" min="0" max="24" step="1"
+                           ng-model="data.mediaBorderRadius"
+                           ng-change="save()"
+                           style="flex: 1; cursor: pointer;">
+                    <input type="number" min="0" max="24"
+                           ng-model="data.mediaBorderRadius"
+                           ng-change="save()"
+                           style="width: 70px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                    <span style="font-size: 13px; color: #666;">px</span>
+                </div>
+                <p class="label2" style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Control corner rounding for media elements (0-24 pixels)
                 </p>
             </div>
         </div>

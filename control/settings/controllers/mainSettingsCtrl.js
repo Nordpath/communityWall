@@ -110,6 +110,9 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                         if (typeof result.data.appSettings.mediaPadding === 'undefined') {
                             result.data.appSettings.mediaPadding = '0';
                         }
+                        if (typeof result.data.appSettings.mediaBorderRadius === 'undefined') {
+                            result.data.appSettings.mediaBorderRadius = '8';
+                        }
                         // Initialize new fields for existing configs
                         if (!result.data.appSettings.usernameFont.familyType) {
                             result.data.appSettings.usernameFont.familyType = 'preset';
@@ -157,6 +160,7 @@ app.controller('MainSettingsCtrl', ['$scope', function ($scope) {
                             customFontUrl: ''
                         };
                         result.data.appSettings.mediaPadding = '0';
+                        result.data.appSettings.mediaBorderRadius = '8';
                     }
                     $scope.data = result.data.appSettings;
 
