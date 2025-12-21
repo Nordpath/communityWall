@@ -976,7 +976,7 @@
               if (text === 'likedComment' && post.userId === currentUserId) return;
               if (text === 'commentReply' && parentComment && parentComment.userId === currentUserId) return;
 
-              Util.setExpression({title: Thread.SocialItems.context.title});
+              Util.setExpression({title: Thread.SocialItems.context.title, appUser: Thread.SocialItems.userDetails});
 
               let titleKey, messageKey, inAppMessageKey;
               if (text === 'likedComment') {

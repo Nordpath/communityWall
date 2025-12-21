@@ -14,8 +14,9 @@
   .text-primary a,
   .text-primary p a {
     font-family: var(--username-font-family, 'Roboto', sans-serif) !important;
-    font-weight: var(--username-font-weight, 600) !important;
+    font-weight: var(--username-font-weight, 700) !important;
     font-size: var(--username-font-size, 13px) !important;
+    color: #0E2145 !important;
   }
   /* fallback */
   @font-face {
@@ -589,9 +590,9 @@ button.btn--lg,
 }
 .social-name {
     font-family: var(--username-font-family, 'Roboto', sans-serif);
-    font-weight: var(--username-font-weight, 600);
+    font-weight: var(--username-font-weight, 700);
     font-size: var(--username-font-size, 13px);
-    color: #444 !important;
+    color: #0E2145 !important;
 }
 
 

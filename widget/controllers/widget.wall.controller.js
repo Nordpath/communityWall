@@ -535,7 +535,7 @@
 
               if (text === 'like' && post.userId === WidgetWall.SocialItems.userDetails.userId) return;
 
-              util.setExpression({ title: WidgetWall.SocialItems.context.title });
+              util.setExpression({ title: WidgetWall.SocialItems.context.title, appUser: WidgetWall.SocialItems.userDetails });
 
               const queryStringObj = {};
               if (WidgetWall.SocialItems.wid) {
