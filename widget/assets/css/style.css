@@ -2709,7 +2709,6 @@ a.comments .iconsTheme.iconsFont {
     border-radius: 20px;
     z-index: 100001;
     backdrop-filter: blur(10px);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .gallery-content {
