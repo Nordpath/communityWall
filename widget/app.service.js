@@ -148,7 +148,8 @@
                 setExpression(expression) {
                     buildfire.dynamic.expressions.getContext = (options, callback) => {
                         const context = {
-                            plugin: expression
+                            plugin: expression.title ? { title: expression.title } : expression,
+                            appUser: expression.appUser || null
                         }
                         callback(null, context)
                     }
