@@ -310,15 +310,15 @@ const stringsConfig = {
 			},
 			personalNotificationMessageBody: {
 				title: "Body"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} sent you a private message."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} sent you a private message."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} sent you a private message."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} sent you a private message."
 			},
 			personalInAppMessageBody: {
 				title: "In App Message"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} sent you a private message."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} sent you a private message."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} sent you a private message."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} sent you a private message."
 			},
 
 			publicNotificationMessageTitle: {
@@ -330,15 +330,15 @@ const stringsConfig = {
 			},
 			publicNotificationMessageBody: {
 				title: "Body"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} added a new post on ${context.plugin.title}"
+				, placeholder: "${context.appUser?.displayName || 'Someone'} added a new post on ${context.plugin.title}"
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} added a new post on ${context.plugin.title}"
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} added a new post on ${context.plugin.title}"
 			},
 			publicInAppMessageBody: {
 				title: "In App Message"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} added a new post on ${context.plugin.title}"
+				, placeholder: "${context.appUser?.displayName || 'Someone'} added a new post on ${context.plugin.title}"
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} added a new post on ${context.plugin.title}"
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} added a new post on ${context.plugin.title}"
 			},
 
 			commentNotificationMessageTitle: {
@@ -350,15 +350,15 @@ const stringsConfig = {
 			},
 			commentNotificationMessageBody: {
 				title: "Body"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} commented on a post on ${context.plugin.title}"
+				, placeholder: "${context.appUser?.displayName || 'Someone'} commented on a post on ${context.plugin.title}"
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} commented on a post on ${context.plugin.title}"
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} commented on a post on ${context.plugin.title}"
 			},
 			commentInAppMessageBody: {
 				title: "In App Message"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} commented on a post on ${context.plugin.title}"
+				, placeholder: "${context.appUser?.displayName || 'Someone'} commented on a post on ${context.plugin.title}"
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} commented on a post on ${context.plugin.title}"
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} commented on a post on ${context.plugin.title}"
 			},
 
 			postLikeNotificationTitle: {
@@ -370,15 +370,15 @@ const stringsConfig = {
 			},
 			postLikeNotificationMessageBody: {
 				title: "Body"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} liked your post."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} liked your post."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} liked your post."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} liked your post."
 			},
 			postLikeInAppMessageBody: {
 				title: "In App Message"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} liked your post."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} liked your post."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} liked your post."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} liked your post."
 			},
 
 			commentLikeNotificationTitle: {
@@ -390,15 +390,15 @@ const stringsConfig = {
 			},
 			commentLikeNotificationMessageBody: {
 				title: "Body"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} liked your comment."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} liked your comment."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} liked your comment."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} liked your comment."
 			},
 			commentLikeInAppMessageBody: {
 				title: "In App Message"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} liked your comment."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} liked your comment."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} liked your comment."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} liked your comment."
 			},
 
 			commentReplyNotificationTitle: {
@@ -410,15 +410,15 @@ const stringsConfig = {
 			},
 			commentReplyNotificationMessageBody: {
 				title: "Body"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} replied to your comment."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} replied to your comment."
 			},
 			commentReplyInAppMessageBody: {
 				title: "In App Message"
-				, placeholder: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+				, placeholder: "${context.appUser?.displayName || 'Someone'} replied to your comment."
 				, maxLength: 150
-				, defaultValue: "${context.appUser?context.appUser.displayName:'Someone'} replied to your comment."
+				, defaultValue: "${context.appUser?.displayName || 'Someone'} replied to your comment."
 			},
 		}
 	},
