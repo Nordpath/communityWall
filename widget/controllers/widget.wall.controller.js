@@ -1811,6 +1811,7 @@
           WidgetWall.customPostText = '';
           WidgetWall.selectedImages = [];
           WidgetWall.selectedVideos = [];
+          WidgetWall.preGeneratedThumbnails = [];
           WidgetWall.selectedImagesText = 'Change selected';
           WidgetWall.selectedVideosText = 'Change selected';
           WidgetWall.editingPost = null;
@@ -1894,6 +1895,7 @@
                   WidgetWall.customPostText = '';
                   WidgetWall.selectedImages = [];
                   WidgetWall.selectedVideos = [];
+                  WidgetWall.preGeneratedThumbnails = [];
                   WidgetWall.editingPost = null;
                   if (!$scope.$$phase) $scope.$apply();
 
@@ -1943,6 +1945,18 @@
                           }
                           if (WidgetWall.selectedVideos.length > 0) {
                               WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
+
+                              if (typeof MediaUtils !== 'undefined') {
+                                  console.log('[MediaPicker] Generating thumbnails immediately for', WidgetWall.selectedVideos.length, 'videos');
+                                  MediaUtils.generateThumbnailsForVideos(WidgetWall.selectedVideos).then(function(thumbnails) {
+                                      WidgetWall.preGeneratedThumbnails = thumbnails.filter(function(t) { return t !== null; });
+                                      console.log('[MediaPicker] Pre-generated', WidgetWall.preGeneratedThumbnails.length, 'thumbnails');
+                                      if (!$scope.$$phase) $scope.$apply();
+                                  }).catch(function(err) {
+                                      console.warn('[MediaPicker] Thumbnail generation failed:', err);
+                                      WidgetWall.preGeneratedThumbnails = [];
+                                  });
+                              }
                           }
 
                           console.log('[MediaPicker] Final state:', {
@@ -1974,6 +1988,7 @@
                       WidgetWall.customPostText = '';
                       WidgetWall.selectedImages = [];
                       WidgetWall.selectedVideos = [];
+                      WidgetWall.preGeneratedThumbnails = [];
                       WidgetWall.editingPost = null;
                       if (!$scope.$$phase) $scope.$apply();
 
@@ -2230,6 +2245,18 @@
                   WidgetWall.selectedVideos = videoUrls.filter(function(url) { return url !== null && url !== '' && url !== 'undefined'; });
                   if (WidgetWall.selectedVideos.length > 0) {
                       WidgetWall.selectedVideosText = WidgetWall.selectedVideos.length === 1 ? '1 video' : WidgetWall.selectedVideos.length + ' videos';
+
+                      if (typeof MediaUtils !== 'undefined') {
+                          console.log('[ImageUpload] Generating thumbnails immediately for', WidgetWall.selectedVideos.length, 'videos');
+                          MediaUtils.generateThumbnailsForVideos(WidgetWall.selectedVideos).then(function(thumbnails) {
+                              WidgetWall.preGeneratedThumbnails = thumbnails.filter(function(t) { return t !== null; });
+                              console.log('[ImageUpload] Pre-generated', WidgetWall.preGeneratedThumbnails.length, 'thumbnails');
+                              if (!$scope.$$phase) $scope.$apply();
+                          }).catch(function(err) {
+                              console.warn('[ImageUpload] Thumbnail generation failed:', err);
+                              WidgetWall.preGeneratedThumbnails = [];
+                          });
+                      }
                   }
 
                   console.log('[ImageUpload] FINAL state:', {
@@ -2257,6 +2284,7 @@
               WidgetWall.customPostText = '';
               WidgetWall.selectedImages = [];
               WidgetWall.selectedVideos = [];
+              WidgetWall.preGeneratedThumbnails = [];
               WidgetWall.selectedImagesText = 'Change selected';
               WidgetWall.selectedVideosText = 'Change selected';
               WidgetWall.editingPost = null;
@@ -2559,7 +2587,16 @@
                       return;
                   }
 
-                  return WidgetWall.generateVideoThumbnails(videosToProcess).then(function(thumbnails) {
+                  var thumbnailPromise;
+                  if (WidgetWall.preGeneratedThumbnails && WidgetWall.preGeneratedThumbnails.length > 0) {
+                      console.log('[submitCustomPost] Using pre-generated thumbnails');
+                      thumbnailPromise = Promise.resolve(WidgetWall.preGeneratedThumbnails);
+                  } else {
+                      console.log('[submitCustomPost] Generating thumbnails now');
+                      thumbnailPromise = WidgetWall.generateVideoThumbnails(videosToProcess);
+                  }
+
+                  return thumbnailPromise.then(function(thumbnails) {
                       $scope.WidgetWall.images = imagesToCheck;
                       $scope.WidgetWall.videos = videosToProcess;
                       $scope.WidgetWall.videoThumbnails = thumbnails.filter(function(t) { return t !== null; });

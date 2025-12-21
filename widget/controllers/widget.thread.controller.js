@@ -1575,6 +1575,7 @@
           Thread.replyingToComment = null;
           Thread.selectedImages = [];
           Thread.selectedVideos = [];
+          Thread.preGeneratedThumbnails = [];
           Thread.selectedImagesText = 'Add Images';
           Thread.selectedVideosText = 'Add Videos';
           Thread.editingPost = null;
@@ -1588,6 +1589,7 @@
                       Thread.replyingToComment = parentComment;
                       Thread.selectedImages = [];
                       Thread.selectedVideos = [];
+                      Thread.preGeneratedThumbnails = [];
                       Thread.selectedImagesText = 'Add Images';
                       Thread.selectedVideosText = 'Add Videos';
                       Thread.editingPost = null;
@@ -1602,6 +1604,7 @@
               Thread.replyingToComment = null;
               Thread.selectedImages = [];
               Thread.selectedVideos = [];
+              Thread.preGeneratedThumbnails = [];
               Thread.selectedImagesText = 'Add Images';
               Thread.selectedVideosText = 'Add Videos';
               Thread.editingPost = null;
@@ -1658,7 +1661,14 @@
                   var videosToProcess = Thread.selectedVideos || [];
 
                   var moderationPromise = Thread.checkContentModeration(imagesToCheck);
-                  var thumbnailPromise = videosToProcess.length > 0 ? Thread.generateVideoThumbnails(videosToProcess) : Promise.resolve([]);
+                  var thumbnailPromise;
+                  if (Thread.preGeneratedThumbnails && Thread.preGeneratedThumbnails.length > 0) {
+                      console.log('[Thread.submitCustomPost] Using pre-generated thumbnails');
+                      thumbnailPromise = Promise.resolve(Thread.preGeneratedThumbnails);
+                  } else {
+                      console.log('[Thread.submitCustomPost] Generating thumbnails now');
+                      thumbnailPromise = videosToProcess.length > 0 ? Thread.generateVideoThumbnails(videosToProcess) : Promise.resolve([]);
+                  }
 
                   Promise.all([moderationPromise, thumbnailPromise]).then(function(results) {
                       var moderationResult = results[0];
@@ -1809,6 +1819,18 @@
                                       }
                                   });
                                   Thread.selectedVideosText = Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos';
+
+                                  if (typeof MediaUtils !== 'undefined' && Thread.selectedVideos.length > 0) {
+                                      console.log('[ThreadVideoSelect] Generating thumbnails immediately for', Thread.selectedVideos.length, 'videos');
+                                      MediaUtils.generateThumbnailsForVideos(Thread.selectedVideos).then(function(thumbnails) {
+                                          Thread.preGeneratedThumbnails = thumbnails.filter(function(t) { return t !== null; });
+                                          console.log('[ThreadVideoSelect] Pre-generated', Thread.preGeneratedThumbnails.length, 'thumbnails');
+                                          if (!$scope.$$phase) $scope.$apply();
+                                      }).catch(function(err) {
+                                          console.warn('[ThreadVideoSelect] Thumbnail generation failed:', err);
+                                          Thread.preGeneratedThumbnails = [];
+                                      });
+                                  }
                               }
 
                               Thread.isUploadingMedia = false;
@@ -1926,6 +1948,19 @@
                           Promise.all(videoPromises).then(function(urls) {
                               Thread.selectedVideos = urls.filter(function(url) { return url !== null; });
                               Thread.selectedVideosText = Thread.selectedVideos.length === 1 ? '1 video' : Thread.selectedVideos.length + ' videos';
+
+                              if (typeof MediaUtils !== 'undefined' && Thread.selectedVideos.length > 0) {
+                                  console.log('[ThreadVideoSelect] Generating thumbnails immediately for', Thread.selectedVideos.length, 'videos');
+                                  MediaUtils.generateThumbnailsForVideos(Thread.selectedVideos).then(function(thumbnails) {
+                                      Thread.preGeneratedThumbnails = thumbnails.filter(function(t) { return t !== null; });
+                                      console.log('[ThreadVideoSelect] Pre-generated', Thread.preGeneratedThumbnails.length, 'thumbnails');
+                                      if (!$scope.$$phase) $scope.$apply();
+                                  }).catch(function(err) {
+                                      console.warn('[ThreadVideoSelect] Thumbnail generation failed:', err);
+                                      Thread.preGeneratedThumbnails = [];
+                                  });
+                              }
+
                               Thread.isUploadingMedia = false;
                               if (!$scope.$$phase) $scope.$apply();
                           });
