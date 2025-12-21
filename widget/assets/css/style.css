@@ -2918,7 +2918,6 @@ a.comments .iconsTheme.iconsFont {
 [class*="toast-success"] {
     background-color: white !important;
     color: #333 !important;
-    border-left: 4px solid #4CAF50 !important;
 }
 
 .toast.warning,
@@ -2927,7 +2926,6 @@ a.comments .iconsTheme.iconsFont {
 [class*="toast-warning"] {
     background-color: white !important;
     color: #333 !important;
-    border-left: 4px solid #FF9800 !important;
 }
 
 .toast.danger,
@@ -2937,7 +2935,6 @@ a.comments .iconsTheme.iconsFont {
 [class*="toast-error"] {
     background-color: white !important;
     color: #333 !important;
-    border-left: 4px solid #F44336 !important;
 }
 
 .toast-message,
