@@ -2900,3 +2900,49 @@ a.comments .iconsTheme.iconsFont {
         max-height: calc(100vh - 150px);
     }
 }
+
+/* Toast notification customization */
+.toast,
+.bf-toast,
+.buildfire-toast,
+[class*="toast-"] {
+    background-color: white !important;
+    color: #333 !important;
+    font-family: 'Roboto', sans-serif !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.toast.success,
+.bf-toast.success,
+.buildfire-toast.success,
+[class*="toast-success"] {
+    background-color: white !important;
+    color: #333 !important;
+    border-left: 4px solid #4CAF50 !important;
+}
+
+.toast.warning,
+.bf-toast.warning,
+.buildfire-toast.warning,
+[class*="toast-warning"] {
+    background-color: white !important;
+    color: #333 !important;
+    border-left: 4px solid #FF9800 !important;
+}
+
+.toast.danger,
+.bf-toast.danger,
+.buildfire-toast.danger,
+[class*="toast-danger"],
+[class*="toast-error"] {
+    background-color: white !important;
+    color: #333 !important;
+    border-left: 4px solid #F44336 !important;
+}
+
+.toast-message,
+.bf-toast-message,
+.buildfire-toast-message {
+    font-family: 'Roboto', sans-serif !important;
+    color: #333 !important;
+}
